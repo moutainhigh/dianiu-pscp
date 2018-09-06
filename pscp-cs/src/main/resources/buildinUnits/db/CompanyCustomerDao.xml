@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.cs.dao.CompanyCustomerDao">
+
+    <select id="getByCustomerId" resultType="com.edianniu.pscp.cs.domain.CompanyCustomer">
+        select * from pscp_company_customer
+        where id = #{value}
+        and deleted=0
+        limit 1
+    </select>
+
+    <insert id="insert" parameterType="com.edianniu.pscp.cs.domain.CompanyCustomer">
+        INSERT INTO pscp_company_customer(
+        id,
+        member_id,
+        mobile,
+        cp_name,
+        cp_contact,
+        cp_contact_mobile,
+        cp_phone,
+        cp_address,
+        company_id,
+        status,
+        invitation_time,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES(
+        nextval('seq_pscp_company_customer'),
+        #{memberId},
+        #{mobile},
+        #{cpName},
+        #{cpContact},
+        #{cpContactMobile},
+        #{cpPhone},
+        #{cpAddress},
+        #{companyId},
+        #{status},
+        #{invitationTime},
+        #{createTime},
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_company_customer') as id;
+        </selectKey>
+    </insert>
+
+    <select id="getCompanyCustomer" parameterType="map"
+            resultType="com.edianniu.pscp.cs.domain.CompanyCustomer">
+        select * from pscp_company_customer
+        <where>
+            deleted = 0
+            <if test="status != null">AND status = #{status}</if>
+            <if test="memberId != null">AND member_id = #{memberId}</if>
+            <if test="companyIdList != null">AND company_id IN
+                <foreach collection="companyIdList" item="companyId" open="(" separator="," close=")">
+                    #{companyId}
+                </foreach>
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <update id="updateCompanyCustomer" parameterType="map">
+        UPDATE pscp_company_customer
+        <set>
+            <if test="newStatus != null">status = #{newStatus},</if>
+            <if test="invitationTime != null">invitation_time = #{invitationTime},</if>
+            <if test="invitationAgreeTime != null">invitation_agree_time = #{invitationAgreeTime},</if>
+            <if test="invitationRejectTime != null">invitation_reject_time = #{invitationRejectTime},</if>
+            modified_time = now()
+        </set>
+        <where>
+            deleted = 0
+            <if test="memberId != null">AND member_id = #{memberId}</if>
+            <if test="companyIdList != null">AND company_id IN
+                <foreach collection="companyIdList" item="companyId" open="(" separator="," close=")">
+                    #{companyId}
+                </foreach>
+            </if>
+            <if test="oldStatus != null">AND status = #{oldStatus}</if>
+        </where>
+    </update>
+
+    <select id="getList" parameterType="map"
+            resultType="com.edianniu.pscp.cs.domain.CompanyCustomer">
+        select * from pscp_company_customer
+        <where>
+            deleted = 0
+            <if test="uid != null">AND member_id = #{uid}</if>
+            <if test="companyId != null">AND company_id = #{companyId}</if>
+        </where>
+    </select>
+    
+    <select id="queryListBindingFacilitatorVO"
+            parameterType="com.edianniu.pscp.cs.bean.query.BindingFacilitatorQuery"
+            resultType="com.edianniu.pscp.cs.bean.company.vo.BindingFacilitatorVO">
+        SELECT c.id, c.name, t.status 
+        FROM pscp_company_customer t
+        LEFT JOIN pscp_company c ON t.company_id = c.id
+        WHERE t.deleted = 0 AND c.deleted = 0 AND t.member_id = #{uid}
+        <if test="status != null">
+        	and t.status = #{status}
+        </if>
+        <if test="name != null and name.trim() != ''">
+        	and c.name like concat('%', #{name}, '%')
+        </if>
+        ORDER BY t.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryCountBindingFacilitatorVO" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.cs.bean.query.BindingFacilitatorQuery">
+        SELECT COUNT(1) 
+        FROM pscp_company_customer t
+        LEFT JOIN pscp_company c ON t.company_id = c.id
+        WHERE t.deleted = 0 AND c.deleted = 0 AND t.member_id = #{uid}
+        <if test="status != null">
+        	and t.status = #{status}
+        </if>
+        <if test="name != null and name.trim() != ''">
+        	and c.name like concat('%', #{name}, '%')
+        </if>
+    </select>
+
+</mapper>

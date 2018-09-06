@@ -1,0 +1,2 @@
+Main-Class: com.edianniu.pscp.cs.AppServer
+Class-Path: ./

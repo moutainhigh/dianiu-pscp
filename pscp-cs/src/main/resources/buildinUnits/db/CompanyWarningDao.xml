@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.cs.dao.CompanyWarningDao">
+	
+	<insert id="save" parameterType="com.edianniu.pscp.cs.bean.power.WarningInfo">
+		INSERT INTO pscp_company_equipment_warnings(
+			id,
+			company_id,
+			warning_type,
+			warning_object,
+			occur_time,
+			description,
+			deal_status,
+			read_status,
+			create_time,
+			create_user,
+			deleted
+		)
+		VALUES(
+			nextval('seq_pscp_company_equipment_warnings'),
+			#{companyId},
+			#{warningType},
+			#{warningObject},
+			#{occurTime},
+			#{description},
+			#{dealStatus},
+			#{readStatus},
+			now(),
+			#{createUser},
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_company_equipment_warnings') AS id;
+		</selectKey>
+	</insert>
+	
+	<update id="update" parameterType="com.edianniu.pscp.cs.bean.power.WarningInfo">
+		UPDATE pscp_company_equipment_warnings
+		<set>
+			<if test="readStatus != null">read_status = #{readStatus},</if>
+			<if test="dealStatus != null">deal_status = #{dealStatus},</if>
+			<if test="revertTime != null">revert_time = #{revertTime},</if>
+			<if test="deleted != null">deleted = #{deleted},</if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+			modified_time = now()
+		</set>
+		WHERE deleted = 0 AND id = #{id}  
+	</update>
+	
+	<select id="queryTotal" parameterType="map" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM pscp_company_equipment_warnings
+		WHERE deleted = 0
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+		<if test="companyIdList != null and companyIdList.size() > 0">AND company_id IN
+			<foreach collection="companyIdList" item="companyId" index="index" open="(" close=")" separator=",">
+				#{companyId}
+			</foreach>
+		</if>
+	</select>
+	
+	<select id="queryList" parameterType="map" 
+			resultType="com.edianniu.pscp.cs.bean.power.WarningInfo">
+		SELECT * FROM pscp_company_equipment_warnings
+		WHERE deleted = 0
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+		<if test="companyIdList != null and companyIdList.size() > 0">AND company_id IN
+			<foreach collection="companyIdList" item="companyId" index="index" open="(" close=")" separator=",">
+				#{companyId}
+			</foreach>
+		</if>
+		order by create_time desc
+		<if test="offset != null and limit != null">
+			LIMIT #{limit} OFFSET #{offset}
+		</if>
+	</select>
+	
+	<select id="queryObject" parameterType="map"
+			resultType="com.edianniu.pscp.cs.bean.power.WarningInfo">
+		SELECT *FROM pscp_company_equipment_warnings
+		WHERE deleted = 0
+		<if test="id != null">AND id = #{id}</if>
+		LIMIT 1
+	</select>
+	
+	
+    
+    
+    
+</mapper>

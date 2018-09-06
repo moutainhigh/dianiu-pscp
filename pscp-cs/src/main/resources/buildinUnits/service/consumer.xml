@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+
+    <dubbo:registry address="${dubbo.address}"/>
+
+    <!-- 文件服务 -->
+    <dubbo:reference id="fileUploadService" interface="com.edianniu.pscp.mis.service.dubbo.FileUploadService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 用户服务-->
+    <dubbo:reference id="userInfoService" interface="com.edianniu.pscp.mis.service.dubbo.UserInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 平台用户服务-->
+    <dubbo:reference id="sysUserInfoService" interface="com.edianniu.pscp.mis.service.dubbo.SysUserInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 钱包服务-->
+    <dubbo:reference id="walletInfoService" interface="com.edianniu.pscp.mis.service.dubbo.WalletInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 支付服务-->
+    <dubbo:reference id="payInfoService" interface="com.edianniu.pscp.mis.service.dubbo.PayInfoService" 
+    				 timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 消息服务-->
+    <dubbo:reference id="messageInfoService" interface="com.edianniu.pscp.message.service.dubbo.MessageInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 公共附件服务-->
+    <dubbo:reference id="commonAttachmentInfoService" interface="com.edianniu.pscp.mis.service.dubbo.CommonAttachmentInfoService" 
+    				 timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 工单缺陷服务-->
+    <dubbo:reference id="workOrderDefectRecordInfoService" interface="com.edianniu.pscp.mis.service.dubbo.WorkOrderDefectRecordInfoService" 
+    				 timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 工单报告服务-->
+    <dubbo:reference interface="com.edianniu.pscp.mis.service.dubbo.WorkOrderReportInfoService" timeout="10000"
+                     id="workOrderReportInfoService" retries="1" version="1.0" check="false"/>
+
+    <!-- 需求搜索服务-->
+    <dubbo:reference interface="com.edianniu.pscp.search.dubbo.NeedsDubboService" timeout="10000"
+                     id="needsDubboService" retries="1" version="1.0" check="false"/>
+    <!-- 报告查询服务-->
+    <dubbo:reference interface="com.edianniu.pscp.search.dubbo.ReportSearchDubboService" timeout="10000"
+                     id="reportSearchDubboService" retries="1" version="1.0" check="false"/>
+    <!-- 报告生产服务-->
+    <dubbo:reference interface="com.edianniu.pscp.search.dubbo.ReportProduceDubboService" timeout="10000"
+                     id="reportProduceDubboService" retries="1" version="1.0" check="false"/>
+</beans>

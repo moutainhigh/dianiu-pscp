@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.OperationRecordDao">
+
+	<insert id="save" 
+			parameterType="com.edianniu.pscp.cs.bean.operationrecord.OperationRecordInfo">
+		INSERT INTO pscp_customer_operation_record
+		(
+		id,
+		room_id,
+		company_id,
+		record_num,
+		equipment_task,
+		ground_lead_num,
+		start_time,
+		end_time,
+		issuing_command,
+		receive_command,
+		operator,
+		guardian,
+		remark,
+		create_time,
+		create_user,
+		deleted
+		)
+		VALUES
+		(
+		nextval('seq_pscp_customer_operation_record'),
+		#{roomId},
+		#{companyId},
+		#{recordNum},
+		#{equipmentTask},
+		#{groundLeadNum},
+		#{startTime},
+		#{endTime},
+		#{issuingCommand},
+		#{receiveCommand},
+		#{operator},
+		#{guardian},
+		#{remark},
+		#{createTime},
+		#{createUser},
+		0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_customer_operation_record') AS id;
+		</selectKey>
+	</insert>
+
+	<update id="update" 
+			parameterType="com.edianniu.pscp.cs.bean.operationrecord.OperationRecordInfo">
+		UPDATE pscp_customer_operation_record
+		<set>
+			<if test="roomId != null"> room_id = #{roomId},</if>
+			<if test="companyId != null"> company_id = #{companyId},</if>
+			<if test="equipmentTask != null"> equipment_task = #{equipmentTask},</if>
+			<if test="groundLeadNum != null"> ground_lead_num = #{groundLeadNum},</if>
+			<if test="startTime != null"> start_time = #{startTime},</if>
+			<if test="endTime != null"> end_time = #{endTime},</if>
+			<if test="issuingCommand != null"> issuing_command = #{issuingCommand},</if>
+			<if test="operator != null"> operator = #{operator},</if>
+			<if test="guardian != null"> guardian = #{guardian},</if>
+			<if test="remark != null"> remark = #{remark},</if>
+			<if test="modifiedTime != null"> modified_time = #{modifiedTime},</if>
+			<if test="modifiedUser != null"> modified_user = #{modifiedUser},</if>
+			<if test="deleted != null"> deleted = #{deleted}</if>
+		</set>
+			WHERE id = #{id}
+	</update>    
+	
+	<select id="getOperationRecordInfoListCount" parameterType="map" resultType ="int">
+		SELECT count(1) FROM pscp_customer_operation_record
+		WHERE deleted = 0
+		<if test="roomId != null"> AND room_id = #{roomId}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+	</select>
+	
+	<select id="getOperationRecordInfoList" parameterType="map"
+			resultType="com.edianniu.pscp.cs.bean.operationrecord.OperationRecordInfo">
+		SELECT * FROM pscp_customer_operation_record
+		WHERE deleted = 0
+		<if test="roomId != null"> AND room_id = #{roomId}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+		ORDER BY create_time DESC
+		<if test="pageSize !=null and offset != null">
+			LIMIT #{pageSize} OFFSET #{offset}
+		</if>
+	</select>
+	
+	<select id="getOperationRecordInfo" 
+			resultType="com.edianniu.pscp.cs.bean.operationrecord.OperationRecordInfo">
+		SELECT * FROM pscp_customer_operation_record
+		WHERE deleted = 0 AND id = #{value}
+		limit 1
+	</select>
+		
+</mapper>
+
+

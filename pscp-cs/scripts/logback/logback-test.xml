@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="5 seconds">
+    <contextName>log</contextName>
+    <jmxConfigurator/>
+    <!-- direct log messages to stdout -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %5p |-%c{35}:%L - %m %n</pattern>
+        </encoder>
+    </appender>
+    <appender name="file"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.dir}/logs/cs.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${user.dir}/logs/bak/cs.%d{yyyy-MM-dd}.%i.log.gz
+            </FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>1024MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %highlight(%5p) %green(|-%c{35}:%L) -
+                %m %n
+            </pattern>
+        </encoder>
+    </appender>
+    <logger name="stc.skymobi" level="error"/>
+    <logger name="com.edianniu.pscp.cs.biz" level="debug"/>
+    <logger name="com.mchange" level="info"/>
+
+    <root level="debug">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="file"/>
+    </root>
+</configuration>

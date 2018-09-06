@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.EquipmentDao">
+
+    <insert id="saveEquipment" 
+    		parameterType="com.edianniu.pscp.cs.bean.equipment.EquipmentInfo">
+    	INSERT INTO pscp_customer_equipment
+    	(
+    	id,
+    	room_id,
+    	company_id,
+    	name,
+    	model,
+    	rated_voltage,
+    	rated_current,
+    	rated_breaking_current,
+    	rated_capacity,
+    	max_working_voltage,
+    	current_transformer_ratio,
+    	voltage_transformer_ratio,
+    	production_date,
+    	serial_number,
+    	manufacturer,
+    	create_user,
+    	create_time,
+    	deleted
+    	)
+    	VALUES
+    	(
+    	nextval('seq_pscp_customer_equipment'),
+    	#{roomId},
+	    #{companyId},
+	    #{name},
+	   	#{model},
+	   	#{ratedVoltage},
+	   	#{ratedCurrent},
+	   	#{ratedBreakingCurrent},
+	   	#{ratedCapacity},
+	   	#{maxWorkingVoltage},
+	   	#{currentTransformerRatio},
+	   	#{voltageTransformerRatio},
+	   	#{productionDate},
+	   	#{serialNumber},
+	   	#{manufacturer},
+    	#{createUser},
+    	now(),
+    	0
+    	)
+    	<selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_customer_equipment') as id;
+        </selectKey>
+    </insert>
+
+	<update id="updateEquipment" 
+			parameterType="com.edianniu.pscp.cs.bean.equipment.EquipmentInfo">
+        UPDATE pscp_customer_equipment
+        <set>
+            <if test="roomId != null"> room_id = #{roomId},</if>
+	    	<if test="companyId != null"> company_id = #{companyId},</if>
+	    	<if test="name != null and name.trim() != ''"> name = #{name},</if>
+	    	<if test="model != null and model.trim() != ''"> model = #{model},</if>
+	    	<if test="ratedVoltage != null and ratedVoltage.trim() != ''"> rated_voltage = #{ratedVoltage},</if>
+	    	<if test="ratedCurrent != null and ratedCurrent.trim() != ''"> rated_current = #{ratedCurrent},</if>
+	    	<if test="ratedBreakingCurrent != null and ratedBreakingCurrent.trim() != ''"> rated_breaking_current = #{ratedBreakingCurrent},</if>
+	    	<if test="ratedCapacity != null and ratedCapacity.trim() != ''"> rated_capacity = #{ratedCapacity},</if>
+	    	<if test="maxWorkingVoltage != null and maxWorkingVoltage.trim() != ''"> max_working_voltage = #{maxWorkingVoltage},</if>
+	    	<if test="currentTransformerRatio != null and currentTransformerRatio.trim() != ''"> current_transformer_ratio = #{currentTransformerRatio},</if>
+	    	<if test="voltageTransformerRatio != null and voltageTransformerRatio.trim() != ''"> voltage_transformer_ratio = #{voltageTransformerRatio},</if>
+	    	<if test="productionDate != null"> production_date = #{productionDate},</if>
+	    	<if test="serialNumber != null and serialNumber.trim() != ''"> serial_number = #{serialNumber},</if>
+	    	<if test="manufacturer != null and manufacturer.trim() != ''"> manufacturer = #{manufacturer},</if>
+	    	<if test="deleted != null"> deleted = #{deleted},</if>
+	    	<if test="modifiedUser != null"> modified_user = #{modifiedUser},</if>
+	    	modified_time = now()
+        </set>
+        WHERE id = #{id} 
+    </update>
+
+	<select id="getEquipmentVOListCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM pscp_customer_equipment
+		WHERE deleted = 0 
+		<if test="roomId != null"> AND room_id = #{roomId}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+	</select>
+	
+	<select id="getEquipmentList" parameterType="map"
+			resultType="com.edianniu.pscp.cs.bean.equipment.EquipmentInfo"> 
+		SELECT * FROM pscp_customer_equipment
+		WHERE deleted = 0 
+		<if test="roomId != null"> AND room_id = #{roomId}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+		ORDER BY create_time DESC
+		<if test="pageSize !=null and offset != null">
+			LIMIT #{pageSize} OFFSET #{offset}
+		</if>
+	</select>
+	
+	<select id="getEquipmentInfo" 
+			resultType="com.edianniu.pscp.cs.bean.equipment.EquipmentInfo">
+		SELECT * FROM pscp_customer_equipment
+		WHERE deleted = 0 AND id = #{value}
+		limit 1
+	</select>
+	
+	
+</mapper>
+
+

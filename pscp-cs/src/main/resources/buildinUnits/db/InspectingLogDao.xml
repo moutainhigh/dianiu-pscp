@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.InspectingLogDao">
+	
+	<insert id="save"
+			parameterType="com.edianniu.pscp.cs.bean.inspectinglog.InspectingLogInfo">
+		INSERT INTO pscp_customer_equipment_inspecting_log
+		(
+		id,
+		equipment_id,
+		type,
+		company_id,
+		status,
+		content,
+		create_time,
+		create_user,
+		fix_test_time,
+		actual_test_time,
+		deleted
+		)
+		VALUES
+		(
+		nextval('seq_pscp_customer_equipment_inspecting_log'),
+		#{equipmentId},
+		#{type},
+		#{companyId},
+		#{status},
+		#{content},
+		#{createTime},
+		#{createUser},
+		#{fixTestTime},
+		#{actualTestTime},
+		0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_customer_equipment_inspecting_log') AS id;
+		</selectKey>
+	</insert>
+	
+	<insert id="saveBatch" parameterType="list">
+		INSERT INTO pscp_customer_equipment_inspecting_log
+		(
+		id,
+		equipment_id,
+		type,
+		company_id,
+		status,
+		create_time,
+		create_user,
+		fix_test_time,
+		deleted
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+			nextval('seq_pscp_customer_equipment_inspecting_log'),
+			#{item.equipmentId},
+			#{item.type},
+			#{item.companyId},
+			#{item.status},
+			#{item.createTime},
+			#{item.createUser},
+			#{item.fixTestTime},
+			0
+			)
+		</foreach>
+	</insert>
+	
+	<select id="getInspectingLogVOListCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM pscp_customer_equipment_inspecting_log
+		WHERE deleted = 0
+		<if test="equipmentId != null">AND equipment_id = #{equipmentId}</if>
+		<if test="type != null">AND type = #{type}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+	</select>
+	
+	<select id="getInspectingLogVOList" parameterType="map"
+			resultType="com.edianniu.pscp.cs.bean.inspectinglog.InspectingLogInfo">
+		SELECT * FROM pscp_customer_equipment_inspecting_log
+		WHERE deleted = 0
+		<if test="equipmentId != null">AND equipment_id = #{equipmentId}</if>
+		<if test="type != null">AND type = #{type}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+		ORDER BY fix_test_time DESC
+		<if test="pageSize != null and offset != null">
+			LIMIT #{pageSize} OFFSET #{offset}
+		</if>
+	</select>
+	
+</mapper>
+
+

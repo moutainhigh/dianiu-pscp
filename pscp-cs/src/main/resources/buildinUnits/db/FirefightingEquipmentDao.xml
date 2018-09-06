@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.FirefightingEquipmentDao">
+	
+	<insert id="save"
+			parameterType="com.edianniu.pscp.cs.bean.firefightingequipment.FirefightingEquipmentInfo">
+		INSERT INTO pscp_customer_firefighting_equipment
+		(
+		id,
+		room_id,
+		company_id,
+		name,
+		box_number,
+		serial_number,
+		placement_position,
+		specifications,
+		indoor_or_outdoor,
+		production_date,
+		expiry_date,
+		view_cycle,
+		view_time_unit,
+		waring_status,
+		initial_test_date,
+		next_test_date,
+		create_time,
+		create_user,
+		deleted
+		)
+		VALUES
+		(
+		nextval('seq_pscp_customer_firefighting_equipment'),
+		#{roomId},
+		#{companyId},
+		#{name},
+		#{boxNumber},
+		#{serialNumber},
+		#{placementPosition},
+		#{specifications},
+		#{indoorOrOutdoor},
+		#{productionDate},
+		#{expiryDate},
+		#{viewCycle},
+		#{viewTimeUnit},
+		#{waringStatus},
+		#{initialTestDate},
+		#{nextTestDate},
+		#{createTime},
+		#{createUser},
+		0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_customer_firefighting_equipment') AS id;
+		</selectKey>
+	</insert>
+	
+	<select id="getFirefightingEquipmentInfoListCount" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM pscp_customer_firefighting_equipment
+		WHERE deleted = 0
+		<if test="roomId != null"> AND room_id = #{roomId}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+	</select>
+	
+	<select id="getFirefightingEquipmentInfoList" parameterType="map"
+			resultType="com.edianniu.pscp.cs.bean.firefightingequipment.FirefightingEquipmentInfo">
+		SELECT * FROM pscp_customer_firefighting_equipment
+		WHERE deleted = 0
+		<if test="roomId != null"> AND room_id = #{roomId}</if>
+		<if test="companyId != null">AND company_id = #{companyId}</if>	
+		ORDER BY create_time DESC
+		<if test="pageSize != null and offset != null">
+			LIMIT #{pageSize} OFFSET #{offset}
+		</if>	
+	</select>
+	
+	<select id="getFirefightingEquipmentInfo" 
+			resultType="com.edianniu.pscp.cs.bean.firefightingequipment.FirefightingEquipmentInfo">
+		SELECT * FROM pscp_customer_firefighting_equipment
+		WHERE deleted = 0 AND id = #{value}
+		limit 1
+	</select>
+	
+	<update id="update" 
+			parameterType="com.edianniu.pscp.cs.bean.firefightingequipment.FirefightingEquipmentInfo">
+		UPDATE pscp_customer_firefighting_equipment
+		<set>
+			<if test="waringStatus != null"> waring_status = #{waringStatus},</if>
+			<if test="nextTestDate != null"> next_test_date = #{nextTestDate},</if>
+			<if test="modifiedTime != null"> modified_time = #{modifiedTime},</if>
+			<if test="modifiedUser != null"> modified_user = #{modifiedUser},</if>
+			<if test="deleted != null"> deleted = #{deleted}</if>
+		</set>
+			WHERE id = #{id}
+	</update>
+	
+	<select id="scanCanCheckSafetyEquipments" parameterType="map" resultType="long">
+		SELECT id FROM pscp_customer_firefighting_equipment
+		<where>
+			deleted=0 
+			AND date_part('day', (next_test_date - now())) = #{graceTime}
+			AND waring_status = 0
+		</where>
+	</select>
+	
+	
+	
+</mapper>
+
+

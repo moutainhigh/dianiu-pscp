@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.cs.dao.WorkOrderEvaluateDao">
+    <insert id="saveWorkOrderEvaluate"
+            parameterType="com.edianniu.pscp.cs.domain.WorkOrderEvaluate">
+        insert into pscp_work_order_evaluate
+        (
+        id,
+        work_order_id,
+        customer_id,
+        content,
+        service_quality,
+        service_speed,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        (
+        nextval('seq_pscp_work_order_evaluate'),
+        #{workOrderId},
+        #{customerId},
+        #{content},
+        #{serviceQuality},
+        #{serviceSpeed},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_work_order_evaluate') as id;
+        </selectKey>
+    </insert>
+
+    <select id="getEvaluateByWorkId" parameterType="long"
+            resultType="com.edianniu.pscp.cs.domain.WorkOrderEvaluate">
+        SELECT * FROM pscp_work_order_evaluate
+        WHERE deleted = 0 AND work_order_id = #{workOrderId}
+    </select>
+
+</mapper>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.RoomDao">
+
+    <select id="queryListRoomVOCount" parameterType="map"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM pscp_customer_distribution_room d
+        <where>
+            d.deleted = 0
+            <if test="companyId != null">AND d.company_id = #{companyId}</if>
+            <if test="name != null and name.trim() != ''">
+            	AND d.name like concat('%',#{name},'%')
+            </if>
+            <if test="director != null and director.trim() != ''">
+            	AND d.director like concat('%',#{director},'%')
+            </if>
+            <if test="contactNumber != null and contactNumber.trim() != ''">
+            	AND d.contact_number like concat('%',#{contactNumber},'%')
+            </if>
+            <if test="startTime != null">
+            	AND d.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+            	AND d.create_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryListRoomVO" parameterType="map"
+            resultType="com.edianniu.pscp.cs.bean.room.vo.RoomVO">
+        SELECT
+        d.id AS id,
+        d.name AS name,
+        to_char(d.create_time,'yyyy-MM-dd') AS createTime,
+        d.director AS director,
+        d.contact_number AS contactNumber,
+        d.address AS address
+        FROM pscp_customer_distribution_room d
+        <where>
+            d.deleted = 0
+            <if test="companyId != null">AND d.company_id = #{companyId}</if>
+            <if test="name != null and name.trim() != ''">
+            	AND d.name like concat('%',#{name},'%')
+            </if>
+            <if test="director != null and director.trim() != ''">
+            	AND d.director like concat('%',#{director},'%')
+            </if>
+            <if test="contactNumber != null and contactNumber.trim() != ''">
+            	AND d.contact_number like concat('%',#{contactNumber},'%')
+            </if>
+            <if test="startTime != null">
+            	AND d.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+            	AND d.create_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY d.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryRoomVO" parameterType="long"
+            resultType="com.edianniu.pscp.cs.bean.room.vo.RoomVO">
+    	SELECT
+	    	d.name AS name,
+	    	to_char(d.create_time,'yyyy-MM-dd') AS createTime,
+	    	d.director AS director,
+	    	d.contact_number AS contactNumber,
+	    	d.address AS address
+		FROM pscp_customer_distribution_room d
+    	WHERE d.id = #{id} AND d.deleted = 0
+    </select>
+
+    <select id="queryRoomList" resultType="com.edianniu.pscp.cs.domain.Room">
+        SELECT id, company_id, name, director, contact_number, address,
+        create_time, create_user, deleted
+        FROM pscp_customer_distribution_room
+        WHERE deleted = 0 AND id IN
+        <if test="roomIds != null">
+            <foreach collection="roomIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+    
+    <select id="queryRoomListCustomerId" resultType="com.edianniu.pscp.cs.bean.room.vo.RoomVO">
+    	SELECT * FROM pscp_customer_distribution_room d
+    	LEFT JOIN pscp_company c ON c.id = d.company_id 
+    	LEFT JOIN pscp_company_customer p ON p.member_id = c.member_id
+    	WHERE p.id = #{customerId} AND d.deleted = 0 AND c.deleted = 0 AND p.deleted = 0
+    </select>
+    
+    <insert id="save"
+            parameterType="com.edianniu.pscp.cs.bean.room.RoomInfo">
+        INSERT INTO pscp_customer_distribution_room
+        (
+        id,
+        company_id,
+        name,
+        director,
+        contact_number,
+        address,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES
+        (
+        nextval('seq_pscp_customer_distribution_room'),
+        #{companyId},
+        #{name},
+        #{director},
+        #{contactNumber},
+        #{address},
+        #{createTime},
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_customer_distribution_room') as id;
+        </selectKey>
+    </insert>
+    
+    <update id="update" parameterType="com.edianniu.pscp.cs.bean.room.RoomInfo">
+    	UPDATE pscp_customer_distribution_room
+    	<set>
+    		<if test="name != null">name = #{name},</if>
+    		<if test="director != null">director = #{director},</if>
+    		<if test="contactNumber != null">contact_number = #{contactNumber},</if>
+    		<if test="address != null">address = #{address},</if>
+    	</set>
+    	WHERE id = #{id}
+    </update>
+    
+    <delete id="delete">
+        UPDATE pscp_customer_distribution_room
+        SET deleted       = -1,
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        WHERE id = #{id}
+    </delete>
+
+
+</mapper>

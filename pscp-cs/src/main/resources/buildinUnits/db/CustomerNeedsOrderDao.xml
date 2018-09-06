@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.CustomerNeedsOrderDao">
+    <sql id="base_sql_column">
+        id, needs_id, company_id, order_id, status, amount, pay_type, pay_status,
+        pay_amount, pay_time, pay_sync_time, pay_async_time,
+        accord_time, quoted_price, quoted_time, cooperation_time,
+        create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <select id="getEntityById" resultType="com.edianniu.pscp.cs.domain.CustomerNeedsOrder">
+        SELECT
+        <include refid="base_sql_column"/>
+        FROM pscp_customer_needs_order
+        WHERE deleted = 0
+        <if test="id != null">AND id = #{id}</if>
+        <if test="needsId != null">AND needs_id = #{needsId}</if>
+        <if test="companyId != null">AND company_id = #{companyId}</if>
+        <if test="orderId != null and orderId != ''">AND order_id = #{orderId}</if>
+        <if test="unequalStatus != null">AND status != #{unequalStatus}</if>
+    </select>
+
+    <select id="queryListNeedsOrderCount" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM pscp_customer_needs_order t
+        LEFT JOIN pscp_customer_needs n ON t.needs_id = n.id
+        LEFT JOIN pscp_company c ON n.company_id = c.id
+        <where>
+            t.deleted = 0 AND t.company_id = #{companyId} AND
+            CASE WHEN t.pay_status !=2 THEN 1 = 1
+            <if test="name != null and name.trim() != ''">AND (replace(n.name, (replace(n.keyword, ',', '')), '*')) LIKE
+                CONCAT('%',#{name},'%')
+            </if>
+            <!--
+            <if test="contactPerson != null and contactPerson.trim() != ''">AND (overlay(n.contact_person placing '*' from 1 for 3)) LIKE CONCAT('%',#{contactPerson},'%')</if>
+            <if test="contactNumber != null and contactNumber.trim() != ''">AND (overlay(n.contact_number placing '*' from 5 for 8)) LIKE CONCAT('%',#{contactNumber},'%')</if>
+            -->
+            WHEN t.pay_status =2 THEN 1 = 1
+            <if test="name != null and name.trim() != ''">AND n.name LIKE CONCAT('%',#{name},'%')</if>
+            <if test="contactPerson != null and contactPerson.trim() != ''">AND n.contact_person LIKE
+                CONCAT('%',#{contactPerson},'%')
+            </if>
+            <if test="contactNumber != null and contactNumber.trim() != ''">AND n.contact_number LIKE
+                CONCAT('%',#{contactNumber},'%')
+            </if>
+            END
+        </where>
+    </select>
+
+    <select id="queryListNeedsOrder" resultType="com.edianniu.pscp.cs.bean.needsorder.vo.NeedsOrderListVO">
+        SELECT
+        t.order_id AS responsedOrderId,
+        t.status AS status,
+        t.pay_status AS payStatus,
+        n.order_id AS orderId,
+        n.name AS name,
+        n.describe AS describe,
+        n.keyword AS keyword,
+        to_char(n.audit_time, 'yyyy-MM-dd') AS publishTime,
+        to_char(n.publish_cutoff_time, 'yyyy-MM-dd') AS publishCutoffTime,
+        to_char(n.working_start_time, 'yyyy-MM-dd') AS workingStartTime,
+        to_char(n.working_end_time, 'yyyy-MM-dd') AS workingEndTime,
+        n.contact_person AS contactPerson,
+        n.contact_number AS contactNumber,
+        n.contact_addr AS contactAddr,
+        c.name AS companyName
+        FROM pscp_customer_needs_order t
+        LEFT JOIN pscp_customer_needs n ON t.needs_id = n.id
+        LEFT JOIN pscp_company c ON n.company_id = c.id
+        <where>
+            t.deleted = 0 AND t.company_id = #{companyId} AND
+            CASE WHEN t.pay_status !=2 THEN 1 = 1
+            <if test="name != null and name.trim() != ''">AND (replace(n.name, (replace(n.keyword, ',', '')), '*')) LIKE
+                CONCAT('%',#{name},'%')
+            </if>
+            <!--
+            <if test="contactPerson != null and contactPerson.trim() != ''">AND (overlay(n.contact_person placing '*' from 1 for 3)) LIKE CONCAT('%',#{contactPerson},'%')</if>
+            <if test="contactNumber != null and contactNumber.trim() != ''">AND (overlay(n.contact_number placing '*' from 5 for 8)) LIKE CONCAT('%',#{contactNumber},'%')</if>
+            -->
+            WHEN t.pay_status =2 THEN 1 = 1
+            <if test="name != null and name.trim() != ''">AND n.name LIKE CONCAT('%',#{name},'%')</if>
+            <if test="contactPerson != null and contactPerson.trim() != ''">AND n.contact_person LIKE
+                CONCAT('%',#{contactPerson},'%')
+            </if>
+            <if test="contactNumber != null and contactNumber.trim() != ''">AND n.contact_number LIKE
+                CONCAT('%',#{contactNumber},'%')
+            </if>
+            END
+        </where>
+
+        ORDER BY n.audit_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="selectNeedsOrderByCondition" resultType="com.edianniu.pscp.cs.bean.needsorder.vo.NeedsOrderVO">
+        SELECT
+        <include refid="base_sql_column"/>
+        FROM pscp_customer_needs_order
+        WHERE deleted = 0
+        <if test="id != null">AND id = #{id}</if>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="payStatus != null">AND pay_status = #{payStatus}</if>
+        <if test="companyId != null">AND company_id = #{companyId}</if>
+        <if test="orderIds != null">AND order_id IN
+            <foreach collection="orderIds" item="orderId" open="(" separator="," close=")">
+                #{orderId}
+            </foreach>
+        </if>
+    </select>
+
+    <update id="updateEntityById">
+        UPDATE pscp_customer_needs_order
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="quotedPrice != null">
+                quoted_price = #{quotedPrice},
+                quoted_time = #{quotedTime},
+            </if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            modified_time = now()
+        </set>
+        WHERE deleted = 0 AND id = #{id}
+    </update>
+
+    <update id="updateBatchNeedsOrderVO">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pscp_customer_needs_order
+            <set>
+                <if test="item != null and item.status != null">
+                    status = #{item.status},
+                </if>
+                <if test="item != null and item.payType != null">
+                    pay_type = #{item.payType},
+                </if>
+                <if test="item != null and item.payStatus != null">
+                    pay_status = #{item.payStatus},
+                </if>
+                <if test="item != null and item.payAmount != null">
+                    pay_amount = #{item.payAmount},
+                </if>
+                <if test="item != null and item.payTime != null">
+                    pay_time = #{item.payTime},
+                </if>
+                <if test="item != null and item.paySyncTime != null">
+                    pay_sync_time = #{item.paySyncTime},
+                </if>
+                <if test="item != null and item.payAsyncTime != null">
+                    pay_async_time = #{item.payAsyncTime},
+                </if>
+                modified_user = #{modifiedUser},
+                modified_time = now()
+            </set>
+            where order_id = #{item.orderId}
+            <if test="item != null and item.id != null">
+                and id = #{item.id}
+            </if>
+            <if test="item != null and item.companyId != null">
+                and company_id = #{item.companyId}
+            </if>
+        </foreach>
+    </update>
+
+    <insert id="saveEntity" parameterType="com.edianniu.pscp.cs.domain.CustomerNeedsOrder">
+        insert into pscp_customer_needs_order
+        (
+        id,
+        needs_id,
+        company_id,
+        order_id,
+        status,
+        amount,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        (
+        nextval('seq_pscp_customer_needs_order'),
+        #{needsId},
+        #{companyId},
+        #{orderId},
+        #{status},
+        #{amount},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_customer_needs_order') as id;
+        </selectKey>
+    </insert>
+
+    <select id="getOvertimeAndUnPayNeedsorders" parameterType="map"
+            resultType="java.lang.Long">
+        SELECT id FROM pscp_customer_needs_order
+        <where>
+            deleted=0 AND
+            (date_part('day', (now()-create_time))*24*60 +
+            date_part('hour', (now()-create_time))*60 +
+            date_part('minute', (now()-create_time))) = #{minutes}
+            <if test="payStatusList != null">AND pay_status IN
+                <foreach collection="payStatusList" item="payStatus" open="(" separator="," close=")">
+                    #{payStatus}
+                </foreach>
+            </if>
+        </where>
+        limit 100
+    </select>
+
+    <select id="getNotGoWellNeedsorders" parameterType="map"
+            resultType="string">
+        SELECT order_id FROM pscp_customer_needs_order
+        <where>
+            deleted=0
+            <if test="statusList != null">AND status IN
+                <foreach collection="statusList" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="payStatus != null">AND pay_status = #{payStatus}</if>
+            <if test="refundStatus != null">AND refund_status = #{refundStatus}</if>
+        </where>
+        ORDER BY modified_time ASC
+        <if test="limit != null">limit #{limit}</if>
+    </select>
+
+    <select id="selectSendMessagePushInfo" resultType="java.util.Map">
+        SELECT t.order_id AS "orderId", t.status, m.id AS "memberId" ,m.mobile,c.name as "companyName"
+        FROM pscp_customer_needs_order t
+        LEFT JOIN pscp_company c ON t.company_id = c.id
+        LEFT JOIN pscp_member m ON c.member_id = m.id
+        WHERE t.deleted = 0
+        AND c.deleted = 0
+        AND m.deleted = 0
+        AND t.needs_id = #{needsId}
+    </select>
+
+    <select id="getMapSendMessagePushInfo" resultType="java.util.Map">
+        SELECT t.order_id AS "orderId", n.name AS "needsName",
+         t.status, m.id AS "memberId" ,m.mobile
+        FROM pscp_customer_needs_order t
+        LEFT JOIN pscp_customer_needs n ON t.needs_id = n.id
+        LEFT JOIN pscp_company c ON t.company_id = c.id
+        LEFT JOIN pscp_member m ON c.member_id = m.id
+        WHERE t.deleted = 0
+        AND c.deleted = 0
+        AND m.deleted = 0
+        AND t.id = #{id}
+    </select>
+</mapper>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.cs.dao.EngineeringProjectDao">
+    
+    <select id="queryObject"
+            resultType="com.edianniu.pscp.cs.domain.EngineeringProject">
+        select * from pscp_engineering_project where id = #{value}
+    </select>
+    
+    <select id="queryProjectInfo" parameterType="map"
+    		resultType="com.edianniu.pscp.cs.bean.engineeringproject.vo.EngineeringProjectVO">
+    	SELECT 
+    		p.status AS status,
+    		p.project_no AS projectNo,
+    		to_char(p.create_time,'yyyy-MM-dd') AS showTime,
+    		p.id AS id,
+    		p.needs_id AS needsId,
+    		p.name AS name,
+    		p.description AS description,
+    		p.actual_settlement_amount AS actualSettlementAmount,
+    		to_char(p.start_time,'yyyy-MM-dd') AS startTime,
+    		to_char(p.end_time,'yyyy-MM-dd') AS endTime,
+    		p.company_id AS companyId,
+    		p.customer_id AS customerId
+    	FROM pscp_engineering_project p
+    	<where>
+    		p.deleted = 0
+    		<if test="needsId != null"> AND p.needs_id = #{needsId} </if>
+    		<if test="projectNo != null"> AND p.project_no = #{projectNo} </if>
+    		<if test="statusList != null"> AND p.status IN
+    			<foreach collection="statusList" item="status" open="(" separator="," close=")">
+    				#{status}
+    			</foreach>
+    		</if>
+    	</where>
+    	limit 1
+    </select>
+    
+    <insert id="createProject" 
+    		parameterType="com.edianniu.pscp.cs.bean.engineeringproject.EngineerProjectInfo">
+    	INSERT INTO pscp_engineering_project
+    	(
+    		id,
+    		project_no,
+    		customer_id,
+    		name,
+    		description,
+    		start_time,
+    		end_time,
+    		scene_investigation,
+    		contract_file_id,
+    		company_id,
+    		status,
+    		needs_id,
+    		room_ids,
+    		create_time,
+    		create_user,
+    		deleted
+    	)
+    	VALUES
+    	(
+    		nextval('seq_pscp_engineering_project'),
+    		#{projectNo},
+    		#{customerId},
+    		#{name},
+    		#{description},
+    		#{startTime},
+    		#{endTime},
+    		#{sceneInvestigation},
+    		#{contractFileId},
+    		#{companyId},
+    		#{status},
+    		#{needsId},
+    		#{roomIds},
+    		#{createTime},
+    		#{createUser},
+    		#{deleted}
+    	)
+    	<selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_engineering_project') as id;
+        </selectKey>
+    </insert>
+    
+    
+    
+    
+    <select id="projectListCount" parameterType="map"
+    		resultType="java.lang.Integer">
+    	SELECT COUNT(1) 
+    	FROM pscp_engineering_project p
+    	LEFT JOIN pscp_company c 
+    	ON p.company_id = c.id
+    	<where>
+    		p.deleted = 0 AND c.deleted = 0
+    		<if test="needsId != null"> AND p.needs_id = #{needsId} </if>
+    		<if test="customerIdList != null"> AND p.customer_id IN
+    			<foreach collection="customerIdList" item="customerId" open="(" separator="," close=")">
+    				#{customerId}
+    			</foreach>
+    		</if>
+    		<if test="queryStatusList != null"> AND p.status IN
+    			<foreach collection="queryStatusList" item="queryStatus" open="(" separator="," close=")">
+    				#{queryStatus}
+    			</foreach>
+    		</if>
+    		<if test="subStatus != null">
+    			AND p.status = #{subStatus}
+    		</if>
+    		<if test="projectNo != null and projectNo.trim() != ''">
+    			AND p.project_no LIKE CONCAT('%', #{projectNo}, '%')
+    		</if>
+    		<if test="name != null and name.trim() != ''">
+    			AND p.name LIKE CONCAT('%', #{name}, '%')
+    		</if>
+    		<if test="companyName != null and companyName.trim() != ''">
+    			AND c.name LIKE CONCAT('%', #{companyName}, '%')
+    		</if>
+    		<if test="workTime != null and workTime.trim() != ''">
+    			AND p.start_time &lt;= #{workTime}
+    			AND p.end_time   &gt;= #{workTime}
+    		</if>
+    		<if test="createTime != null and createTime.trim() != ''">
+    			AND to_char(p.create_time, 'yyyy-MM-dd') = #{createTime}
+    		</if>
+    	</where>
+    </select>
+    
+    <select id="queryProjectList" parameterType="map"
+    		resultType="com.edianniu.pscp.cs.bean.engineeringproject.vo.EngineeringProjectVO">
+    	SELECT 
+    		p.id AS id,
+    		p.project_no AS projectNo,
+    		p.status AS status,
+    		p.name AS name,
+    		to_char(p.start_time,'yyyy-MM-dd') AS startTime,
+    		to_char(p.end_time,'yyyy-MM-dd') AS endTime,
+    		p.company_id AS companyId,
+    		to_char(p.create_time,'yyyy-MM-dd') AS showTime,
+    		c.name AS companyName,
+    		p.room_ids
+    	FROM pscp_engineering_project p	
+    	LEFT JOIN pscp_company c ON p.company_id = c.id
+    	<where>
+    		p.deleted = 0 AND c.deleted = 0
+    		<if test="needsId != null"> AND p.needs_id = #{needsId} </if>
+    		<if test="customerIdList != null"> AND p.customer_id IN
+    			<foreach collection="customerIdList" item="customerId" open="(" separator="," close=")">
+    				#{customerId}
+    			</foreach>
+    		</if>
+    		<if test="queryStatusList != null"> AND p.status IN
+    			<foreach collection="queryStatusList" item="queryStatus" open="(" separator="," close=")">
+    				#{queryStatus}
+    			</foreach>
+    		</if>
+    		<if test="subStatus != null">
+    			AND p.status = #{subStatus}
+    		</if>
+    		<if test="projectNo != null and projectNo.trim() != ''">
+    			AND p.project_no LIKE CONCAT('%', #{projectNo}, '%')
+    		</if>
+    		<if test="name != null and name.trim() != ''">
+    			AND p.name LIKE CONCAT('%', #{name}, '%')
+    		</if>
+    		<if test="companyName != null and companyName.trim() != ''">
+    			AND c.name LIKE CONCAT('%', #{companyName}, '%')
+    		</if>
+    		<if test="workTime != null and workTime.trim() != ''">
+    			AND p.start_time &lt;= #{workTime}
+    			AND p.end_time   &gt;= #{workTime}
+    		</if>
+    		<if test="createTime != null and createTime.trim() != ''">
+    			AND to_char(p.create_time, 'yyyy-MM-dd') = #{createTime}
+    		</if>
+    	</where>
+    	ORDER BY p.create_time DESC
+		<if test="offset != null and pageSize != null">
+			limit #{pageSize} offset #{offset}
+		</if>
+    </select>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <update id="updateProject"  parameterType="map">
+    	update pscp_engineering_project
+    	<set>
+    		status = #{status}
+    	</set>
+    	<where>
+    		deleted = 0 AND status = 0
+    		<if test="needsId != null"> AND needs_id = #{needsId} </if>
+    		<if test="companyId != null"> AND company_id = #{companyId} </if>
+    	</where>
+    </update>
+    
+    <select id="getProjectId" parameterType="java.lang.Long"
+    		resultType="java.lang.Long">
+    	SELECT * from pscp_engineering_project 
+    	where deleted = 0 and customer_id IN(
+			SELECT id from pscp_company_customer 
+			where member_id = 1250 and deleted = 0
+		)
+		order by create_time;
+    </select>
+</mapper>

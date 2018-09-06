@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.WorkOrderDao">
+    <update id="updateEvaluateInfo" parameterType="com.edianniu.pscp.cs.domain.WorkOrder">
+        UPDATE pscp_work_order
+        SET appraiser_time = now(), status = 4, appraiser = #{appraiser}
+        WHERE id = #{id} AND status = 3
+    </update>
+
+    <select id="queryListWorkOrderVOCount" parameterType="map"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM pscp_work_order t
+        left join pscp_engineering_project e on t.engineering_project_id = e.id
+        left join pscp_company_customer c on e.customer_id = c.id
+        <where>
+            t.deleted = 0 and e.deleted = 0 and c.deleted = 0
+            <if test="uid != null">AND c.member_id = #{uid}</if>
+            <if test="name != null and name != ''">
+                AND t.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="exclusiveType != null">
+                AND t.type != #{exclusiveType}
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="queryListWorkOrderVO" parameterType="map"
+            resultType="com.edianniu.pscp.cs.bean.workorder.vo.WorkOrderVO">
+        SELECT
+        t.order_id AS orderId,
+        t.name AS name,
+        e.name AS projectName,
+        t.status AS status,
+        t.type AS type,
+        to_char(t.create_time,'yyyy-MM-dd HH24:mi:ss') AS publishTime
+        FROM pscp_work_order t
+        left join pscp_engineering_project e on t.engineering_project_id = e.id
+        left join pscp_company_customer c on e.customer_id = c.id
+        <where>
+            t.deleted = 0 and e.deleted = 0 and c.deleted = 0
+            <if test="uid != null">AND c.member_id = #{uid}</if>
+            <if test="name != null and name != ''">
+                AND t.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="exclusiveType != null">
+                AND t.type != #{exclusiveType}
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="getWorkOrderByOrderId" parameterType="string"
+            resultType="com.edianniu.pscp.cs.domain.WorkOrder">
+        SELECT * FROM pscp_work_order WHERE order_id = #{orderId};
+    </select>
+
+    <select id="getWorkOrderDetailsVOByOrderId" parameterType="string"
+            resultType="com.edianniu.pscp.cs.bean.workorder.vo.WorkOrderDetailsVO">
+        SELECT
+        id,
+        type,
+        order_id AS orderId,
+        name,
+        (to_char(start_time,'yyyy-mm-dd') || '~' ||
+        to_char(end_time,'yyyy-mm-dd')) AS workTime,
+        content,
+        address,
+        hazard_factor_identifications AS hazardFactor,
+        identification_other AS hazardFactorOther,
+        safety_measures AS safetyMeasures,
+        safety_measures_other AS safetyMeasuresOther,
+        carrying_tools AS carryingTools,
+        to_char(create_time,'yyyy-mm-dd') AS publishTime,
+        status,
+        latitude,
+        longitude,
+        company_id AS companyId,
+        defect_records AS defectRecords,
+        engineering_project_id AS engineeringProjectId,
+        to_char(actual_start_time,'yyyy-MM-dd HH24:mi:ss') AS actualStartTime,
+        to_char(actual_end_time,'yyyy-MM-dd HH24:mi:ss') AS actualEndTime
+        FROM pscp_work_order
+        WHERE order_id = #{orderId};
+    </select>
+</mapper>

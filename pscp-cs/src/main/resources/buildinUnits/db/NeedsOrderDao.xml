@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.NeedsOrderDao">
+
+    <select id="query" resultType="com.edianniu.pscp.cs.bean.needs.ResponsedCompany">
+		SELECT id AS id,
+			   needs_id AS needsId,
+			   company_id AS companyId,
+			   order_id AS orderId,
+			   status AS status,
+			   quoted_price AS quotedPrice,
+			   to_char(create_time,'yyyy-MM-dd HH:mm:ss') AS showTime
+	    FROM pscp_customer_needs_order
+		WHERE needs_id = #{needsId} AND order_id = #{responsedOrderId}
+	</select>
+
+    <update id="operateNeedsOrder" parameterType="map">
+        UPDATE pscp_customer_needs_order
+        <set>
+            <if test="cooperationTime != null">cooperation_time = #{cooperationTime},</if>
+            status = #{newStatus}
+        </set>
+        <where>
+            needs_id =#{needsId}
+            <if test="responsedOrderId != null">AND order_id = #{responsedOrderId}</if>
+            <if test="oldStatusList != null">AND status IN
+                <foreach collection="oldStatusList" item="oldStatus" open="(" separator="," close=")">
+                    #{oldStatus}
+                </foreach>
+            </if>
+        </where>
+    </update>
+
+    <select id="queryList" parameterType="map"
+            resultType="com.edianniu.pscp.cs.bean.needs.ResponsedCompany">
+        SELECT id AS id,
+        needs_id AS needsId,
+        company_id AS companyId,
+        order_id AS orderId,
+        status AS status,
+        pay_status AS payStatus,
+        quoted_price AS quotedPrice,
+        to_char(create_time,'yyyy-MM-dd HH24:mi:ss') AS showTime
+        FROM pscp_customer_needs_order
+        WHERE needs_id = #{needsId} AND deleted = 0
+        <if test="payStatus != null">AND pay_status = #{payStatus}</if>
+        <if test="queryStatusList != null">AND status IN
+            <foreach collection="queryStatusList" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="queryRespondDetails" parameterType="string"
+            resultType="com.edianniu.pscp.cs.bean.needs.NeedsOrderInfo">
+    	SELECT 
+    		id AS id,
+    		order_id AS orderId,
+    		company_id AS companyId,
+    		status AS status,
+			quoted_price AS quotedPrice
+		FROM pscp_customer_needs_order
+		WHERE order_id = #{orderId}	
+    </select>
+
+    <select id="queryEntityList"
+            resultType="com.edianniu.pscp.cs.domain.CustomerNeedsOrder">
+        SELECT * FROM pscp_customer_needs_order
+        WHERE deleted = 0
+        <if test="companyId != null">AND company_id = #{companyId}</if>
+        <if test="unequalStatus != null">AND status != #{unequalStatus}</if>
+        <if test="needsIds != null">AND needs_id IN
+            <foreach collection="needsIds" item="needsId" open="(" separator="," close=")">
+                #{needsId}
+            </foreach>
+        </if>
+    </select>
+
+</mapper>

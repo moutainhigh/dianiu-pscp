@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.CommonAttachmentDao">
+    
+    <insert id="saveBatch">
+        INSERT INTO pscp_common_attachment(
+        	id,
+        	foreign_key,
+        	company_id,
+        	member_id,
+        	business_type,
+        	type,
+        	fid,
+        	order_num,
+        	create_time,
+        	create_user,
+        	deleted
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            nextval('seq_pscp_common_attachment'),
+            #{item.foreignKey},
+            #{item.companyId},
+            #{item.memberId},
+            #{item.businessType},
+            #{item.type},
+            #{item.fId},
+            #{item.orderNum},
+            #{item.createTime},
+            #{item.createUser},
+            #{item.deleted}
+            )
+        </foreach>
+    </insert>
+   
+    
+    
+    
+    
+</mapper>

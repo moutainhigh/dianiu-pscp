@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cs.dao.NeedsDao">
+
+    <insert id="save" parameterType="com.edianniu.pscp.cs.bean.needs.NeedsInfo">
+        INSERT INTO pscp_customer_needs(
+        id,
+        company_id,
+        order_id,
+        name,
+        describe,
+        caution_money,
+        publish_cutoff_time,
+        working_start_time,
+        working_end_time,
+        contact_person,
+        contact_number,
+        contact_addr,
+        status,
+        distribution_room_ids,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES(
+        nextval('seq_pscp_customer_needs'),
+        #{companyId},
+        #{orderId},
+        #{name},
+        #{describe},
+        #{cautionMoney},
+        #{publishCutoffTime},
+        #{workingStartTime},
+        #{workingEndTime},
+        #{contactPerson},
+        #{contactNumber},
+        #{contactAddr},
+        #{status},
+        #{distributionRoomIds},
+        #{createTime},
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_customer_needs') as id;
+        </selectKey>
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.cs.bean.needs.NeedsInfo">
+        update pscp_customer_needs
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="describe != null">describe = #{describe},</if>
+            <if test="publishCutoffTime != null">publish_cutoff_time = #{publishCutoffTime},</if>
+            <if test="workingStartTime != null">working_start_time = #{workingStartTime},</if>
+            <if test="workingEndTime != null">working_end_time = #{workingEndTime},</if>
+            <if test="contactPerson != null">contact_person = #{contactPerson},</if>
+            <if test="contactNumber != null">contact_number = #{contactNumber},</if>
+            <if test="contactAddr != null">contact_addr = #{contactAddr},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="onShelves != null">on_shelves = #{onShelves},</if>
+            <if test="keyword != null and keyword.trim() != ''">keyword = #{keyword},</if>
+            <if test="failReason != null and failReason.trim() != ''">fail_reason = #{failReason},</if>
+            <if test="distributionRoomIds != null">distribution_room_ids = #{distributionRoomIds},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        <where>
+            1 = 1
+            <if test="id != null">AND id = #{id}</if>
+            <if test="orderId != null">AND order_id = #{orderId}</if>
+            <if test="companyId != null">AND company_id = #{companyId}</if>
+        </where>
+    </update>
+    
+    <select id="getNeedsByOrderId"
+            resultType="com.edianniu.pscp.cs.bean.needs.vo.NeedsVO">
+        SELECT
+        t.id AS id,
+        t.order_id AS orderId,
+        t.status AS status,
+        t.name AS name,
+        (CASE WHEN t.status=0 THEN to_char(t.create_time,'yyyy-MM-dd') 
+              ELSE to_char(t.audit_time,'yyyy-MM-dd') 
+        END) AS publishTime,
+        t.describe AS describe,
+        to_char(t.publish_cutoff_time,'yyyy-MM-dd') AS publishCutoffTime,
+        to_char(t.working_start_time,'yyyy-MM-dd') AS workingStartTime,
+        to_char(t.working_end_time,'yyyy-MM-dd') AS workingEndTime,
+        t.contact_person AS contactPerson,
+        t.contact_number AS contactNumber,
+        t.contact_addr AS contactAddr,
+        t.distribution_room_ids AS distributionRooms,
+        t.keyword AS keyword,
+        t.fail_reason AS failReason,
+        t.company_id AS companyId,
+        t.caution_money AS cautionMoney,
+        c.name AS companyName
+        FROM pscp_customer_needs t
+        LEFT JOIN pscp_company c ON t.company_id = c.id
+        <where>
+            t.deleted = 0
+            <if test="orderId != null">AND t.order_id = #{orderId}</if>
+            <if test="needsId != null">AND t.id = #{needsId}</if>
+        </where>
+    </select>
+
+    <select id="queryNeedsListVOCount" parameterType="map"
+            resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM pscp_customer_needs
+        <where>
+            deleted = 0
+            <if test="companyId != null">AND company_id = #{companyId}</if>
+            <if test="queryStatus!= null">AND status IN
+                <foreach collection="queryStatus" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="name != null and name.trim() != ''">
+            	AND name like concat ('%', #{name}, '%')
+            </if>
+            <if test="orderId != null and orderId.trim() != ''">
+            	AND order_id like concat ('%', #{orderId}, '%')
+            </if>
+            <if test="publishTime != null and publishTime.trim() != ''">
+            	AND
+            	(case when status=0 then to_char(create_time,'yyyy-MM-dd')
+            	      else to_char(audit_time,'yyyy-MM-dd')
+            	end) 
+            	= #{publishTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryList" parameterType="map"
+            resultType="com.edianniu.pscp.cs.bean.needs.vo.NeedsVO">
+        SELECT
+        status AS status,
+        id AS id,
+        order_id AS orderId,
+        name AS name,
+        describe AS describe,
+        distribution_room_ids AS distributionRooms,
+        (CASE WHEN status=0 THEN to_char(create_time,'yyyy-MM-dd') 
+              ELSE to_char(audit_time,'yyyy-MM-dd') 
+        END) AS publishTime
+        FROM pscp_customer_needs
+        <where>
+            deleted = 0
+            <if test="companyId != null">AND company_id = #{companyId}</if>
+            <if test="queryStatus!= null">AND status IN
+                <foreach collection="queryStatus" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="name != null and name.trim() != ''">
+            	AND name like concat ('%', #{name}, '%')
+            </if>
+            <if test="orderId != null and orderId.trim() != ''">
+            	AND order_id like concat ('%', #{orderId}, '%')
+            </if>
+            <if test="publishTime != null and publishTime.trim() != ''">
+            	AND
+            	(case when status=0 then to_char(create_time,'yyyy-MM-dd')
+            	      else to_char(audit_time,'yyyy-MM-dd')
+            	end) 
+            	= #{publishTime}
+            </if>
+        </where>
+        ORDER BY create_time DESC, audit_time ASC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryNeedsMarketCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.cs.bean.query.NeedsMarketListQuery">
+      SELECT COUNT(1) FROM pscp_customer_needs
+      WHERE deleted = 0 AND status = 1
+    </select>
+
+    <select id="queryNeedsMarketList"
+            parameterType="com.edianniu.pscp.cs.bean.query.NeedsMarketListQuery"
+            resultType="com.edianniu.pscp.cs.bean.needs.vo.NeedsMarketVO">
+        SELECT
+        t.id AS id,
+        t.order_id AS orderId,
+        t.name AS name,
+        t.describe AS describe,
+        to_char(t.audit_time, 'yyyy-MM-dd') AS publishTime,
+        (CASE WHEN o.id > 0 THEN 1 ELSE 0 END) AS respondStatus,
+        COALESCE(o.pay_status, '0') AS payStatus,
+        t.keyword AS keyword
+        FROM pscp_customer_needs t
+        LEFT join pscp_customer_needs_order o ON t.id = o.needs_id
+        AND o.company_id = #{companyId}
+        WHERE t.deleted = 0 AND t.status = 1
+        ORDER BY t.audit_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryNeedsMarketListNotRequiredCompanyIdCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.cs.bean.query.NeedsMarketListQuery">
+        SELECT COUNT(1) FROM pscp_customer_needs
+        WHERE deleted = 0 AND audit_time IS NOT NULL AND status &gt; 0
+    </select>
+
+    <select id="queryNeedsMarketListNotRequiredCompanyId"
+            parameterType="com.edianniu.pscp.cs.bean.query.NeedsMarketListQuery"
+            resultType="com.edianniu.pscp.cs.bean.needs.vo.NeedsMarketVO">
+        SELECT
+        t.id AS id,
+        t.order_id AS orderId,
+        t.name AS name,
+        t.describe AS describe,
+        to_char(t.audit_time, 'yyyy-MM-dd') AS publishTime,
+        to_char(t.publish_cutoff_time,'yyyy-MM-dd') AS publishCutoffTime,
+        t.keyword AS keyword
+        FROM pscp_customer_needs t
+        WHERE t.deleted = 0
+        AND t.audit_time IS NOT NULL
+        AND t.status &gt; 0
+        ORDER BY t.audit_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="getNeedsViewListCount" parameterType="map" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM pscp_customer_needs
+        <where>
+            deleted = 0
+            <if test="needsName != null and needsName.trim() != ''">AND name LIKE CONCAT('%',#{needsName},'%')</if>
+            <if test="companyIds != null">AND company_id IN
+                <foreach collection="companyIds" item="companyId" open="(" separator="," close=")">
+                    #{companyId}
+                </foreach>
+            </if>
+            <if test="queryStatusList !=null">AND status IN
+                <foreach collection="queryStatusList" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="queryNeedsViewList" parameterType="map" resultType="com.edianniu.pscp.cs.bean.needs.vo.NeedsViewVO">
+        SELECT
+        n.order_id AS orderId,
+        n.name AS needsName,
+        n.status AS needsStatus,
+        to_char(n.create_time,'yyyy-MM-dd') AS publishTime,
+        to_char(n.publish_cutoff_time,'yyyy-MM-dd') AS publishCutoffTime,
+        n.fail_reason AS failReason,
+        n.company_id AS companyId,
+        c.name AS memberName,
+        c.mobile AS LoginId
+        FROM pscp_customer_needs n
+        LEFT JOIN pscp_company c
+        ON n.company_id = c.id
+        <where>
+            n.deleted = 0 AND c.deleted = 0
+            <if test="needsName != null and needsName.trim() != ''">AND n.name LIKE CONCAT('%',#{needsName},'%')</if>
+            <if test="companyIds != null">AND company_id IN
+                <foreach collection="companyIds" item="companyId" open="(" separator="," close=")">
+                    #{companyId}
+                </foreach>
+            </if>
+            <if test="queryStatusList != null">AND n.status IN
+                <foreach collection="queryStatusList" item="status" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY n.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="getCustomerNeedsById" resultType="com.edianniu.pscp.cs.domain.Needs">
+        SELECT
+        id,
+        company_id,
+        order_id,
+        name,
+        describe,
+        keyword,
+        caution_money,
+        publish_cutoff_time,
+        working_start_time,
+        working_end_time,
+        contact_person,
+        contact_number,
+        contact_addr,
+        status,
+        distribution_room_ids,
+        audit_time,
+        create_time,
+        create_user,
+        deleted
+        FROM pscp_customer_needs
+        WHERE deleted = 0
+        <if test="id != null">AND id= #{id}</if>
+        <if test="orderId != null and orderId != ''">AND order_id = #{orderId}</if>
+    </select>
+
+    <select id="getOvertimeNeeds" parameterType="map"
+            resultType="java.lang.Long">
+        SELECT id FROM pscp_customer_needs
+        <where>
+        	publish_cutoff_time &lt; now() AND deleted = 0 
+        	AND ((status = #{auditing} AND on_shelves = 0) OR (status = #{responding} AND on_shelves = 1))
+        </where>
+        <if test="limit != null">limit #{limit}</if>
+    </select>
+
+    <select id="getSendMessagePushCustomer" resultType="java.util.Map">
+        SELECT t.id AS "needsId", m.id AS "memberId", m.mobile,c.name AS "memberName"
+        FROM pscp_customer_needs t
+        LEFT JOIN pscp_company c ON t.company_id = c.id
+        LEFT JOIN pscp_member m ON c.member_id = m.id
+        WHERE t.deleted = 0 AND c.deleted = 0 AND c.deleted = 0
+        AND t.id = #{id}
+        LIMIT 1
+    </select>
+
+</mapper>

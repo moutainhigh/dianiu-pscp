@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.cs.dao.WorkOrderEvaluateAttachmentDao">
+    <insert id="saveBatch" parameterType="map">
+        insert into pscp_work_order_evaluate_attachment
+        (
+        id,
+        work_order_evaluate_id,
+        type,
+        fid,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        <foreach collection="attachmentList" item="item" index="index" separator=",">
+            (nextval('seq_pscp_work_order_evaluate_attachment'),
+            #{evaluateId},
+            #{item.type},
+            #{item.fid},
+            #{createTime},
+            #{createUser},
+            0)
+        </foreach>
+    </insert>
+
+    <select id="listMapByEvaluateId" parameterType="long" resultType="java.util.Map">
+        SELECT id, fid FROM pscp_work_order_evaluate_attachment
+        WHERE deleted = 0 AND work_order_evaluate_id = #{evaluateId}
+    </select>
+</mapper>

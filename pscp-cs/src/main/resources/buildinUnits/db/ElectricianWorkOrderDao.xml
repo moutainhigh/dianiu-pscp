@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.cs.dao.ElectricianWorkOrderDao">
+    <select id="getWorkOrderLeader" parameterType="long" resultType="java.util.Map">
+        SELECT
+        t.electrician_id AS id,
+        e.user_name AS name,
+        m.mobile AS "contactTel"
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        LEFT JOIN pscp_member m ON t.electrician_id = m.id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND m.deleted = 0
+        AND t.work_order_leader = 1
+        AND t.work_order_id = #{workOrderId}
+        LIMIT 1
+    </select>
+
+    <select id="getCompanyElectricianWorkOrder" parameterType="long" resultType="java.util.Map">
+        SELECT
+        t.check_option_id AS "checkOptionId",
+        t.check_option AS "checkOption",
+        t.electrician_id AS id,
+        e.user_name AS name
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND t.type = 1
+        AND t.work_order_id = #{workOrderId}
+    </select>
+</mapper>

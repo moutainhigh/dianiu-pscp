@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+
+    <!-- 提供方应用信息，用于计算依赖关系 -->
+    <dubbo:application name="pscp-cs"/>
+    <!-- 使用multicast广播注册中心暴露服务地址 -->
+    <dubbo:registry address="${dubbo.address}"/>
+    <!-- 用dubbo协议在20880端口暴露服务 -->
+    <dubbo:protocol name="dubbo" port="${dubbo.port}"/>
+    <!-- 连接到监控中心 -->
+    <!--
+    <dubbo:monitor address="${monitor.address}" />
+    -->
+
+    <!-- 配置服务 -->
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.ConfigureParamService"
+                   ref="configureParamService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 需求服务 -->
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.NeedsInfoService"
+                   ref="needsInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 服务商需求响应订单服务 -->
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.CustomerNeedsOrderInfoService"
+                   ref="customerNeedsOrderInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 配电房安全用具服务 -->
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.SafetyEquipmentInfoService"
+                   ref="safetyEquipmentInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 配电房消防设施服务 -->
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.FirefightingEquipmentInfoService"
+                   ref="firefightingEquipmentInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 配电房设备 -->               
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.EquipmentInfoService"
+                   ref="equipmentInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 配电房检查日志 -->               
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.InspectingLogInfoService"
+                   ref="inspectingLogInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 配电房工作日志 -->               
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.DutyLogInfoService"
+                   ref="dutyLogInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 配电房操作日志 -->               
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.OperationRecordInfoService"
+                   ref="operationRecordInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 配电房 -->
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.RoomInfoService"
+                   ref="roomInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 智能监控 -->
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.PowerInfoService"
+                   ref="powerInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 工程项目 -->               
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.ProjectInfoService"
+                   ref="projectInfoService" timeout="120000" retries="1" version="1.0"/>
+    <!-- 历史服务商 -->               
+    <dubbo:service interface="com.edianniu.pscp.cs.service.dubbo.CompanyCustomerInfoService"
+                   ref="csCompanyCustomerInfoService" timeout="120000" retries="1" version="1.0"/>
+    
+                   
+
+</beans>
