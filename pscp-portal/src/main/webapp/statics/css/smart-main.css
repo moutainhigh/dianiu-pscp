@@ -1,0 +1,480 @@
+body {
+  background-color: #efefef;
+}
+
+#app {
+  padding: 12px 15px 0 15px;
+}
+
+/* 监控列表 */
+
+.smart-cus-slot {
+  min-height: 500px;
+  max-height: 750px;
+  overflow: scroll;
+  text-align: center;
+}
+
+.smart-cus-line {
+  background-color: #fff;
+  margin-bottom: 15px;
+  padding: 12px 15px;
+  cursor: pointer;
+}
+
+.smart-cus-line table {
+  width: 100%;
+}
+
+.smart-cus-line table tr td {
+  padding: 6px 12px;
+  text-align: center;
+  color: #777;
+  width: 20%;
+}
+
+.smart-cus-line table tr:nth-child(2) td {
+  font-size: 20px;
+}
+
+.smart-cus-line table tr:nth-child(2) td .label.label-danger {
+  font-size: 14px;
+  font-weight: 100;
+}
+
+/* 总告警 */
+
+.smart-alarm-all-list {
+  margin-top: 15px;
+  background-color: #fff;
+}
+
+.smart-alarm-all-in {
+  min-height: 400px;
+}
+
+.smart-alarm-all-list table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.smart-alarm-all-page {
+  padding: 6px 12px;
+}
+
+.smart-alarm-all-list table tr th {
+  padding: 12px 12px;
+  text-align: center;
+  color: #999;
+}
+
+.smart-alarm-all-list table tr td {
+  padding: 6px 12px;
+  text-align: center;
+  color: #777;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*.smart-alarm-all-list table tr td:hover{white-space: normal;overflow: auto;}*/
+
+.smart-alarm-all-list table tr:nth-child(even) {
+  background-color: #DDDDDC;
+}
+
+#load, #loadLine, #quantityBar, #distributedPie, #feePie, #singlePie {
+  padding: 0 15px 12px 15px;
+}
+
+.smart-all-title {
+  height: 80px;
+  background-color: #fff;
+  margin-bottom: 15px;
+  padding-left: 15px;
+  line-height: 80px;
+}
+
+.smart-sur-avata{
+  max-width: 80px;
+  height: 80px;
+  vertical-align: middle;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.smart-sur-name {
+  font-size: 16px;
+  color: #777;
+}
+
+.smart-all-ele-info {
+  float: right;
+  line-height: 1.25;
+  padding-right: 50px;
+  color: #777;
+  font-size: 12px;
+}
+
+.smart-all-ele-label {
+  height: 80px;
+  width: 200px;
+  text-align: center;
+}
+
+.smart-all-ele-num {
+  font-size: 18px;
+  display: inline-block;
+  padding-top: 10px;
+}
+
+.smart-fee-content {
+  margin-bottom: 15px;
+}
+
+.eleFeeDetail {
+  height: 40px;
+  width: 100%;
+  background: #fff;
+  line-height: 40px;
+  padding-left: 15px;
+}
+
+.smart-fee-detail {
+  background-color: #fff;
+  margin-top: 15px;
+}
+
+.smart-fee-detail .table {
+  margin-bottom: 0;
+}
+
+.smart-fee-detail .table>tbody>tr>td, .smart-fee-detail .table>tbody>tr>th {
+  width: 20%;
+  border-top: none;
+  text-align: center;
+}
+
+.smart-fee-detail .table>tbody>tr>th {
+  color: #999;
+  font-size: 14px;
+}
+
+.smart-fee-detail .table>tbody>tr>td {
+  color: #777;
+  font-size: 16px;
+}
+
+.smart-fee-detail-all {
+  height: 50px;
+  line-height: 50px;
+  background-color: #fff;
+  padding-left: 50px;
+  color: #777;
+  font-size: 16px;
+  margin-top: 15px;
+}
+
+.smart-ranking-content-title {
+  height: 40px;
+  line-height: 40px;
+  padding-left: 2em;
+  background-color: #fff;
+  margin-bottom: 15px;
+}
+
+.smart-ranking-content-title span {
+  font-size: 16px;
+  color: #777;
+}
+
+.smart-ranking-block {
+  float: left;
+  width: 300px;
+  height: 150px;
+  background-color: #5883ff;
+  margin-left: 35px;
+  border-radius: 10px;
+  text-align: center;
+  padding: 12px 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.smart-ranking-pa {
+  padding-top: 75px;
+  height: 250px;
+  background: #fff;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.smart-ranking-num-bg {
+  width: 35%;
+  position: absolute;
+  height: 100%;
+  top: 0;
+  opacity: .4;
+}
+
+.smart-ranking-num-title {
+  font-size: 36px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.smart-ranking-num-cont {
+  font-size: 24px;
+  color: #fff;
+}
+
+.smart-ranking-list table {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.smart-ranking-list table tr td {
+  padding: 6px 12px;
+  text-align: center;
+  color: #777;
+  font-size: 18px;
+}
+
+.smart-ranking-list table tr:nth-child(1) td {
+  color: #999;
+  font-size: 14px;
+}
+
+.imframe {
+  width: 100%;
+  min-height: 200px;
+  overflow: visible;
+  background: #fff;
+}
+
+.smart-main-header {
+  background: #333;
+}
+
+.nav.navbar-nav li {
+  text-align: center;
+}
+
+.smart-factor-list table, .smart-peakvalley-list table {
+  width: 95%;
+  margin-top: 20px;
+  margin-left: 5%;
+}
+
+.smart-factor-list table tr td, .smart-peakvalley-list table tr td {
+  padding: 4px 12px;
+  font-size: 16px;
+  color: #777;
+}
+
+.smart-factor-page, .smart-peakvalley-page {
+  padding: 6px 12px;
+  margin-top: 25px;
+}
+
+.smart-health-content {
+  background-color: #fff;
+}
+
+.threeLoadBorder {
+  width: 140px;
+  height: 140px;
+  border-radius: 5px;
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.threeLoadBorder.first {
+  border: 5px solid #fff565;
+}
+
+.threeLoadBorder.second {
+  border: 5px solid #7ed2f7;
+}
+
+.threeLoadBorder.third {
+  border: 5px solid #da4d3e;
+}
+
+#firstLoad, #secondLoad, #thirdLoad {
+  width: 200px;
+  height: 200px;
+  display: inline-block;
+  position: absolute;
+}
+
+.smart-health-div {
+  display: inline-block;
+  padding: 12px 15px;
+  width: 100%;
+  margin-left: 20px;
+}
+
+#voltageLine {
+  width: 100%;
+  height: 450px;
+}
+
+/* 图标标题 */
+
+.chart-title {
+  background-color: #fff;
+  padding: 6px 15px;
+  position: relative;
+}
+
+.chart-title-icon {
+  max-width: 50px;
+}
+
+.chart-title-span {
+  color: #777;
+  font-size: 16px;
+  margin-left: 3px;
+}
+
+/* 三相平衡 */
+
+#threePhaseRadar, #childThreePhaseRadar {
+  width: 100%;
+  height: 300px;
+  display: inline-block;
+}
+
+#balanceLine, #childBalanceLine {
+  width: 100%;
+  height: 300px;
+  display: inline-block;
+}
+
+.three-phase-chart {
+  padding: 12px 15px;
+  background-color: #fff;
+  margin-bottom: 15px;
+}
+
+.three-phase-graphics {
+  background-color: #fff;
+  padding: 12px 15px;
+}
+
+.three-phase-graphics-in {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  display: inline-block;
+  height: 250px;
+  padding: 0;
+  width: 100%;
+}
+
+.three-phase-graphics-in.a {
+  border: 2px solid #ffd014;
+}
+
+.three-phase-graphics-in.b {
+  border: 2px solid #7dc0f3;
+}
+
+.three-phase-graphics-in.c {
+  border: 2px solid #ff95b0;
+}
+
+.three-phase-graphics-top {
+  width: 100%;
+  height: 40px;
+  background-color: #ffd014;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  line-height: 40px;
+}
+
+.three-phase-graphics-top.a {
+  background-color: #ffd014;
+}
+
+.three-phase-graphics-top.b {
+  background-color: #7dc0f3;
+}
+
+.three-phase-graphics-top.c {
+  background-color: #ff95b0;
+}
+
+.smart-balance-detection-title {
+  height: 40px;
+  line-height: 40px;
+  padding-left: 15px;
+  color: #777;
+  background-color: #fff;
+  margin-bottom: 15px;
+}
+
+.smart-peak-legend {
+  position: absolute;
+  top: 2%;
+  right: 12%;
+}
+
+.smart-peak-legend li {
+  font-size: 12px;
+  float: left;
+  line-height: 20px;
+  position: relative;
+}
+
+.smart-peak-icon {
+  display: inline-block;
+  width: 30px;
+  height: 15px;
+  position: absolute;
+  top: 2px;
+  border-radius: 5px;
+}
+
+.smart-peak-line {
+  display: inline-block;
+  width: 30px;
+  height: 3px;
+  position: absolute;
+  top: 8px;
+  border-radius: 5px;
+}
+
+.smart-peak-tip {
+  margin-left: 32px;
+  margin-right: 15px;
+  color: #333;
+}
+
+.content-wrapper, .right-side {
+  background-color: #fff;
+}
+
+#navThird {
+  display: none;
+  color: #777;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.smart-cus-slot .no-content-span {
+  font-size: 16px;
+  color: #777;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.smart-cus-slot .no-content-div {
+  display: inline-block;
+  text-align: center;
+  margin-top: 200px;
+}

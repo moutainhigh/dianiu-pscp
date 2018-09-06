@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.MemberBankCardDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.portal.entity.MemberBankCardEntity">
+		select * from pscp_member_bank_card where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.portal.entity.MemberBankCardEntity" parameterType="map">
+		select * from pscp_member_bank_card where 1=1
+			<if test="bean != null and bean.uid != null">
+				and uid = #{bean.uid}
+			</if>
+			and  deleted=0 
+		order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int" parameterType="map">
+		select count(*) from pscp_member_bank_card  where 1=1
+		<if test="bean != null and bean.uid != null">
+				and uid =#{uid}
+			</if>
+		 and deleted=0
+		
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.portal.entity.MemberBankCardEntity">
+		insert into pscp_member_bank_card
+		(
+			id, 
+			uid, 
+			bank_id, 
+			bank_name, 
+			bank_branch_name, 
+			account, 
+			province_id,
+			city_id,
+			status, 
+			create_time, 
+			create_user, 		 
+			deleted, 
+			remark
+		)
+		values
+		(
+			nextval('seq_pscp_member_bank_card'), 
+			#{uid}, 
+			#{bankId}, 
+			#{bankName}, 
+			#{bankBranchName}, 
+			#{account}, 
+			#{provinceId},
+			#{cityId},
+			#{status}, 
+			now(), 
+			#{createUser}, 
+			0, 
+			#{remark}
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+    		SELECT currval('seq_pscp_member_bank_card') as id;
+    	</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.portal.entity.MemberBankCardEntity">
+		update pscp_member_bank_card 
+		<set>
+			<if test="uid != null">uid = #{uid}, </if>
+			<if test="bankId != null">bank_id = #{bankId}, </if>
+			<if test="bankName != null">bank_name = #{bankName}, </if>
+			<if test="bankBranchName != null">bank_branch_name = #{bankBranchName}, </if>
+			<if test="account != null">account = #{account}, </if>
+			<if test="status != null">status = #{status}, </if>
+			<if test="provinceId!=null">province_id=#{provinceId},</if>
+			<if test="cityId!=null">city_id=#{cityId},</if>		
+			<if test="deleted != null">deleted = #{deleted}, </if>
+			<if test="remark != null">remark = #{remark},</if>
+			<if test="modifiedTime != null">modified_time = now() ,</if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_member_bank_card set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_member_bank_card set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

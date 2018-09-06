@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>告警</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css?_${date.systemTime}">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="chart-title" style="padding-left: 30px;line-height: 48px;">
+            <img class="chart-title-icon" src="${rc.contextPath}/statics/img/smartAlarm.png" style="max-width: 40px;" />
+            <span class="chart-title-span">告警</span>
+        </div>
+        <div style="background-color: #fff;overflow: hidden;position: relative;">
+	      <table id="jqGridAlarm"></table>
+	      <div id="jqGridPagerAlarm"></div>
+	    </div>
+    </div>
+    <script src="${rc.contextPath}/js/cus_st/smart-alarm.js?_${date.systemTime}"></script>
+</body>
+
+</html>

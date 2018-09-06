@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>智能监控</title>
+    #parse("sys/header.html")
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="${rc.contextPath}/statics/plugins/element-ui@2.0.10/css/index.css">
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css">
+</head>
+
+<body>
+    <div id="rrpc" v-cloak>
+        <div class="smart-cus-in">
+            <header class="smart-main-header">
+                <nav class="navbar navbar-static-top" style="margin-bottom: 0;border-width: 0;">
+                    <div class="nav-menu-self">
+                        <div class="nav-menu-self-in" @click="toCusList">
+                            <span>
+                                << 返回客户列表 </span>
+                        </div>
+                    </div>
+                    <div style="float: right;">
+                        <div class="nav-menu-self">
+                            <div class="nav-menu-self-in" onmouseover="showPowerFeeMenu()" onmouseout="hidePowerFeeMenu()">
+                                能耗费用
+                                <i class="fa fa-caret-down" aria-hidden="true"></i>
+                            </div>
+                            <div id="powerFeeMenu" class="nav-menu-self-li" onmouseover="showPowerFeeMenu()" onmouseout="hidePowerFeeMenu()" style="display:none">
+                                <ul class="nav navbar-nav">
+                                    <li @click="changeNav" data-url="smart-device.html">总览</li>
+                                    <li @click="changeNav" data-url="smart-fee.html">参考电费</li>
+                                    <li @click="changeNav" data-url="smart-ranking.html">用能排行</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="nav-menu-self">
+                            <div class="nav-menu-self-in" onmouseover="showEleSafety()" onmouseout="hideEleSafety()">
+                                用电安全
+                                <i class="fa fa-caret-down" aria-hidden="true"></i>
+                            </div>
+                            <div id="eleSafety" class="nav-menu-self-li" onmouseover="showEleSafety()" onmouseout="hideEleSafety()" style="display:none">
+                                <ul class="nav navbar-nav">
+                                    <li @click="changeNav" data-url="smart-health.html">电压健康</li>
+                                    <li @click="changeNav" data-url="smart-balance.html">电流平衡</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="nav-menu-self">
+                            <div class="nav-menu-self-in" onmouseover="showWise()" onmouseout="hideWise()">
+                                合理用能
+                                <i class="fa fa-caret-down" aria-hidden="true"></i>
+                            </div>
+                            <div id="wise" class="nav-menu-self-li" onmouseover="showWise()" onmouseout="hideWise()" style="display:none">
+                                <ul class="nav navbar-nav">
+                                    <li @click="changeNav" data-url="smart-factor.html">功率因数</li>
+                                    <li @click="changeNav" data-url="smart-peakvalley.html">峰谷利用</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </header>
+            <!-- iframe -->
+            <section class="content">
+                <iframe src="smart-device.html" ref="ifame" class="imframe" scrolling="yes" frameborder="0"></iframe>
+            </section>
+        </div>
+    </div>
+    <!-- 引入组件库 -->
+    <script src="${rc.contextPath}/statics/plugins/element-ui@2.0.10/js/index.js"></script>
+    <script src="${rc.contextPath}/statics/libs/axios.min.js"></script>
+    <script src="${rc.contextPath}/js/st/smart-main.js?_${date.systemTime}"></script>
+</body>
+
+</html>

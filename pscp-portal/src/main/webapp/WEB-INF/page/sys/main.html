@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>控制台</title>
+    #parse("sys/header.html")
+    <style>
+    .form-control-static {
+        padding: 10px 25px;
+        color: #333;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp">
+        <div class="form-group">
+            <div v-if="user.isFacilitator == 1">
+                <div class="col-sm-12">
+                    <span class="sys-main-title">&nbsp;用户基本信息:&nbsp;</span>
+                    <p class="form-control-static">欢迎登录电力服务云平台</p>
+                    <p class="form-control-static"><span>欢迎回来&nbsp;:&nbsp;</span><span>{{ user.loginName }}</span></p>
+                    <p class="form-control-static"><span>您的用户ID&nbsp;:&nbsp;</span><span>{{ user.mobile }}</span></p>
+                    <p class="form-control-static"><span>角色&nbsp;:&nbsp;</span><span>{{ companyInfo.role }}</span></p>
+                    <p class="form-control-static">
+                        <span>您的认证状态&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <span class="label label-success" v-show="companyInfo.status == 2 ">认证成功</span>
+                        <span class="label label-warning" v-show="companyInfo.status == 1 ">认证中</span>
+                        <span class="label label-danger" v-show="companyInfo.status == -1 ">认证失败</span>
+                        <span class="label label-warning" v-show="companyInfo.status == null||companyInfo.status == 0 ">未认证</span>
+                        <button type="button" class="btn btn-primary" v-show="companyInfo.status == null || companyInfo.status == 0 || companyInfo.status == -1" onclick="gotoCompanyAuth(1)">认证为服务商</button>
+                        <button type="button" class="btn btn-primary" v-show="companyInfo.status == null || companyInfo.status == 0 || companyInfo.status == -1" onclick="gotoCompanyAuth(2)">认证为客户</button>
+                    </p>
+                    <p class="form-control-static">
+                        <button type="button" class="btn btn-primary" v-show="companyInfo.status == 1 || companyInfo.status == 2" onclick="gotoCompanyAuth()">去查看</button>
+                    </p>
+                    <div v-show="companyInfo.status&&companyInfo.status != 0">
+                        <span class="sys-main-title">&nbsp;企业信息:&nbsp;</span>
+                        <p class="form-control-static"><span>企业名称&nbsp;:&nbsp;</span><span>{{ companyInfo.companyName }}</span></p>
+                        <p class="form-control-static"><span>企业地址&nbsp;:&nbsp;</span><span>{{ companyInfo.companyAddr }}</span></p>
+                        <p class="form-control-static"><span>联系人&nbsp;:&nbsp;</span><span>{{ companyInfo.contacts }}</span></p>
+                        <p class="form-control-static"><span>手机号码&nbsp;:&nbsp;</span><span>{{ companyInfo.contactNumber }}</span></p>
+                        <p class="form-control-static"><span>座机号码&nbsp;:&nbsp;</span><span>{{ companyInfo.companyPhone }}</span></p>
+                    </div>
+                </div>
+                <hr>
+            </div>
+            <div v-else-if="user.isElectrician == 1">
+                <div class="col-sm-12">
+                    <span class="sys-main-title">&nbsp;用户基本信息:&nbsp;</span>
+                    <p class="form-control-static">欢迎登录电力服务云平台</p>
+                    <p class="form-control-static"><span>欢迎回来&nbsp;:&nbsp;</span><span>{{ user.loginName }}</span></p>
+                    <p class="form-control-static"><span>您的用户ID&nbsp;:&nbsp;</span><span>{{ user.mobile }}</span></p>
+                    <p class="form-control-static"><span>角色&nbsp;:&nbsp;</span><span>{{ electricianInfo.role }}</span></p>
+                    <p class="form-control-static">
+                        <span>您的认证状态&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <span class="label label-success" v-show="electricianInfo.certifiedStatus == 2 ">认证成功</span>
+                        <span class="label label-warning" v-show="electricianInfo.certifiedStatus == 1 ">认证中</span>
+                        <span class="label label-danger" v-show="electricianInfo.certifiedStatus == -1 ">认证失败</span>
+                        <span class="label label-warning" v-show="electricianInfo.certifiedStatus == null||electricianInfo.certifiedStatus == 0 ">未认证</span>
+                    </p>
+                    <p v-if="electricianInfo.role == '企业电工'" class="form-control-static"><span>所属企业名称&nbsp;:&nbsp;</span><span>{{ electricianInfo.companyName }}</span></p>
+                    <p v-if="electricianInfo.role == '企业电工'" class="form-control-static"><span>所属企业地址&nbsp;:&nbsp;</span><span>{{ electricianInfo.companyAddr }}</span></p>
+                    <span class="sys-main-title">&nbsp;电工基本信息:&nbsp;</span>
+                    <p class="form-control-static"><span>姓名&nbsp;:&nbsp;</span><span>{{ electricianInfo.electricianName }}</span></p>
+                    <p class="form-control-static"><span>身份证号码&nbsp;:&nbsp;</span><span>{{ electricianInfo.idNumber }}</span></p>
+                    <p class="form-control-static">
+                        <span>电工证书&nbsp;:&nbsp;</span>
+                        <ul class="upload-ul" style="padding-left: 25px;">
+                            <li class="upload-li" v-for="img in electricianInfo.certificateList">
+                                <img :src="img" class="upload-img" @click="imgEnlarge" />
+                            </li>
+                        </ul>
+                    </p>
+                    <p class="form-control-static">
+                        <span>身份证正反面&nbsp;:&nbsp;</span>
+                        <ul class="upload-ul" style="padding-left: 25px;">
+                            <li class="upload-li" v-for="img in electricianInfo.idImagesList">
+                                <img :src="img" class="upload-img" @click="imgEnlarge" />
+                            </li>
+                        </ul>
+                    </p>
+                    <span v-if="electricianInfo.role == '社会电工'" class="sys-main-title">&nbsp;电工资质:&nbsp;</span>
+                    <p v-if="electricianInfo.role == '社会电工'" class="form-control-static">
+                        <span style="margin-left: 10px;">&nbsp;{{ electricianInfo.qualificationList[0].name }}:&nbsp;</span>
+                        <br />
+                        <label class="checkbox-inline" v-for="(item,index) in electricianInfo.qualificationList[0].certificateList">
+                            <input type="checkbox" :checked="item.checked" disabled><span>{{ item.name}}</span>
+                        </label>
+                        <br />
+                        <br />
+                        <span style="margin-left: 10px;">&nbsp;{{ electricianInfo.qualificationList[1].name }}:&nbsp;</span>
+                        <br />
+                        <label class="checkbox-inline" v-for="(item,index) in electricianInfo.qualificationList[1].certificateList">
+                            <input type="checkbox" :checked="item.checked" disabled><span>{{ item.name}}</span>
+                        </label>
+                        <br />
+                        <br />
+                        <span style="margin-left: 10px;">&nbsp;{{ electricianInfo.qualificationList[2].name }}:&nbsp;</span>
+                        <br />
+                        <label class="checkbox-inline" v-for="(item,index) in electricianInfo.qualificationList[2].certificateList">
+                            <input type="checkbox" :checked="item.checked" disabled><span>{{ item.name}}</span>
+                        </label>
+                    </p>
+                    <span class="sys-main-title">&nbsp;简历信息:&nbsp;</span>
+                    <p v-if="!electricianInfo.resume.city" class="form-control-static">暂无</p>
+                    <div v-if="electricianInfo.resume.city">
+                        <p class="form-control-static"><span>最高学历&nbsp;:&nbsp;</span><span>{{ electricianInfo.resume.diploma }}</span></p>
+                        <p class="form-control-static"><span>所在城市&nbsp;:&nbsp;</span><span>{{ electricianInfo.resume.city }}</span></p>
+                        <p class="form-control-static"><span>工作年限&nbsp;:&nbsp;</span><span>{{ electricianInfo.resume.workingYears }}</span></p>
+                        <p class="form-control-static"><span>期望费用(元/天)&nbsp;:&nbsp;</span><span>{{ electricianInfo.resume.expectedFee }}</span></p>
+                    </div>
+                    <div v-if="electricianInfo.experiences.length>0">
+                        <span class="sys-main-title">&nbsp;工作经历:&nbsp;</span>
+                        <div v-for="item in electricianInfo.experiences">
+                            <p class="form-control-static"><span>公司名称&nbsp;:&nbsp;</span><span>{{ item.companyName }}</span></p>
+                            <p class="form-control-static"><span>工作时期&nbsp;:&nbsp;</span><span>{{ item.startTime }}——{{ item.endTime }}</span></p>
+                            <p class="form-control-static"><span>工作内容&nbsp;:&nbsp;</span><span>{{ item.workContent }}</span></p>
+                            <hr />
+                        </div>
+                    </div>
+                </div>
+                <hr>
+            </div>
+            <div v-else-if="user.isCustomer == 1">
+                <div class="col-sm-12">
+                    <span class="sys-main-title">&nbsp;用户基本信息:&nbsp;</span>
+                    <p class="form-control-static">欢迎登录电力服务云平台</p>
+                    <p class="form-control-static"><span>欢迎回来&nbsp;:&nbsp;</span><span>{{ user.mobile }}</span></p>
+                    <p class="form-control-static"><span>您的用户ID&nbsp;:&nbsp;</span><span>{{ user.mobile }}</span></p>
+                    <p class="form-control-static"><span>角色&nbsp;:&nbsp;</span><span>{{ customerInfo.role }}</span></p>
+                    <span class="sys-main-title">&nbsp;所属公司信息:&nbsp;</span>
+                    <p class="form-control-static"><span>企业名称&nbsp;:&nbsp;</span><span>{{ customerInfo.companyName }}</span></p>
+                    <p class="form-control-static"><span>企业地址&nbsp;:&nbsp;</span><span>{{ customerInfo.companyAddr }}</span></p>
+                    <p class="form-control-static"><span>联系人&nbsp;:&nbsp;</span><span>{{ customerInfo.contacts }}</span></p>
+                    <p class="form-control-static"><span>手机号码&nbsp;:&nbsp;</span><span>{{ customerInfo.contactNumber }}</span></p>
+                    <p class="form-control-static"><span>联系电话&nbsp;:&nbsp;</span><span>{{ customerInfo.companyPhone }}</span></p>
+                </div>
+            </div>
+
+            <div v-else>
+                <div class="col-sm-12">
+                    <span class="sys-main-title">&nbsp;用户基本信息:&nbsp;</span>
+                    <p class="form-control-static">欢迎登录电力服务云平台</p>
+                    <p class="form-control-static"><span>欢迎回来&nbsp;:&nbsp;</span><span>{{ user.mobile }}</span></p>
+                    <p class="form-control-static"><span>您的用户ID&nbsp;:&nbsp;</span><span>{{ user.mobile }}</span></p>
+                    <p class="form-control-static"><span>角色&nbsp;:&nbsp;</span><span>{{ companyInfo.role }}</span></p>
+                    <p class="form-control-static">
+                        <span>您的认证状态&nbsp;:&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <span class="label label-success" v-show="companyInfo.status == 2 ">认证成功</span>
+                        <span class="label label-warning" v-show="companyInfo.status == 1 ">认证中</span>
+                        <span class="label label-danger" v-show="companyInfo.status == -1 ">认证失败</span>
+                        <span class="label label-warning" v-show="companyInfo.status == null||companyInfo.status == 0">未认证</span>
+                         <button type="button" class="btn btn-primary" v-show="companyInfo.status == null || companyInfo.status == 0 || companyInfo.status == -1" onclick="gotoCompanyAuth(1)">认证为服务商</button>
+                        <button type="button" class="btn btn-primary" v-show="companyInfo.status == null || companyInfo.status == 0 || companyInfo.status == -1" onclick="gotoCompanyAuth(2)">认证为客户</button>
+                        <button type="button" class="btn btn-primary" v-show="companyInfo.status == 1 || companyInfo.status == 2" onclick="gotoCompanyAuth()">去查看</button>
+                    </p>
+                </div>
+                <hr>
+            </div>
+
+        </div>
+    </div>
+    <script>
+    var vm = new Vue({
+        el: '#rrapp',
+        data: {
+            title: '首页',
+            user: {
+                loginName: '',
+                mobile: '',
+                isFacilitator: 0,
+                isElectrician: 0,
+                isCustomer: 0
+            },
+            companyInfo: {
+                companyName: '',
+                companyAddr: '',
+                contacts: '',
+                contactNumber: '',
+                companyPhone: '',
+                status: null,
+                role: '普通用户/服务商'
+            },
+            electricianInfo: {
+                certifiedStatus: null,
+                electricianName: '',
+                idNumber: '',
+                certificateList: [],
+                idImagesList: [],
+                qualificationList: [{
+                        name: '',
+                        certificateList: []
+                    },
+                    {
+                        name: '',
+                        certificateList: []
+                    },
+                    {
+                        name: '',
+                        certificateList: []
+                    }
+                ],
+                role: '电工',
+                companyName: '',
+                companyAddr: '',
+                resume: {
+                    city: '',
+                    diploma: '',
+                    expectedFee: '',
+                    synopsis: '',
+                    workingYears: ''
+                },
+                experiences: []
+            },
+            customerInfo: {
+                role: '客户',
+                companyName: '',
+                companyAddr: '',
+                contacts: '',
+                contactNumber: '',
+                companyPhone: ''
+            }
+        },
+        methods: {
+        },
+        created: function() {
+            var self = this;
+            $.getJSON("user/info?_" + $.now(), function(r) {
+                if(r.code ==0&&r.user){
+                    self.user = r.user;
+                    $.ajax({
+                        url: $ctx + '/main',
+                        type: 'post',
+                        dataType: 'json',
+                        success: function(r) {
+                            if (r.code == 0) {
+                                if (self.user.isFacilitator == 1) {
+                                    self.companyInfo = r.data;
+                                    self.companyInfo.status = r.data.certifiedStatus;
+                                } else if (self.user.isElectrician == 1) {
+                                    self.electricianInfo = r.data;
+                                } else if (self.user.isCustomer == 1) {
+                                    self.customerInfo = r.data;
+                                } else{
+                                    self.companyInfo = r.data;
+                                    self.companyInfo.status = r.data.certifiedStatus;
+                                }
+                            } else{
+                                alert(r.msg);
+                            }
+                        }
+                    });
+                }else{
+                    console(r);
+                }
+                    
+                    
+                });
+        }
+    });
+    </script>
+</body>
+
+</html>

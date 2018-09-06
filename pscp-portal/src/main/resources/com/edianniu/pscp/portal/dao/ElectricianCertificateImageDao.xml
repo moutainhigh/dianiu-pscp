@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.ElectricianCertificateImageDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.portal.entity.ElectricianCertificateImageEntity">
+		select * from pscp_electrician_certificate_image where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.portal.entity.ElectricianCertificateImageEntity">
+		select * from pscp_electrician_certificate_image where deleted=0 order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	<select id="queryListByElectricianId" resultType="com.edianniu.pscp.portal.entity.ElectricianCertificateImageEntity">
+		select * from pscp_electrician_certificate_image where electrician_id = #{value} and deleted=0
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_certificate_image  where deleted=0
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.portal.entity.ElectricianCertificateImageEntity">
+		insert into pscp_electrician_certificate_image
+		(
+			id, 
+			electrician_id, 
+			file_id, 
+			order_num, 
+			status, 
+			create_time, 
+			create_user, 
+			modified_time, 
+			modified_user, 
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_electrician_certificate_image'),
+			#{electricianId}, 
+			#{fileId}, 
+			#{orderNum}, 
+			#{status}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.portal.entity.ElectricianCertificateImageEntity">
+		update pscp_electrician_certificate_image 
+		<set>
+			<if test="electricianId != null">electrician_id = #{electricianId}, </if>
+			<if test="fileId != null">file_id = #{fileId}, </if>
+			<if test="orderNum != null">order_num = #{orderNum}, </if>
+			<if test="status != null">status = #{status}, </if>
+			<if test="createTime != null">create_time = #{createTime}, </if>
+			<if test="createUser != null">create_user = #{createUser}, </if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	<delete id="deleteByElectricianId">
+	update pscp_electrician_certificate_image set deleted=-1,modified_time=now(),modified_user=${modifiedUser} 
+	where electrician_id = #{value}
+	</delete>
+	<delete id="delete">
+	    update pscp_electrician_certificate_image set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_electrician_certificate_image set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

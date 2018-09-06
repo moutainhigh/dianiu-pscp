@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>配电房管理</title>
+    #parse("sys/header.html")
+    <style>
+    .btn {
+        margin-right: 1em;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <div class="grid-btn">
+                <div class="col-sm-2" style="padding-left: 0;">
+                    <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="名称">
+                </div>
+                <div class="col-sm-2" style="padding-left: 0;">
+                    <input type="text" class="form-control" v-model="q.director" @keyup.enter="query" placeholder="负责人">
+                </div>
+                <div class="col-sm-2" style="padding-left: 0;">
+                    <input type="text" class="form-control" v-model="q.contactNumber" @keyup.enter="query" placeholder="联系方式">
+                </div>
+           		<div id="startTime" style="width: 20%;" class="input-group date form_datetime col-sm-3 query" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+          			<input type="text" class="form-control" v-model="q.startTime" placeholder="开始时间">
+          			<span id="startTime-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+        		</div>
+           		<div id="endTime" style="width: 20%;" class="input-group date form_datetime col-sm-3 query" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+          			<input type="text" class="form-control" v-model="q.endTime" placeholder="开始时间">
+          			<span id="endTime-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+        		</div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn">
+                <a class="btn btn-primary" @click="info"><i class="fa fa-eye"></i>&nbsp;详情</a>
+                <a class="btn btn-primary" @click="update"><i class="fa fa-edit"></i>&nbsp;编辑</a>
+                <a class="btn btn-primary" @click="add" ><i class="fa fa-plus"></i>&nbsp;新增</a>
+                <a class="btn btn-primary" @click="del" ><i class="fa fa-times"></i>&nbsp;删除</a>
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        
+        
+        <div v-show="!showList" class="panel panel-default">
+	      <div class="panel-heading">{{title}}</div>
+	      
+	      <form class="form-horizontal" data-vv-scope="form-1">
+	        <div class="form-group" hidden="true">
+	          <label class="col-sm-2 control-label">id</label>
+	          <div class="col-sm-5">
+	            <input type="text" class="form-control" v-model="room.id"  data-vv-name="id" 
+	            v-validate="'required|max:200'" :class="{'is-danger': errors.has('form-1.id')}" :disabled="!canEdit"/>
+	            <span v-show="errors.has('form-1.id')" class="help is-danger">{{ errors.first('form-1.id') }}</span>
+	          </div>
+	        </div>
+	        <div class="form-group">
+	          <label class="col-sm-2 control-label">配电房名称<span style="color: red;">*</span></label>
+	          <div class="col-sm-5">
+	            <input type="text" class="form-control" v-model="room.name" placeholder="配电房名称" data-vv-name="配电房名称" 
+	            v-validate="'required|max:200'" :class="{'is-danger': errors.has('form-1.配电房名称')}" :disabled="!canEdit"/>
+	            <span v-show="errors.has('form-1.配电房名称')" class="help is-danger">{{ errors.first('form-1.配电房名称') }}</span>
+	          </div>
+	        </div>
+	        <div class="form-group">
+	          <label class="col-sm-2 control-label">负责人<span style="color: red;">*</span></label>
+	          <div class="col-sm-5">
+	            <input type="text" class="form-control" v-model="room.director"  placeholder="负责人" data-vv-name="负责人"
+	            v-validate="'required|max:10'" :class="{'is-danger': errors.has('form-1.负责人')}" :disabled="!canEdit"/>
+	            <span v-show="errors.has('form-1.负责人')" class="help is-danger">负责人</span>
+	          </div>
+	        </div>
+	        <div class="form-group">
+	          <label class="col-sm-2 control-label">联系电话<span style="color: red;">*</span></label>
+	          <div class="col-sm-5">
+	            <input type="text" class="form-control" v-model="room.contactNumber"  placeholder="联系电话" data-vv-name="联系电话"
+	            v-validate="'required'" :class="{'is-danger': errors.has('form-1.联系电话')}" :disabled="!canEdit"/>
+	            <span v-show="errors.has('form-1.联系电话')" class="help is-danger">联系电话</span>
+	          </div>
+	        </div>
+	        <div class="form-group">
+	          <label class="col-sm-2 control-label">配电房地址<span style="color: red;">*</span></label>
+	          <div class="col-sm-5">
+	            <input type="text" class="form-control" v-model="room.address"  placeholder="配电房地址" data-vv-name="配电房地址"
+	            v-validate="'required|max:512'" :class="{'is-danger': errors.has('form-1.配电房地址')}" :disabled="!canEdit"/>
+	            <span v-show="errors.has('form-1.配电房地址')" class="help is-danger">配电房地址</span>
+	          </div>
+	        </div>
+	        
+	        <div class="form-group" style="margin:25px;">
+	          <div class="col-sm-2 control-label"></div>
+	          <input type="button" class="btn btn-primary" @click="save" value="保存" v-show="true" /> &nbsp;&nbsp;
+	          <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+	        </div>
+	      </form>
+	    </div>
+	    
+    </div>
+    <script src="${rc.contextPath}/js/cp/room.js?_${date.systemTime}"></script>
+</body>
+
+</html>

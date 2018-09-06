@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.SysUserDao">
+    
+    <sql id="pscp_member_columns">
+        id as userId,
+        login_name as loginName,
+        real_name as realName,
+        mobile,
+        passwd,
+        tx_img as txImg,
+        nick_name as nickName,
+        sex,
+        age,
+        remark,
+        status,
+        is_customer as isCustomer,
+        is_facilitator as isFacilitator,
+        is_electrician as isElectrician,
+        is_admin as isAdmin,
+        company_id as companyId,
+        create_time as createTime,
+        create_user as createUser,
+        modified_time as modifiedTime,
+        modified_user as modifiedUser,
+        deleted
+    </sql>
+    
+    <select id="queryObject" resultType="com.edianniu.pscp.portal.entity.SysUserEntity">
+        select
+        <include refid="pscp_member_columns"/>
+        from pscp_member where id = #{value} and deleted=0
+    </select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.portal.entity.SysUserEntity" parameterType="map">
+        select
+        <include refid="pscp_member_columns"/>
+        from pscp_member
+        <where>
+            deleted=0 and is_admin=0 and is_facilitator=1
+            <if test="loginName != null and loginName.trim() != ''">
+                and login_name like concat('%',#{loginName},'%')
+            </if>
+            <if test="mobile != null and mobile.trim() != ''">
+                and mobile like concat('%',#{mobile},'%')
+            </if>
+            <if test="bean !=null and bean.mobile != '' ">
+                and mobile =#{bean.mobile}
+            </if>
+            <if test="bean !=null and bean.isCustomer != null ">
+                and is_customer =#{bean.isCustomer}
+            </if>
+            <if test="bean !=null and bean.isFacilitator != null ">
+                and is_facilitator =#{bean.isFacilitator}
+            </if>
+            <if test="bean !=null and bean.isElectrician != null ">
+                and is_electrician =#{bean.isElectrician}
+            </if>
+            <if test="bean !=null and bean.isAdmin != null ">
+                and is_admin =#{bean.isAdmin}
+            </if>
+            <if test="bean !=null and bean.companyId != null">
+                and company_id=#{bean.companyId}
+            </if>
+            <if test="companyId != null">
+                and company_id=#{companyId}
+            </if>
+        </where>
+        order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int" parameterType="map">
+        select count(*) from pscp_member
+        <where>
+            deleted=0 and is_admin=0 and is_facilitator=1
+            <if test="loginName != null and loginName.trim() != ''">
+                and login_name like concat('%',#{loginName},'%')
+            </if>
+            <if test="mobile != null and mobile.trim() != ''">
+                and mobile like concat('%',#{mobile},'%')
+            </if>
+            <if test="bean !=null and bean.mobile != '' ">
+                and mobile =#{bean.mobile}
+            </if>
+            <if test="bean !=null and bean.isCustomer != null ">
+                and is_customer =#{bean.isCustomer}
+            </if>
+            <if test="bean !=null and bean.isFacilitator != null ">
+                and is_facilitator =#{bean.isFacilitator}
+            </if>
+            <if test="bean !=null and bean.isElectrician != null ">
+                and is_electrician =#{bean.isElectrician}
+            </if>
+            <if test="bean !=null and bean.isAdmin != null ">
+                and is_admin =#{bean.isAdmin}
+            </if>
+            <if test="bean !=null and bean.companyId != null">
+                and company_id=#{bean.companyId}
+            </if>
+            <if test="bean !=null and companyId != null">
+                and company_id=#{companyId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询用户的所有权限 -->
+    <select id="queryAllPerms" resultType="String">
+		select m.perms from pscp_sys_member_role ur 
+			LEFT JOIN pscp_sys_role_menu rm on ur.role_id = rm.role_id 
+			LEFT JOIN pscp_sys_menu m on rm.menu_id = m.id 
+		where ur.user_id = #{userId} and ur.deleted=0 and rm.deleted=0 and m.deleted=0
+	</select>
+
+    <!-- 查询用户的所有菜单ID -->
+    <select id="queryAllMenuId" resultType="Long">
+		select m.id from pscp_sys_member_role ur 
+			LEFT JOIN pscp_sys_role_menu rm on ur.role_id = rm.role_id 
+			LEFT JOIN pscp_sys_menu m on rm.menu_id = m.id 
+		where ur.user_id = #{userId} and ur.deleted=0 and rm.deleted=0 and m.deleted=0
+	</select>
+
+    <select id="queryByLoginName" resultType="com.edianniu.pscp.portal.entity.SysUserEntity">
+        select
+        <include refid="pscp_member_columns"/>
+        from pscp_member where login_name = #{loginName} and deleted=0 limit 1
+    </select>
+    
+    <select id="queryByRealName" resultType="com.edianniu.pscp.portal.entity.SysUserEntity">
+        select
+        <include refid="pscp_member_columns"/>
+        from pscp_member where real_name = #{realName} and deleted=0 limit 1
+    </select>
+    
+    <select id="queryByMobile" resultType="com.edianniu.pscp.portal.entity.SysUserEntity">
+        select
+        <include refid="pscp_member_columns"/>
+        from pscp_member where mobile = #{mobile} and deleted=0 limit 1
+    </select>
+    
+    <select id="queryByCompanyName" resultType="com.edianniu.pscp.portal.entity.SysUserEntity">
+    	SELECT 
+    		m.id as userId,
+	        m.login_name as loginName,
+	        m.real_name as realName,
+	        m.mobile,
+	        m.passwd,
+	        m.tx_img as txImg,
+	        m.nick_name as nickName,
+	        m.sex,
+	        m.age,
+	        m.remark,
+	        m.status,
+	        m.is_customer as isCustomer,
+	        m.is_facilitator as isFacilitator,
+	        m.is_electrician as isElectrician,
+	        m.is_admin as isAdmin,
+	        m.company_id as companyId,
+	        m.create_time as createTime,
+	        m.create_user as createUser,
+	        m.modified_time as modifiedTime,
+	        m.modified_user as modifiedUser,
+	        m.deleted
+    	FROM pscp_member m
+    	INNER JOIN pscp_company c ON c.id = m.company_id 
+    	WHERE m.deleted = 0 AND m.is_admin = 1 AND c.deleted = 0 AND c.name = #{companyName}
+    	limit 1
+    </select>
+    
+    <select id="getCountByLoginName" resultType="int">
+		select 
+		 count(*)
+		from pscp_member where login_name = #{loginName} and deleted=0
+	</select>
+	<select id="getCountByRealName" resultType="int">
+		select 
+		 count(*)
+		from pscp_member where real_name = #{realName} and deleted=0
+	</select>
+	
+    <select id="getCountByMobile" resultType="int">
+		select 
+		 count(*)
+		from pscp_member where mobile = #{mobile} and deleted=0
+	</select>
+	
+    <insert id="save" parameterType="com.edianniu.pscp.portal.entity.SysUserEntity" useGeneratedKeys="true"
+            keyProperty="userId">
+        insert into pscp_member
+        (
+        id,
+        login_name,
+        mobile,
+        passwd,
+        tx_img,
+        nick_name,
+        real_name,
+        sex,
+        age,
+        remark,
+        status,
+        is_customer,
+        is_facilitator,
+        is_electrician,
+        is_admin,
+        company_id,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        (
+        nextval('seq_pscp_member'),
+        #{loginName},
+        #{mobile},
+        #{passwd},
+        #{txImg},
+        #{nickName},
+        #{realName},
+        #{sex},
+        #{age},
+        #{remark},
+        #{status},
+        #{isCustomer},
+        #{isFacilitator},
+        #{isElectrician},
+        #{isAdmin},
+        #{companyId},
+        #{createTime},
+        #{createUser},
+        #{deleted}
+
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="userId">
+            SELECT currval('seq_pscp_member') as userId;
+        </selectKey>
+    </insert>
+
+    <select id="getCompanyAdmin" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.portal.entity.SysUserEntity">
+        select
+        <include refid="pscp_member_columns"/>
+        from pscp_member
+        where deleted=0 and is_admin=1 and is_facilitator=1 and is_customer = 0 and company_id=#{companyId}
+    </select>
+
+    <select id="getEntityById" resultType="com.edianniu.pscp.portal.entity.SysUserEntity">
+        select
+        <include refid="pscp_member_columns"/>
+        from pscp_member
+        where deleted=0 and id = #{userId}
+    </select>
+
+    <update id="update" parameterType="com.edianniu.pscp.portal.entity.SysUserEntity">
+        update pscp_member
+        <set>
+            <if test="loginName != null">login_name = #{loginName},</if>
+            <if test="mobile != null">mobile = #{mobile},</if>
+            <if test="passwd != null">passwd = #{passwd},</if>
+            <if test="txImg != null">tx_img = #{txImg},</if>
+            nick_name = #{nickName},
+            <if test="realName != null and realName != ''">real_name = #{realName},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="age != null">age = #{age},</if>
+            remark = #{remark},
+            <if test="status != null">status = #{status},</if>
+            <if test="isCustomer != null">is_customer = #{isCustomer},</if>
+            <if test="isFacilitator != null">is_facilitator = #{isFacilitator},</if>
+            <if test="isElectrician != null">is_electrician = #{isElectrician},</if>
+            <if test="isAdmin != null">is_admin = #{isAdmin},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            modified_time=now(),modified_user=#{modifiedUser}
+        </set>
+        where id = #{userId} and deleted=0
+    </update>
+
+    <update id="updatePassword" parameterType="map">
+        UPDATE pscp_member
+        SET passwd = #{newPasswd}
+        WHERE id = #{userId} AND passwd = #{passwd} AND deleted = 0
+    </update>
+
+    <delete id="deleteBatch">
+        update pscp_member set deleted=-1, modified_time=now(),modified_user=#{modifiedUser} where id in
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        ;
+        update pscp_sys_member_role set deleted=-1, modified_time=now(),modified_user=#{modifiedUser} where user_id in
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+
+</mapper>

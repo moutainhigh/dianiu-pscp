@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.ElectricianWorkLogAttachmentDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.portal.entity.ElectricianWorkLogAttachmentEntity">
+		select * from pscp_electrician_work_log_attachment where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.portal.entity.ElectricianWorkLogAttachmentEntity">
+        select * from pscp_electrician_work_log_attachment where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_work_log_attachment  where deleted=0
+	</select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.portal.entity.ElectricianWorkLogAttachmentEntity">
+		insert into pscp_electrician_work_log_attachment
+		(
+			`id`, 
+			`work_log_id`, 
+			`type`, 
+			`fid`, 
+			`company_id`, 
+			`create_time`, 
+			`create_user`, 
+			`modified_time`, 
+			`modified_user`, 
+			`deleted`
+		)
+		values
+		(
+			#{id}, 
+			#{workLogId}, 
+			#{type}, 
+			#{fid}, 
+			#{companyId}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.portal.entity.ElectricianWorkLogAttachmentEntity">
+        update pscp_electrician_work_log_attachment
+        <set>
+            <if test="workLogId != null">`work_log_id` = #{workLogId},</if>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="fid != null">`fid` = #{fid},</if>
+            <if test="companyId != null">`company_id` = #{companyId},</if>
+            <if test="createTime != null">`create_time` = #{createTime},</if>
+            <if test="createUser != null">`create_user` = #{createUser},</if>
+            <if test="modifiedTime != null">`modified_time` = #{modifiedTime},</if>
+            <if test="modifiedUser != null">`modified_user` = #{modifiedUser},</if>
+            <if test="deleted != null">`deleted` = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_electrician_work_log_attachment
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_electrician_work_log_attachment set deleted=-1,modified_time=now(),modified_user=${modifiedUser}
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectMapByWorkLogId" parameterType="long" resultType="map">
+        SELECT id, type, fid
+        FROM pscp_electrician_work_log_attachment
+        WHERE deleted = 0
+        AND work_log_id = #{workOrderId}
+    </select>
+</mapper>

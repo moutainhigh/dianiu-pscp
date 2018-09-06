@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>消息中心</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/plugins/layui/css/layui.css">
+    <style>
+    .layui-tab-brief>.layui-tab-title .layui-this {
+        color: #09c;
+    }
+
+    .layui-tab-brief>.layui-tab-more li.layui-this:after,
+    .layui-tab-brief>.layui-tab-title .layui-this:after {
+        border-bottom: 2px solid #09c;
+    }
+
+    .layui-laypage .layui-laypage-curr .layui-laypage-em {
+        background-color: #09c;
+    }
+
+    .layui-laypage a:hover {
+        color: #09c;
+    }
+
+    .layui-collapse {
+        margin: 6px 0;
+    }
+
+    .layui-colla-content {
+        padding-left: 4em;
+    }
+
+    .layui-colla-title {
+        background-color: #fff;
+    }
+
+    .clearMsg {
+        position: absolute;
+        right: 5px;
+        top: 15px;
+        z-index: 9999;
+    }
+
+    .noMsg {
+        text-align: center;
+        padding-top: 200px;
+    }
+
+    .noMsg span {
+        font-size: 16px;
+    }
+
+    .msg-content {
+        min-height: 450px;
+        max-height: 600px;
+        overflow: scroll;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp">
+        <a class="btn btn-primary btn-sm clearMsg" @click="clearMsg"><i class="fa fa-trash-o"></i>&nbsp;清空</a>
+        <tabs>
+            <tab status="not" :name="unreadMsgHtml" selected="true"></tab>
+            <tab status="all" :name="'全部消息'"></tab>
+        </tabs>
+        <div class="msg-content">
+            <div v-if="list == null||list.length == 0" class="noMsg">
+                <span>暂无消息</span>
+            </div>
+            <div class="layui-collapse" lay-accordion v-if="list&&list.length>0&&showPage">
+                <message v-for="(item,index) in list" :getdata="item" :key="index"></message>
+            </div>
+        </div>
+        <!-- 分页 -->
+        <div id="page" class="msg-page"></div>
+    </div>
+    <script src="${rc.contextPath}/statics/plugins/layui/layui.js" type="text/javascript"></script>
+</body>
+<script src="${rc.contextPath}/js/cp/message.js?_${date.systemTime}"></script>
+
+</html>

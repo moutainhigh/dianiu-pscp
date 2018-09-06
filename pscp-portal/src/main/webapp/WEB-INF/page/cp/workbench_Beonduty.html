@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    #parse("sys/header.html")
+</head>
+<body>
+<div id="content">
+    <div class="grid-btn" style="padding-left: 15px;">
+        <div class="clearfix">
+            <div class="grid-btn" style="margin-bottom: 0px;">
+                <a class="btn btn-primary"><i class="fa fa-eye"></i>&nbsp;查看</a>
+                <a class="btn btn-primary"><i class="fa fa-eye"></i>&nbsp;删除</a>
+                <a class="btn btn-primary"><i class="fa fa-eye"></i>&nbsp;新增日志</a>
+            </div>
+        </div>
+        <div class="clearfix" style="padding: 10px 0 0 0;">
+            <div class="col-sm-2" style="padding-left: 0;">
+                <input type="text" class="form-control" placeholder="日志名称"/> <!--  @keyup.enter="query" -->
+            </div>
+            <div class="col-sm-3">
+                <v-select multiple label="name" placeholder="所属配电房"></v-select>
+                <input type="hidden" data-vv-name="配电房" v-validate="'required'">
+            </div>
+            <div id="date-end" style="width: 20%;" class="input-group date form_datetime col-sm-2 query"
+                 data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                <input id="date-end-remove" class="form-control" size="16" type="text" readonly placeholder="日期">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            </div>
+            <a class="btn btn-default">查询</a>
+        </div>
+    </div>
+    <div style="padding-left: 15px;">
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    var gridParam = {
+        url: "../dutylog/list",
+        datatype: "json",
+        autowidth: true,
+        height: 400,
+        colModel: [
+            {
+                label: "日志名称",
+                name: "title",
+                width: 50
+            }, {
+                label: "所属配电房",
+                name: "roomName",
+                width: 50
+            }, {
+                label: "时间",
+                name: "createTime",
+                width: 50
+            }
+        ],
+        viewrecords: true,
+        rowNum: 10,
+        pager: "#jqGridPager",
+        rowList: [
+            10, 30, 50
+        ],
+        jsonReader: {
+            root: "page.list",
+            page: "page.currPage",
+            total: "page.totalPage",
+            records: "page.totalCount"
+        },
+        prmNames: {
+            page: "page",
+            rows: "limit",
+        },
+        gridComplete: function () {
+            $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+        }
+    };
+    var vm = new Vue({
+        el: '#content',
+        data: {
+            q: {
+                endTime: ''
+            }
+        },
+        mounted: function () {
+            var self = this
+            $('.form_datetime.query').datetimepicker({
+                language: 'zh-CN',
+                weekStart: 1,
+                todayBtn: 1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                minView: 2
+            });
+            $('#date-end').on('changeDate', function (ev) {
+                self.q.endTime = getNowFormatDate(ev.date);
+            });
+            $("#jqGrid").jqGrid(gridParam) //加载表格
+        }
+    })
+</script>

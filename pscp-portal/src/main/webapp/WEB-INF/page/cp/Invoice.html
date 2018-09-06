@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    #parse("sys/header.html")
+    <title>工程项目</title>
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/TenantManagement.css">
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/invoice.css">
+    <style>
+        .invoicetitle {
+            font-size: 18px;
+            color: #f69021;
+        }
+    </style>
+</head>
+<body>
+<div id="Invoice" v-cloak>
+    <div v-show="showList&&showDetailInfo">
+        <tabs>
+            <tab status="1" name="未开票" selected="true"></tab>
+            <tab status="2" name="已开票"></tab>
+        </tabs>
+        <div class="tenant_search">
+            <div class="row">
+                <div class="col-sm-2" style="padding-left:0;">
+                    <div class="input-group">
+                        <input type="text" class="form-control" v-model="q.payerCompanyName" placeholder="开票公司">
+                    </div>
+                </div>
+                <div id="date-start" style="width:20%;" class="input-group date form_datetime col-sm-1 query"
+                     data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                    <input id="date-start-remove" class="form-control" v-model="q.payDate" type="text" readonly
+                           placeholder="支付日期">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div class="submit_btn col-sm-2" style="padding-left:0;">
+                    <button type="button" class="btn btn-success submitBtn" @click="query">查询</button>
+                    <button type="button" class="btn btn-success submitBtn" @click="empty">重置</button>
+                </div>
+            </div>
+        </div>
+        <div class="tenant_list">
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+    </div>
+    <div v-show="!showList">
+        <div v-show="!showDetailInfo" class="invoicetitle">未开票</div>
+        <div v-show="showDetailInfo" class="invoicetitle">已开票</div>
+        <div class="row">
+            <div class="clearfix">
+                <label class="col-sm-2 control-label" style="padding: 0;">付款单号:</label>
+                <div class="col-sm-6" style="padding: 0;">
+                    <p id="payOrderId" class="form-control-static" style="padding: 0;"></p>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label class="col-sm-2 control-label" style="padding: 0;">付款内容:</label>
+                <div class="col-sm-6" style="padding: 0;">
+                    <p id="payerName" class="form-control-static" style="padding: 0;"></p>
+                    <div class="pay-content">
+                        <p id="period"></p>
+                        <p id="fee"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label class="col-sm-2 control-label" style="padding: 0;">支付日期:</label>
+                <div class="col-sm-6" style="padding: 0;">
+                    <p id="payTime" class="form-control-static" style="padding: 0;"></p>
+                </div>
+            </div>
+            <div class="clearfix">
+                <label class="col-sm-2 control-label" style="padding: 0;">发票信息:</label>
+                <div class="invoice-info">
+                    <div class="info-content">
+                        <span>公司抬头:</span>
+                        <p id="companyName"></p>
+                    </div>
+                    <div class="info-content">
+                        <span>纳税人编号:</span>
+                        <p id="taxpayerId"></p>
+                    </div>
+                    <div class="info-content">
+                        <span>联系电话:</span>
+                        <p id="contactNumber"></p>
+                    </div>
+                    <div class="info-content">
+                        <span>发票金额:</span>
+                        <p id="amount"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-show="!showDetailInfo" class="invoiceBtn">
+            <button type="button" id="ticketopening" class="btn btn-info">已开票</button>
+        </div>
+    </div>
+</div>
+<script src="${rc.contextPath}/js/cp/Invoice.js?_${date.systemTime}"></script>
+</body>
+</html>

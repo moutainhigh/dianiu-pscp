@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.SysGeneratorPgDao">
+	<select id="queryList" resultType="map">
+		select t1.table_name as tableName,t1.table_type as
+		tableType,t2.table_comment as tableComment from
+		information_schema.tables t1
+
+		left JOIN
+		(
+		SELECT a.oid,
+		a.relname AS
+		table_name,
+		b.description AS table_comment
+		FROM pg_class a
+		LEFT OUTER
+		JOIN pg_description b ON b.objsubid=0 AND a.oid = b.objoid
+		WHERE
+		a.relnamespace = (SELECT oid FROM pg_namespace WHERE
+		nspname='public')
+		AND a.relkind='r')t2
+		on t1.table_name=t2.table_name
+		where
+		t1.table_catalog=(select * from CURRENT_CATALOG) and
+		t1.table_schema=(select * from CURRENT_SCHEMA)
+		<if test="tableName != null and tableName.trim() != ''">
+			and t1.table_name like concat('%', #{tableName}, '%')
+		</if>
+		order by t1.table_name
+		<if test="offset != null and limit != null">
+			<!-- limit #{offset}, #{limit} -->
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		information_schema.tables t1
+		where
+		t1.table_catalog=(select * from CURRENT_CATALOG) and
+		t1.table_schema=(select * from CURRENT_SCHEMA)
+		<if test="tableName != null and tableName.trim() != ''">
+			and t1.table_name like concat('%', #{tableName}, '%')
+		</if>
+
+	</select>
+
+	<select id="queryTable" resultType="map">
+		select t1.table_name as
+		tableName,t1.table_type as
+		tableType,t2.table_comment as tableComment
+		from
+		information_schema.tables t1
+
+		left JOIN
+		(
+		SELECT a.oid,
+		a.relname AS
+		table_name,
+		b.description AS table_comment
+		FROM pg_class a
+		LEFT OUTER
+		JOIN pg_description b ON b.objsubid=0 AND a.oid = b.objoid
+		WHERE
+		a.relnamespace = (SELECT oid FROM pg_namespace WHERE
+		nspname='public')
+		AND a.relkind='r')t2
+		on t1.table_name=t2.table_name
+		where
+		t1.table_catalog=(select * from CURRENT_CATALOG) and
+		t1.table_schema=(select * from CURRENT_SCHEMA) and
+		t1.table_name=#{tableName}
+
+	</select>
+
+	<select id="queryColumns" resultType="map">
+		<!-- select column_name columnName, data_type dataType, column_comment 
+			columnComment, column_key columnKey, extra from information_schema.columns 
+			where table_name = #{tableName} and table_schema = (select * from CURRENT_SCHEMA) 
+			order by ordinal_position -->
+
+		SELECT
+		a.attname AS columnName,
+		t.typname AS dataType,
+		a.attlen AS
+		length,
+		a.atttypmod AS lengthvar,
+		a.attnotnull AS notnull,
+		b.description
+		AS columnComment
+		FROM pg_class c,
+		pg_attribute a
+		LEFT OUTER JOIN
+		pg_description b ON a.attrelid=b.objoid AND a.attnum =
+		b.objsubid,
+		pg_type t
+		WHERE a.attnum > 0
+		and a.attrelid = c.oid
+		and a.atttypid =
+		t.oid and c.relname=#{tableName}
+		order by a.attnum
+	</select>
+	<select id="queryColumnKey" resultType="map">
+		select
+		pg_constraint.conname as pk_name,pg_attribute.attname as
+		columnName,pg_type.typname as dataType from
+		pg_constraint inner join
+		pg_class
+		on pg_constraint.conrelid = pg_class.oid
+		inner join
+		pg_attribute on pg_attribute.attrelid = pg_class.oid
+		and
+		pg_attribute.attnum = pg_constraint.conkey[1]
+		inner join pg_type on
+		pg_type.oid = pg_attribute.atttypid
+		where pg_class.relname =
+		#{tableName}
+		and pg_constraint.contype='p'
+	</select>
+</mapper>

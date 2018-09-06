@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>智能设备</title>
+  #parse("sys/header.html")
+  <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css">
+  <style>
+    .col-sm-4 {
+      padding-top: 0;
+    }
+
+    .row {
+      border-top: none;
+      padding: 0;
+      margin-bottom: 20px;
+    }
+
+    .other {
+      background-color: #DDDDDC;
+      background-image: none;
+    }
+
+    .table-bordered {
+      border: none;
+    }
+
+    .table-bordered>tbody>tr>td,
+    .table-bordered>tbody>tr>th,
+    .table-bordered>tfoot>tr>td,
+    .table-bordered>tfoot>tr>th,
+    .table-bordered>thead>tr>td,
+    .table-bordered>thead>tr>th {
+      border: none;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <div class="smart-all-title">
+      <img src="${rc.contextPath}/statics/img/ad-test-3.png" class="smart-sur-avata" />
+      <span class="smart-sur-name">{{ companyName }}</span>
+      <div class="smart-all-ele-info">
+        <table>
+          <tr>
+            <td class="smart-all-ele-label">
+              <span>本月功率因数</span>
+              <br />
+              <span class="smart-all-ele-num">{{ powerFactorMonth }}</span>
+            </td>
+            <td class="smart-all-ele-label">
+              <span>本月用电</span>
+              <br />
+              <span class="smart-all-ele-num">{{ quantityMonth }}kWh</span>
+            </td>
+            <td class="smart-all-ele-label">
+              <span>本月电费</span>
+              <br />
+              <span class="smart-all-ele-num">{{ feeMonth }}元</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    
+    <tabs>
+      <tab status="-1" name="总览" selected="true">
+        <div>
+          <div class="row">
+            <div class="col-sm-4" style="padding: 0;">
+              <div style="height: 475px;background-color: #fff;">
+                <div class="chart-title" style="line-height: 46px;">
+                  <img class="chart-title-icon" src="${rc.contextPath}/statics/img/loadChart.png" />
+                  <span class="chart-title-span">用电负荷</span>
+                </div>
+                <div id="load" style="width: 100%;height:400px;" ref="load"></div>
+              </div>
+            </div>
+            <div class="col-sm-8" style="padding-right: 0;overflow: hidden;">
+              <div style="height: 475px;background-color: #fff;">
+                <date-pick-day></date-pick-day>
+                <div id="loadLine" style="width: 100%;height:400px;">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-sm-12" style="padding:0;overflow: hidden;">
+              <div class="chart-title">
+                <img class="chart-title-icon" src="${rc.contextPath}/statics/img/quantityBar.png" style="max-width: 40px;" />
+                <span class="chart-title-span">用电量</span>
+                <date-pick-month-bar></date-pick-month-bar>
+              </div>
+              <div id="quantityBar" style="width: 100%;height:400px;"></div>
+            </div>
+          </div>
+          <div class="row" style="background-color: #fff;">
+            <div class="chart-title" style="line-height: 43px;">
+              <img class="chart-title-icon" src="${rc.contextPath}/statics/img/distributedPie.png" style="max-width: 40px;" />
+              <span class="chart-title-span">用电分布</span>
+              <date-pick-month-pie></date-pick-month-pie>
+            </div>
+
+            <div style="padding:0" class="col-sm-7">
+              <div id="distributedPie" style="width: 100%;height:400px;"></div>
+            </div>
+            <div class="col-sm-5" style="padding:0;">
+              <div id="feePie" style="width: 100%;height:400px;" v-show="showFeePie"></div>
+            </div>
+          </div>
+        </div>
+      </tab>
+      <tab name="综合" status="0"></tab>
+      <tab name="动力" status="1"></tab>
+      <tab name="照明" status="2"></tab>
+      <tab name="空调" status="3"></tab>
+      <tab name="特殊" status="4"></tab>
+      <tab name="告警" status="-2" id="tab_warning"></tab>
+      <tab name="参考电费" status="-3"></tab>
+    </tabs>
+
+    <div style="background-color: #fff;height: 0px;overflow: hidden;position: relative;" ref="list" id="list">
+      <date-pick-day-table></date-pick-day-table>
+      <table id="jqGrid"></table>
+      <div id="jqGridPager"></div>
+    </div>
+    <div style="background-color: #fff;height: 0px;overflow: hidden;position: relative;" ref="listalarm" id="listalarm">
+      <date-pick-day-table-alarm></date-pick-day-table-alarm>
+      <table id="jqGridAlarm"></table>
+      <div id="jqGridPagerAlarm"></div>
+    </div>
+    
+    
+    <div class="smart-fee-content" style="background-color: #fff;height: 0px;overflow: hidden;position: relative;" ref="fee" id="fee">
+        <div class="row" style="border-top:0;padding:0;">
+            <div class="col-sm-12" style="padding:0;">
+                <div class="chart-title" style="line-height: 49px;">
+                    <img class="chart-title-icon" src="${rc.contextPath}/statics/img/feeChart.png" style="max-width: 35px;" />
+                    <span class="chart-title-span">用电分布</span>
+                    <date-pick-month-fee></date-pick-month-fee>
+                </div>
+                <div id="singlePie" style="width: 100%;height:300px;margin-bottom: 15px;"></div>
+            </div>
+        </div>
+        <div>
+            <div class="chart-title" style="line-height: 40px;">
+                <img class="chart-title-icon" src="${rc.contextPath}/statics/img/feeDetail.png" style="max-width: 35px;" />
+                <span class="chart-title-span">用电明细</span>
+            </div>
+            <div class="smart-fee-detail">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>抄表项</th>
+                            <th>本期示数</th>
+                            <th>上期示数</th>
+                            <th>倍率</th>
+                            <th>电量</th>
+                        </tr>
+                        <tr v-for="item in meterReadingItems">
+                            <td>{{ item.typeName }}</td>
+                            <td>{{ item.thisPeriodReading }}</td>
+                            <td>{{ item.lastPeriodReading }}</td>
+                            <td>{{ item.multiple }}</td>
+                            <td>{{ item.quantity }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="smart-fee-detail">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>核定需量</th>
+                            <th>实际需量</th>
+                            <th>受电容量</th>
+                            <th>力调标准</th>
+                            <th>实际力率</th>
+                        </tr>
+                        <tr>
+                            <td>{{ verifyDemand }}</td>
+                            <td>{{ actualDemand }}</td>
+                            <td>{{ electricCapacity }}</td>
+                            <td>{{ standardAdjustRate }}</td>
+                            <td>{{ actualAdjustRate }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="smart-fee-detail">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>计费项目</th>
+                            <th>计费数量</th>
+                            <th>单价</th>
+                            <th>金额</th>
+                            <th>备注</th>
+                        </tr>
+                        <tr v-for="item in countItems">
+                            <td>{{ item.typeName }}</td>
+                            <td>{{ item.countNum }}</td>
+                            <td>{{ item.price }}</td>
+                            <td>{{ item.charge }}</td>
+                            <td>{{ item.remark }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="smart-fee-detail-all">
+                <span>合计金额:</span>&nbsp;{{ totalCharge }}({{ totalChargeOfHan }})元
+            </div>
+        </div>
+    </div>
+    
+  </div>
+  
+  
+  <script src="${rc.contextPath}/statics/libs/echarts.js"></script>
+  <script src="${rc.contextPath}/js/cus_st/smart-device.js?_${date.systemTime}"></script>
+</body>
+
+</html>

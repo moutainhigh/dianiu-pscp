@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.CompanyDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.portal.entity.CompanyEntity">
+		select * from pscp_company where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.portal.entity.CompanyEntity">
+		select * from pscp_company where deleted=0 
+		order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_company  where deleted=0
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.portal.entity.CompanyEntity">
+		insert into pscp_company
+		(
+			id, 
+			identifier, 
+			member_id, 
+			member_type,
+			user_name, 
+			id_card_no, 
+			id_card_front_img, 
+			id_card_back_img,
+			organization_code_img,
+			name, 
+			type, 
+			legal_person, 
+			business_licence, 
+			business_licence_img, 
+			contacts, 
+			mobile, 
+			email, 
+			phone, 
+			province_id, 
+			city_id, 
+			area_id, 
+			address, 
+			website, 
+			application_letter_fid, 
+			status, 
+			remark, 
+			create_time, 
+			create_user, 
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_company'),
+			#{identifier}, 
+			#{memberId}, 
+			#{memberType}, 
+			#{userName}, 
+			#{idCardNo}, 
+			#{idCardFrontImg}, 
+			#{idCardBackImg},
+			#{organizationCodeImg},
+			#{name}, 
+			#{type}, 
+			#{legalPerson}, 
+			#{businessLicence}, 
+			#{businessLicenceImg}, 
+			#{contacts}, 
+			#{mobile}, 
+			#{email}, 
+			#{phone}, 
+			#{provinceId}, 
+			#{cityId}, 
+			#{areaId}, 
+			#{address}, 
+			#{website}, 
+			#{applicationLetterFid}, 
+			#{status}, 
+			#{remark}, 
+			now(), 
+			#{createUser},  
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+    		SELECT currval('seq_pscp_company') as id;
+    	</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.portal.entity.CompanyEntity">
+		update pscp_company 
+		<set>
+			<if test="identifier != null">identifier = #{identifier}, </if>
+			<if test="memberId != null">member_id = #{memberId}, </if>
+			<if test="memberType != null">member_type = #{memberType}, </if>
+			<if test="userName != null">user_name = #{userName}, </if>
+			<if test="idCardNo != null">id_card_no = #{idCardNo}, </if>
+			<if test="idCardFrontImg != null">id_card_front_img = #{idCardFrontImg}, </if>
+			<if test="idCardBackImg != null">id_card_back_img = #{idCardBackImg}, </if>
+			<if test="organizationCodeImg != null">organization_code_img = #{organizationCodeImg}, </if>
+			<if test="name != null">name = #{name}, </if>
+			<if test="type != null">type= #{type}, </if>
+			<if test="legalPerson != null">legal_person = #{legalPerson}, </if>
+			<if test="businessLicence != null">business_licence = #{businessLicence}, </if>
+			<if test="businessLicenceImg != null">business_licence_img = #{businessLicenceImg}, </if>
+			<if test="contacts != null">contacts = #{contacts}, </if>
+			<if test="mobile != null">mobile = #{mobile}, </if>
+			<if test="email != null">email = #{email}, </if>
+			<if test="phone != null">phone = #{phone}, </if>
+			<if test="provinceId != null">province_id = #{provinceId}, </if>
+			<if test="cityId != null">city_id = #{cityId}, </if>
+			<if test="areaId != null">area_id = #{areaId}, </if>
+			<if test="address != null">address = #{address}, </if>
+			<if test="website != null">website = #{website}, </if>
+			<if test="applicationLetterFid != null">application_letter_fid = #{applicationLetterFid}, </if>
+			<if test="status != null">status = #{status}, </if>
+			<if test="remark != null">remark = #{remark}, </if>
+			<if test="createTime != null">create_time = #{createTime}, </if>
+			<if test="createUser != null">create_user = #{createUser}, </if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_company set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_company set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="getCompanyByUid" parameterType="java.lang.Long" resultType="com.edianniu.pscp.portal.entity.CompanyEntity">
+		select * from pscp_company where member_id = #{uid} and deleted=0
+	</select>
+	<select id="getCompanyById" parameterType="java.lang.Long" resultType="com.edianniu.pscp.portal.entity.CompanyEntity">
+		select * from pscp_company where id = #{id} and deleted=0
+	</select>
+	<select id="getCompanyByName" parameterType="java.lang.String" resultType="com.edianniu.pscp.portal.entity.CompanyEntity">
+		select * from pscp_company where name = #{name} and deleted=0
+	</select>
+</mapper>

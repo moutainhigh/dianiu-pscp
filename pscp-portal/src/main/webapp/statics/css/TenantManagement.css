@@ -1,0 +1,336 @@
+#tenantManagement {
+    padding: 0 120px 0 70px;
+}
+
+#Invoice {
+    padding: 30px 120px 0 70px;
+}
+
+.newTenant_btn {
+    width: 100%;
+    overflow: hidden;
+}
+
+.newTenant_btn .tenant_btn {
+    float: right;
+    background: #23A0EF;
+    color: #ffffff;
+}
+
+.tenant_search {
+    margin-top: 10px;
+    margin-bottom: 30px;
+    overflow: hidden;
+}
+
+.tenant_search .submit_btn .submitBtn {
+    outline: none;
+    border: none;
+    height: 30px;
+    background: #23A0EF;
+    color: #ffffff;
+}
+
+.tenant_search .submit_btn .submitBtn:nth-child(2) {
+    background: #F69021;
+}
+
+.tenant_list .tenantList thead tr {
+    background: #D8D8D8;
+}
+
+.tenant_list .tenantList thead tr th {
+    text-align: center;
+    padding: 0;
+    line-height: 30px;
+    padding-left: 20px;
+    color: #666666;
+}
+
+.tenant_list .tenantList tbody tr {
+    padding: 10px 0;
+    background: #ffffff;
+    /*height: 86px;*/
+}
+
+.tenant_list .tenantList tbody tr:nth-child(even) {
+    background: #EAEAEA;
+}
+
+.tenant_list .tenantList tbody tr td {
+    padding: 0;
+    line-height: 30px;
+    padding-left: 20px;
+    color: #666666;
+}
+
+.tenant_list .tenantList tbody tr td button {
+    outline: none;
+    border: none;
+    padding: 0 3px;
+    margin: 8px 2px 0;
+    height: 20px;
+    line-height: 20px;
+    background: #9af590;
+    border-radius: 5px;
+    color: #ffffff;
+}
+
+.tenant_list .tenantList tbody tr td button:nth-child(2) {
+    background: #00c2f5;
+}
+
+h6 {
+    padding-left: 14px;
+    height: 20px;
+    color: #666666;
+    line-height: 20px;
+}
+
+.paycheckbox {
+    padding-left: 14px;
+    margin: 0px 0 0px 30px;
+}
+
+.subBtn {
+    margin: 10px 0 30px 120px;
+}
+
+.td-btn {
+    height: 22px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.payMethod {
+    padding: 20px 0;
+    width: 100%;
+}
+
+.payMethod .prePayment {
+    float: left;
+    width: 100px;
+}
+
+.payMethod .monthly {
+    float: left;
+    width: 100px;
+}
+
+.payMethod .prePayment i {
+    display: block;
+    float: left;
+    width: 20px;
+    height: 20px;
+}
+
+.payMethod .prePayment span {
+    display: block;
+    float: left;
+}
+
+.buildinglist li {
+    cursor: pointer;
+}
+
+.equipmentList li {
+    cursor: pointer;
+}
+
+#giveanAlarm {
+    display: none;
+}
+#edgiveanAlarm {
+    display: none;
+}
+#unitPrice {
+    display: none;
+}
+
+#timeSharing {
+    display: none;
+}
+#edunitPrice {
+    display: none;
+}
+
+#edtimeSharing {
+    display: none;
+}
+#seeunitPrice {
+    display: none;
+}
+
+#seetimeSharing {
+    display: none;
+}
+
+.paymethod .beforehand{
+    float: left;
+    padding:0 3px;
+    height:100%;
+    user-select: none;
+    cursor: pointer;
+}
+
+.paymethod .monthlyKnot{
+    float: left;
+    padding:0 3px;
+    height:100%;
+    user-select: none;
+    cursor: pointer;
+}
+.paymethod .beforehand i{
+    display: block;
+    margin-right: 3px;
+    float: left;
+    width: 15px;
+    height:15px;
+    border-radius: 50%;
+    background-image: url("../img/unchecked.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.paymethod .beforehand i.active{
+    background-image: url("../img/selected.png");
+}
+.paymethod .beforehand span{
+    display: block;
+    float: left;
+    font-size: 12px;
+    color: #000;
+}
+.paymethod .monthlyKnot i{
+    display: block;
+    margin-right: 3px;
+    float: left;
+    width: 15px;
+    height:15px;
+    background-image: url("../img/unchecked.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.paymethod .monthlyKnot i.active{
+    background-image: url("../img/selected.png");
+}
+.paymethod .monthlyKnot span{
+    display: block;
+    float: left;
+    font-size: 12px;
+    color: #000;
+}
+
+
+
+
+
+.addpaymethod .beforehand{
+    float: left;
+    padding:0 3px;
+    height:100%;
+    user-select: none;
+    cursor: pointer;
+}
+
+.addpaymethod .monthlyKnot{
+    float: left;
+    padding:0 3px;
+    height:100%;
+    user-select: none;
+    cursor: pointer;
+}
+.addpaymethod .beforehand i{
+    display: block;
+    margin-right: 3px;
+    float: left;
+    width: 15px;
+    height:15px;
+    border-radius: 50%;
+    background-image: url("../img/unchecked.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.addpaymethod .beforehand i.active{
+    background-image: url("../img/selected.png");
+}
+.addpaymethod .beforehand span{
+    display: block;
+    float: left;
+    font-size: 12px;
+    color: #000;
+}
+.addpaymethod .monthlyKnot i{
+    display: block;
+    margin-right: 3px;
+    float: left;
+    width: 15px;
+    height:15px;
+    background-image: url("../img/unchecked.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.addpaymethod .monthlyKnot i.active{
+    background-image: url("../img/selected.png");
+}
+.addpaymethod .monthlyKnot span{
+    display: block;
+    float: left;
+    font-size: 12px;
+    color: #000;
+}
+
+
+
+
+
+.seepaymethod .seebeforehand i{
+    display: block;
+    margin-right: 3px;
+    float: left;
+    width: 15px;
+    height:15px;
+    border-radius: 50%;
+    background-image: url("../img/unchecked.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.seepaymethod .seebeforehand i.active{
+    background-image: url("../img/selected.png");
+}
+.seepaymethod .seebeforehand span{
+    display: block;
+    float: left;
+    font-size: 12px;
+    color: #000;
+}
+.seepaymethod .seemonthlyKnot i{
+    display: block;
+    margin-right: 3px;
+    float: left;
+    width: 15px;
+    height:15px;
+    background-image: url("../img/unchecked.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.seepaymethod .seemonthlyKnot i.active{
+    background-image: url("../img/selected.png");
+}
+.seepaymethod .seemonthlyKnot span{
+    display: block;
+    float: left;
+    font-size: 12px;
+    color: #000;
+}
+
+#addInfo{
+    width: 100%;
+}
+
+#addInfo h6{
+    float: left;
+}
+
+#addInfo .addBtn{
+    float: left;
+}

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>招募社会电工</title>
+    #parse("sys/header.html")
+    <style>
+    .form-horizontal {
+        width: 100%;
+    }
+
+    @media (min-width: 768px) {
+        .col-sm-2 {
+            width: 16.66666667%;
+        }
+    }
+
+    .btn .caret {
+        margin-left: 5px;
+    }
+
+    a {
+        cursor: pointer;
+    }
+
+    .fa-plus-square-o,
+    .fa-minus-square-o {
+        padding-top: 5px;
+        font-size: 26px;
+    }
+
+    .checkbox label,
+    .radio label {
+        margin-right: 15px;
+    }
+
+    .checkbox input[type=checkbox],
+    .checkbox-inline input[type=checkbox],
+    .radio input[type=radio],
+    .radio-inline input[type=radio] {
+        margin-left: -15px;
+    }
+
+    .checkbox {
+        padding-left: 15px;
+    }
+
+    .input-group[class*=col-] {
+        float: left;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .input-group-addon {
+        background-color: #fff;
+    }
+
+    .btn-group {
+        width: 100%;
+    }
+
+    .col-sm-1 {
+        width: 10%;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp">
+        <form class="form-horizontal">
+            <div class="form-part">
+                <div v-for="(item,index) in recruitList" :key="index" :is="item.component.componentName" :options="certificateOptions" :index="index" :mydata="item.component" v-if="item.component.status != -1" @add-electrican="listenAddElectrican" @remove-electrican="listenRemoveElectrican" @push-electrican-data="getElectricanData" @push-quantity="listenQuantity" @push-fee="listenFee" @push-start="listenStart" @push-end="listenEnd">
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        <span style="color: red;">*</span>预支付费用(元):
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" readonly v-model="allFee" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12" style="text-align: center;">
+                        <input type="button" class="btn btn-primary" value="保存" @click="save" />
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div id="payType" class="pay-type" style="display: none;">
+            <div class="radio" v-for="item in payTypeList" v-if="item.status == 1&&item.id != 1002">
+                <img :src="'${rc.contextPath}/statics/img/' + item.type +'.png'">
+                <label>
+                    <input type="radio" :checked="item.id == payTypeCheckedId" :disabled="item.disabled == 1" @click="choosePayType(item.id)">
+                    <span>{{ item.name }}</span>
+                    <span v-show="item.id == 1003" style="color: #f60;font-size: 16px;">{{ walletAmount }}</span>
+                    <span v-show="item.id == 1003">元</span>
+                </label>
+            </div>
+            <div style="padding-left: 15px;">
+                <span>您需要支付的费用:</span>
+                <span style="color: #f60;font-size: 16px;">{{ payAmount }}</span>
+                <span>元</span>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/recruit.js?_${date.systemTime}"></script>
+</body>
+
+</html>

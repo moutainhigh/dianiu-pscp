@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>企业基本资料</title>
+    #parse("sys/header.html")
+    <style>
+    .form-horizontal {
+        width: 100%;
+    }
+
+    h4 {
+        margin: 0 0 0 2em;
+        font-weight: bold;
+    }
+
+    @media (min-width: 768px) {
+        .col-sm-2 {
+            width: 16.66666667%;
+        }
+        h4 {
+            margin: 0 0 2em 2em;
+            font-weight: bold;
+        }
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <!-- <ul class="nav nav-tabs">
+            <li role="presentation" class="active">
+                <a><i class="fa fa-building"></i>企业信息</a>
+            </li>
+            <li role="presentation"><a href="${rc.contextPath}/companybankcard/companybankcard.html"><i class="fa fa-credit-card-alt"></i>财务信息</a></li>
+        </ul> -->
+        <div class="panel panel-default">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="col-sm-2">
+                        <span style="font-size: 14px;font-weight: 700;">认证状态&nbsp;:&nbsp;</span>
+                        <span class="label label-success" v-show="status == 2 ">认证成功</span>
+                        <span class="label label-warning" v-show="status == 1 ">认证中</span>
+                        <span class="label label-danger" v-show="status == -1 ">认证失败</span>
+                        <span class="label label-warning" v-show="status == 0 || status == null ">未认证</span>
+                    </div>
+                </div>
+                <div class="form-part">
+                    <h4>基本信息</h4>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>企业名称:</div>
+                        <div class="col-sm-2">
+                            <input v-model="company.id" type="hidden" />
+                            <input v-model="company.memberType" type="hidden" />
+                            <input v-model="company.memberId" type="hidden" />
+                            <input v-model="company.name" type="text" class="input form-control" name="企业名称" placeholder="请输入企业名称" v-validate="'required|max:32'" :class="{'is-danger': errors.has('企业名称')}" :readonly="readonly||isAuthSuccess" />
+                            <span v-show="errors.has('企业名称')" class="help is-danger">{{ errors.first('企业名称') }}</span>
+                        </div>
+                        <div class="col-sm-2 control-label longCol"><span style="color: red;">*</span>平台用户名:</div>
+                        <div class="col-sm-2">
+                            <input type="text" v-model="company.userName" class="input form-control" name="平台用户名" placeholder="请输入平台用户名" v-validate="'required|max:16'" :class="{'is-danger': errors.has('平台用户名')}" readonly />
+                            <span v-show="errors.has('平台用户名')" class="help is-danger">{{ errors.first('平台用户名') }}</span>
+                        </div>
+                        <div class="col-sm-2">
+                            <span type="button" class="btn btn-primary" @click="changeMobile" v-show="status == 2">修改平台用户名</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label upload-label"><span style="color: red;">*</span>营业执照:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.businessLicenceImgDo.imgUrl">
+                                        <img :src="company.businessLicenceImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn" @click="delImg('businessLicenceImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn" v-show="!company.businessLicenceImgDo.imgUrl&&!readonly&&!isAuthSuccess" @click="addImg('businessLicenceImgDo')"></button>
+                                <input id="businessLicenceImgDo" type="file" @change="onFileChange" style="display: none;" accept="image/gif,image/jpeg,image/jpg,image/png" />
+                                <input type="hidden" v-model="company.businessLicenceImgDo.imgUrl" data-vv-name="营业执照" v-validate="'required'" />
+                                <span v-show="errors.has('营业执照')" class="help is-danger">{{ errors.first('营业执照') }}</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 control-label upload-label longCol"><span style="color: red;">*</span>组织机构代码证:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.organizationCodeImgDo.imgUrl">
+                                        <img :src="company.organizationCodeImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn" @click="delImg('organizationCodeImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn" v-show="!company.organizationCodeImgDo.imgUrl&&!readonly&&!isAuthSuccess" @click="addImg('organizationCodeImgDo')"></button>
+                                <input id="organizationCodeImgDo" type="file" @change="onFileChange" style="display: none;" accept="image/gif,image/jpeg,image/jpg,image/png" />
+                                <input type="hidden" v-model="company.organizationCodeImgDo.imgUrl" data-vv-name="组织机构代码证" v-validate="'required'" />
+                                <span v-show="errors.has('组织机构代码证')" class="help is-danger">{{ errors.first('组织机构代码证') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>营业执照注册号:</div>
+                        <div class="col-sm-2">
+                            <input type="text" v-model="company.businessLicence" class="form-control" placeholder="请输入营业执照注册号" data-vv-name="营业执照注册号" v-validate="'required|max:32'" :class="{'is-danger': errors.has('营业执照注册号')}" :readonly="readonly||isAuthSuccess" />
+                            <span v-show="errors.has('营业执照注册号')" class="help is-danger">{{ errors.first('营业执照注册号') }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" v-show="memberType==1">
+                        <div class="col-sm-2 control-label upload-label"><span style="color: red;">*</span>企业资质(承装、修、试资质):</div>
+                        <div class="col-sm-10" style="padding-left: 15px;">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-for="(img,index) in company.enterpriseQualificationImgList" v-if="img.status!=-1&&enterpriseQualificationImgListLength>0">
+                                        <img :src="img.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn" @click="delImg('enterpriseQualificationImgList',index)">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                    <button type="button" class="upload-btn" v-show="enterpriseQualificationImgListLength<3&&!readonly&&!isAuthSuccess" @click="addImg('enterpriseQualificationImgList')"></button>
+                                    <input type="file" id="enterpriseQualificationImgList" @change="onFileChange" style="display: none;" accept="image/gif,image/jpeg,image/jpg,image/png" />
+                                    <input type="hidden" v-model="enterpriseQualificationImgListLength" data-vv-name="企业承修资质" v-validate="'required'" />
+                                    <span v-show="errors.has('企业承修资质')" class="help is-danger">{{ errors.first('企业承修资质') }}</span>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>公司地址:</div>
+                        <div class="col-sm-10" style="padding-left: 15px;">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('省份')}">
+                                    {{ province.name }}<span class="caret" v-if="!readonly&&!isAuthSuccess"></span>
+                                </button>
+                                <input type="hidden" v-model="company.provinceId" data-vv-name="省份" v-validate="'required'" />
+                                <ul class="dropdown-menu" v-if="!readonly&&!isAuthSuccess">
+                                    <li v-for=" province in provinces">
+                                        <a @click="getProvince(province.name,province.id)">{{ province.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('城市')}">
+                                    {{ city.name }}<span class="caret" v-if="!readonly&&!isAuthSuccess"></span>
+                                </button>
+                                <input type="hidden" v-model="company.cityId" data-vv-name="城市" v-validate="'required'" />
+                                <ul class="dropdown-menu" v-if="!readonly&&!isAuthSuccess">
+                                    <li v-for=" city in citys">
+                                        <a @click="getCity(city.name,city.id)">{{ city.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('地区')}">
+                                    {{ area.name }}<span class="caret" v-if="!readonly&&!isAuthSuccess"></span>
+                                </button>
+                                <input type="hidden" v-model="company.areaId" data-vv-name="地区" v-validate="'required'" />
+                                <ul class="dropdown-menu" v-if="!readonly&&!isAuthSuccess">
+                                    <li v-for=" area in areas">
+                                        <a @click="getArea(area.name,area.id)">{{area.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <input type="text" v-model="company.address" class="input form-control" name="公司地址" placeholder="请输入公司地址" v-validate="'required|max:32'" :class="{'is-danger': errors.has('公司地址')}" :readonly="readonly||isAuthSuccess" style="width: auto;display: inline-block;" />
+                            <span v-show="errors.has('公司地址')" class="help is-danger">{{ errors.first('公司地址') }}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">官网地址:</div>
+                        <div class="col-sm-2">
+                            <input type="text" v-model="company.website" class="form-control" placeholder="请输入官网地址" :readonly="readonly" />
+                        </div>
+                    </div>
+                </div>
+                <hr class="hr" />
+                <h4>联系方式</h4>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>联系人</div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" v-model="company.contacts" placeholder="请输入联系人姓名" data-vv-name="联系人" v-validate="'required|max:16'" :class="{'is-danger': errors.has('联系人')}" :readonly="readonly" />
+                        <span v-show="errors.has('联系人')" class="help is-danger">{{ errors.first('联系人') }}</span>
+                    </div>
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>手机号码</div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" v-model="company.mobile" placeholder="请输入手机号码" data-vv-name="手机号码" v-validate="'required|mobile'" :class="{'is-danger': errors.has('手机号码')}" :readonly="readonly" />
+                        <span v-show="errors.has('手机号码')" class="help is-danger">{{ errors.first('手机号码') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>座机号码</div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" v-model="company.phone" placeholder="请输入座机号码" data-vv-name="座机号码" v-validate="'required|max:16'" :class="{'is-danger': errors.has('座机号码')}" :readonly="readonly" />
+                        <span v-show="errors.has('座机号码')" class="help is-danger">{{ errors.first('座机号码') }}</span>
+                    </div>
+                </div>
+                
+                <div class="form-group" v-show="memberType==1">
+                    <div class="col-sm-2 control-label upload-label longCol"><span style="color: red;">*</span>企业申请公函:</div>
+                    <div class="col-sm-9">
+                        <div>
+                            <ul class="upload-ul">
+                                <li class="upload-li" v-if="company.applicationLetterFidImgDo.imgUrl">
+                                    <img :src="company.applicationLetterFidImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn" @click="delImg('applicationLetterFidImgDo')">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </a>
+                                </li>
+                                <span class="letter-tip">模板:</span>
+                                <span class="template-img">
+                                    <img src="${rc.contextPath}/statics/img/letter_template.png" class="upload-img" @click="imgEnlargeTem" />
+                                </span>
+                                <a href="${rc.contextPath}/statics/doc/电牛平台认证申请信息表.docx" target="_blank"><span class="template-download">下载doc模板</span></a>
+                            </ul>
+                        </div>
+                        <span class="letter-tip"><i class="fa fa-question-circle-o" aria-hidden="true"></i>上传加盖企业公章的原件照片或扫描件,支持.jpg .jpeg .bmp .gif .png格式&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <div>
+                            <button type="button" class="upload-btn" v-show="!company.applicationLetterFidImgDo.imgUrl&&!readonly&&!isAuthSuccess" @click="addImg('applicationLetterFidImgDo')"></button>
+                            <input id="applicationLetterFidImgDo" type="file" @change="onFileChange" style="display: none;" accept="image/gif,image/jpeg,image/jpg,image/png,image/bmp" />
+                            <input type="hidden" v-model="company.applicationLetterFidImgDo.imgUrl" data-vv-name="企业申请公函" v-validate="'required'" />
+                            <span v-show="errors.has('企业申请公函')" class="help is-danger">{{ errors.first('企业申请公函') }}</span>
+
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>身份证正面:</div>
+                    <div class="col-sm-2">
+                        <div>
+                            <ul class="upload-ul">
+                                <li class="upload-li" v-if="company.idCardFrontImgDo.imgUrl">
+                                    <img :src="company.idCardFrontImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn" @click="delImg('idCardFrontImgDo')">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <button type="button" class="upload-btn" v-show="!company.idCardFrontImgDo.imgUrl&&!readonly&&!isAuthSuccess" @click="addImg('idCardFrontImgDo')"></button>
+                            <input id="idCardFrontImgDo" type="file" @change="onFileChange" style="display: none;" accept="image/gif,image/jpeg,image/jpg,image/png" />
+                            <input type="hidden" v-model="company.idCardFrontImgDo.imgUrl" data-vv-name="身份证正面" v-validate="'required'" />
+                            <span v-show="errors.has('身份证正面')" class="help is-danger">{{ errors.first('身份证正面') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label "><span style="color: red;">*</span>身份证反面:</div>
+                    <div class="col-sm-2">
+                        <div>
+                            <ul class="upload-ul">
+                                <li class="upload-li" v-if="company.idCardBackImgDo.imgUrl">
+                                    <img :src="company.idCardBackImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn" @click="delImg('idCardBackImgDo')">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <button type="button" class="upload-btn" v-show="!company.idCardBackImgDo.imgUrl&&!readonly&&!isAuthSuccess" @click="addImg('idCardBackImgDo')"></button>
+                            <input id="idCardBackImgDo" type="file" @change="onFileChange" style="display: none;" accept="image/gif,image/jpeg,image/jpg,image/png" />
+                            <input type="hidden" v-model="company.idCardBackImgDo.imgUrl" data-vv-name="身份证反面" v-validate="'required'" />
+                            <span v-show="errors.has('身份证反面')" class="help is-danger">{{ errors.first('身份证反面') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" v-if="status != 1">
+                    <div class="col-sm-11 control-label" style="text-align: center;">
+                        <input v-show="!notAuth" type="button" class="btn btn-primary" :value="changeInfoBtn" @click="toggleReadonly" /> &nbsp;&nbsp;
+                        <input v-if="!readonly" type="button" class="btn btn-primary" value="保存" @click="saveOrUpdate" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="changeMobile" style="display: none;">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">原用户名</div>
+                        <span class="label label-success" style="vertical-align: bottom;display: initial;">{{company.userName}}</span>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">新用户名</div>
+                        <div class="col-sm-6" style="padding: 0;">
+                            <input type="mobile" class="form-control" v-model="newMobile.mobile" placeholder="请输入新手机号码" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">验证码</div>
+                        <div class="col-sm-4" style="padding: 0;">
+                            <input type="text" class="form-control" v-model="newMobile.msgCode" placeholder="请输入验证码" />
+                        </div>
+                        <div class="col-sm-4" style="padding-top: 0;">
+                            <button type="button" class="btn btn-primary" @click="getMsgCode">获取短信验证码</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">登录密码</div>
+                        <div class="col-sm-6" style="padding: 0;">
+                            <input type="text" class="form-control" v-model="newMobile.pwd" placeholder="请输入登录密码" />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/company.js?_${date.systemTime}"></script>
+</body>
+
+</html>

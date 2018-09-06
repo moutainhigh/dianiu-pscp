@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html id="sHtml" data-dpr='dpr'>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>电力服务云平台</title>
+    <link rel="icon" href="statics/img/favicon.ico">
+    <link rel="stylesheet" href="statics/css/normalize.css">
+    <link rel="stylesheet" href="statics/css/m_index.css">
+    
+    <style>
+        .news-content-in,.annc-content-in{overflow: hidden;text-overflow:ellipsis;}
+        .news-content-in{max-height: 70%;}
+        .annc-content-in{white-space: nowrap;}
+        [v-cloak] { display: none; }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="content">
+            <div class="download">
+                <div>
+                    <table class="ele">
+                        <tr>
+                            <td>
+                                <a href="statics/mobile-download/download.html?fromEle">
+                                    <img src="statics/img/toggle-icon-ele.png" class="download-icon">
+                                    <br />
+                                    <span class="download-title">我是电工</span>
+                                    <br />
+                                    <span>精准推送需求</span>
+                                    <br/>
+                                    <span>社电培训认证</span>
+                                    <br/>
+                                    <span>在线结算无风险</span>
+                                    <br/>
+                                    <button type="button" class="download-btn">免费入驻</button>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="sur">
+                        <tr>
+                            <td>
+                                <a href="statics/mobile-download/download.html?fromSur">
+                                    <img src="statics/img/toggle-icon-sur.png" class="download-icon">
+                                    <br />
+                                    <span class="download-title">我是服务商</span>
+                                    <br />
+                                    <span>线上派单招募</span>
+                                    <br/>
+                                    <span>合理招募社电</span>
+                                    <br/>
+                                    <span>实时监控警告</span>
+                                    <br/>
+                                    <button type="button" class="download-btn">免费入驻</button>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="cus">
+                        <tr>
+                            <td>
+                                <a href="statics/mobile-download/download.html?fromCus">
+                                    <img src="statics/img/toggle-icon-cus.png" class="download-icon">
+                                    <br />
+                                    <span class="download-title">我是客户</span>
+                                    <br/>
+                                    <br />
+                                    <span>APP实时监控</span>
+                                    <br/>
+                                    <span>工单进度一手掌控</span>
+                                    <br/>
+                                    <button type="button" class="download-btn">免费入驻</button>
+                                </a>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="market" v-show="needsTopList&&needsTopList.length>0">
+                <h6>需求市场<a href="news/m_index.html">查看更多>></a></h6>
+                <a v-for="(item,index) in needsTopList" v-if="index < 3" :href="'news/m_index.html#/marketDetail/' + item.orderId" class="inline-jp">
+                    <div class="market-inline">
+                        <h6 class="market-inline-title">{{ item.name }}</h6>
+                        <span class="market-time">发布时间: {{ item.publishTime }}</span>
+                        <br/>
+                        <span class="market-time">截止时间: {{ item.publishCutoffTime }}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="market-time">响应人数: {{ item.responseNumber }}</span>
+                    </div>
+                </a>
+            </div>
+            <div class="news">
+                <h6>行业资讯<a href="news/m_index.html#/news">查看更多>></a></h6>
+                <a v-for="(item,index) in industryTopList" v-if="index < 3" :href="'news/m_index.html#/newsDetail/' + item.id" class="inline-jp">
+                    <div class="news-inline">
+                        <div class="news-content">
+                            <div class="news-content-in">
+                                {{ item.title }}
+                                <span class="news-time">{{ item.publishTime }}</span>
+                            </div>
+                        </div>
+                        <div class="news-img" :style="'background: url('+ item.coverPic +');background-size: 100% 100%;'">
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="annc">
+                <h6>消息公告<a href="news/m_index.html#/annc">查看更多>></a></h6>
+                <a v-for="(item,index) in noticeTopList" v-if="index < 5" :href="'news/m_index.html#/newsDetail/' + item.id" class="inline-jp">
+                    <div class="annc-inline">
+                        <div class="annc-content">
+                            <div class="annc-content-in">
+                                {{ item.title }}
+                            </div>
+                        </div>
+                        <div class="annc-time">
+                            {{ item.publishTime }}
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="about">
+                <h6>关于我们</h6>
+                <div class="about-content">
+                    杭州电牛科技有限公司总部位于杭州，是电力服务云平台理念的先驱者。公司旗下的产品“e电牛”是基于地理位置的电工现场管理工具和电力服务需求对接平台。我们为电力服务单位提供专业的电工调度、现场作业指导、安全管控等服务。平台整合了不同细分工种的电工资源，以就近原则，为电网公司、工商专变用户、电力设备制造商、物业公司、充电桩业主、光伏电站等需求方，提供快速、高效、经济、安全的电工服务。公司技术团队由全国知名的两院院士专家领衔，科技研发团队实力超强，经验丰富。公司计划尽快完成高新技术企业的申报和审核，争取在科技转化为生产力的研发实践以及各级各类科技项目申报中获得国家级、省级、市级、以及高新区政府的大力支持与帮助。
+                </div>
+            </div>
+        </div>
+        <footer>
+            <span>电牛科技版权所有 2004-2017 ICP证： 浙B2-20150087</span>
+        </footer>
+    </div>
+</body>
+
+
+
+<script src="statics/libs/polyfill.min.js"></script>
+<script src="statics/libs/fastclick.js"></script>
+<script src="statics/libs/axios.min.js"></script>
+<script src="statics/libs/vue.min.js"></script>
+<script src="js/m_index.js"></script>
+</html>

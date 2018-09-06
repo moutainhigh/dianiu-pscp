@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    #parse("sys/header.html")
+</head>
+<body>
+<div id="content">
+    <div class="grid-btn" style="padding-left: 15px;">
+        <div class="clearfix">
+            <div class="grid-btn" style="margin-bottom: 0px;">
+                <a class="btn btn-primary"><i class="fa fa-eye"></i>&nbsp;查看</a>
+                <a class="btn btn-primary"><i class="fa fa-eye"></i>&nbsp;删除</a>
+                <a class="btn btn-primary"><i class="fa fa-eye"></i>&nbsp;新增设备</a>
+            </div>
+        </div>
+        <div class="clearfix" style="padding: 10px 0 0 0;">
+            <div class="col-sm-2" style="padding-left: 0;">
+                <input type="text" class="form-control" placeholder="消防设备名称"/> <!--  @keyup.enter="query" -->
+            </div>
+            <div class="col-sm-3">
+                <v-select multiple label="name" placeholder="所属配电房"></v-select>
+                <input type="hidden" data-vv-name="配电房" v-validate="'required'">
+            </div>
+            <a class="btn btn-default">查询</a>
+        </div>
+    </div>
+    <div style="padding-left: 15px;">
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    var gridParam = {
+        url: "../firefightingequipment/list",
+        datatype: "json",
+        autowidth: true,
+        height: 400,
+        colModel: [
+            {
+                label: "消防设备名称",
+                name: 'name',
+                width: 50
+            }, {
+                label: "所属配电房",
+                name: "roomName",
+                width: 50
+            }
+        ],
+        viewrecords: true,
+        rowNum: 10,
+        pager: "#jqGridPager",
+        rowList: [
+            10, 30, 50
+        ],
+        jsonReader: {
+            root: "page.list",
+            page: "page.currPage",
+            total: "page.totalPage",
+            records: "page.totalCount"
+        },
+        prmNames: {
+            page: "page",
+            rows: "limit",
+        },
+        gridComplete: function () {
+            $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
+        }
+    };
+    var vm = new Vue({
+        el: '#content',
+        data: {},
+        mounted: function () {
+            $("#jqGrid").jqGrid(gridParam) //加载表格
+        }
+    })
+</script>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>工程项目</title>
+  #parse("sys/header.html")
+  <style type="text/css">
+    .form-horizontal {
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .grid-btn .col-sm-2 {
+        width: 12.66666667%;
+      }
+      h4 {
+        margin: 0 0 2em 4em;
+      }
+    }
+
+    .input-group[class*=col-] {
+      float: left;
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="rrapp" v-cloak>
+    <div v-show="showList">
+      <tabs>
+        <tab status="notStart" name="未启动" icon="fa-calendar-times-o" selected="true"></tab>
+        <tab status="ongoing" name="进行中" icon="fa-star-half-o"></tab>
+        <tab status="end" name="已结束" icon="fa-star"></tab>
+      </tabs>
+      <div class="grid-btn">
+        <div class="col-sm-2" style="padding-left: 0;">
+          <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="项目名称">
+        </div>
+        <div class="col-sm-2">
+          <input type="text" class="form-control" v-model="q.cpName" @keyup.enter="query" placeholder="业主单位">
+        </div>
+        <div class="col-sm-2">
+          <input type="text" class="form-control" v-model="q.cpContact" @keyup.enter="query" placeholder="联系人">
+        </div>
+        <div class="col-sm-2">
+          <input type="text" class="form-control" v-model="q.cpContactMobile" @keyup.enter="query" placeholder="手机号码">
+        </div>
+        <div id="date-start" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+          <input class="form-control" size="16" type="text" readonly placeholder="项目开始日期" v-model="q.startTime" />
+          <span id="date-start-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+        </div>
+        <div id="date-end" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+          <input class="form-control" size="16" type="text" readonly placeholder="项目结束日期" v-model="q.endTime" />
+          <span id="date-end-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+        </div>
+        <a class="btn btn-default" @click="query">查询</a>
+      </div>
+      <div class="grid-btn">
+        #if($shiro.hasPermission("engineeringproject:save"))
+        <a class="btn btn-primary" @click="add" v-show="statusInVm == 'notStart'"><i class="fa fa-plus"></i>&nbsp;新增</a> #end #if($shiro.hasPermission("engineeringproject:update"))
+        <a class="btn btn-primary" @click="update"><i class="fa fa-eye"></i>&nbsp;查看</a> #end
+        <!-- #if($shiro.hasPermission("engineeringproject:delete"))
+                <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+                #end -->
+      </div>
+      <table id="jqGrid"></table>
+      <div id="jqGridPager"></div>
+    </div>
+    <div v-show="!showList" class="panel panel-default">
+      <div class="panel-heading">{{title}}</div>
+      <form class="form-horizontal" data-vv-scope="form-1">
+        <div class="form-group">
+          <label class="col-sm-2 control-label">项目名称<span style="color: red;">*</span></label>
+          <div class="col-sm-5">
+            <input type="text" class="form-control" v-model="engineeringProject.name" placeholder="项目名称" data-vv-name="项目名称" v-validate="'required|max:50'" :class="{'is-danger': errors.has('form-1.项目名称')}" :disabled="(projectId&&statusInVm!='notStart')||isCreateBySelf==2||!canEdit"
+            />
+            <span v-show="errors.has('form-1.项目名称')" class="help is-danger">{{ errors.first('form-1.项目名称') }}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">选择客户<span style="color: red;">*</span></label>
+          <div class="col-sm-3">
+            <select class="form-control" v-model="engineeringProject.customerId" :class="{'is-danger': errors.has('form-1.客户')}" :disabled="(projectId&&statusInVm!='notStart')||isCreateBySelf==2||!canEdit" @change="getRooms">
+                            <option :value="''">请选择客户</option>
+                            <option v-for="(item,index) in customers" :value="item.id" :selected="engineeringProject.customerId == item.id">{{ item.name }}</option>
+                        </select>
+            <input type="hidden" v-model="engineeringProject.customerId" data-vv-name="客户" v-validate="'required'">
+            <span v-show="errors.has('form-1.客户')" class="help is-danger">请选择客户</span>
+          </div>
+          <div>
+            <label class="col-sm-2 control-label">关联配电房<span style="color: red;">*</span></label>
+            <div class="col-sm-5" v-if="showRooms">
+              <v-select multiple :options="rooms" label="name" v-model="selectedRooms" placeholder="请选择配电房" :class="{'is-danger': errors.has('form-1.配电房')}"></v-select>
+              <input type="hidden" v-model="selectedRooms" data-vv-name="配电房" v-validate="'required'">
+              <span v-show="errors.has('form-1.配电房')" class="help is-danger">选择配电房</span>
+            </div>
+            <div class="col-sm-3" v-if="!showRooms">
+              <input type="text" class="form-control" v-model="roomsString" disabled="disabled">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">项目开始时间<span style="color: red;">*</span></label>
+          <div class="col-sm-5">
+            <input id="project-start" class="form-control form_datetime" size="16" type="text" readonly data-date-format="yyyy-mm-dd" placeholder="项目开始日期" :value="engineeringProject.startTimeConvert" :class="{'is-danger': errors.has('form-1.项目开始时间')}" :disabled="(projectId&&statusInVm!='notStart')||isCreateBySelf==2||!canEdit"
+            />
+            <input type="hidden" v-model="engineeringProject.startTimeConvert" data-vv-name="项目开始时间" v-validate="'required'" />
+            <span v-show="errors.has('form-1.项目开始时间')" class="help is-danger">请选择项目开始时间</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">项目结束时间<span style="color: red;">*</span></label>
+          <div class="col-sm-5">
+            <input id="project-end" class="form-control form_datetime" size="16" type="text" readonly data-date-format="yyyy-mm-dd" placeholder="项目结束时间" :value="engineeringProject.endTimeConvert" :class="{'is-danger': errors.has('form-1.项目结束时间')}" :disabled="(projectId&&statusInVm!='notStart')||isCreateBySelf==2||!canEdit"
+            />
+            <input type="hidden" v-model="engineeringProject.endTimeConvert" data-vv-name="项目结束时间" v-validate="'required'" />
+            <span v-show="errors.has('form-1.项目结束时间')" class="help is-danger">请选择项目结束时间</span>
+          </div>
+        </div>
+        <div class="form-group" v-show="isCreateBySelf!=2||statusInVm!='notStart'">
+        <label class="col-sm-2 control-label upload-label">合作附件</label>
+        <div class="col-sm-10" style="padding-left: 15px;" v-if="statusInVm == 'end'">
+          <ul class="upload-ul" v-if="engineeringProject.cooperationAttachmentList&&engineeringProject.cooperationAttachmentList.length > 0">
+            <li class="upload-li" v-for="item in engineeringProject.cooperationAttachmentList">
+              <img :src="item.fid" class="upload-img" @click="imgEnlarge" />
+            </li>
+          </ul>
+          <p class="form-control-static" v-else>暂无</p>
+        </div>
+        <div class="col-sm-10" style="padding-left: 15px;" v-else>
+          <img-upload :id="'cooperationAttachmentList'" :data="engineeringProject.cooperationAttachmentList" :length="9"></img-upload>
+        </div>
+      </div>
+        <div class="form-group">
+          <label class="col-sm-2 control-label">状态<span style="color: red;">*</span></label>
+          <div class="col-sm-5">
+            <select class="form-control" v-model="engineeringProject.status" :disabled="(projectId&&statusInVm!='notStart')||isCreateBySelf==2">
+                            <option :value="-1" disabled v-show="engineeringProject.status == -1">已取消</option>
+                            <option :value="0">未启动</option>
+                            <option :value="1">进行中</option>
+                            <option :value="2" disabled v-show="engineeringProject.status == 2">费用确认</option>
+                            <option :value="3" disabled v-show="engineeringProject.status == 3">已结算/已结束</option>
+                        </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin:25px;">
+          <div class="col-sm-2 control-label"></div>
+          <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="保存" v-show="(statusInVm == 'notStart'&&isCreateBySelf==1)||statusInVm == 'ongoing'" /> &nbsp;&nbsp;
+          <input v-show="statusInVm == 'ongoing'&&projectId&&isCreateBySelf == 2" type="button" class="btn btn-success" @click="settlement" value="结算" style="margin-right: 1em;">
+          <input v-show="statusInVm == 'ongoing'&&projectId&&isCreateBySelf == 1" type="button" class="btn btn-success" @click="end" value="结束" v-show="statusInVm == 'ongoing'" style="margin-right: 1em;">
+          <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+        </div>
+      </form>
+    </div>
+    <div id="settlementHtml" v-show="false">
+      <form class="form-horizontal">
+        <div class="form-group">
+          <label class="col-sm-3 control-label">结算实际金额<span style="color: red;">*</span></label>
+          <div class="col-sm-5">
+            <input type="text" class="form-control" placeholder="请输入结算实际金额" v-model="engineeringProject.actualSettlementAmount" maxlength="10" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="col-sm-3 control-label upload-label">结算附件</label>
+          <div class="col-sm-9" style="padding-left: 15px;">
+            <div>
+              <img-upload :id="'actualPriceAttachmentList'" :data="engineeringProject.actualPriceAttachmentList" :length="9"></img-upload>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="${rc.contextPath}/js/cp/engineeringproject.js?_${date.systemTime}"></script>
+</body>
+
+</html>

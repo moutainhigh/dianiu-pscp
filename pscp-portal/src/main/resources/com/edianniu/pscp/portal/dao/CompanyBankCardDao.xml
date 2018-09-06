@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.CompanyBankCardDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.portal.entity.CompanyBankCardEntity">
+		select * from pscp_company_bank_card where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.portal.entity.CompanyBankCardEntity">
+		select * from pscp_company_bank_card where deleted=0 order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_company_bank_card  where deleted=0
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.portal.entity.CompanyBankCardEntity">
+		insert into pscp_company_bank_card
+		(
+			id, 
+			company_id, 
+			bank_id, 
+			bank_name, 
+			bank_branch_name, 
+			account, 
+			province_id,
+			city_id,
+			remark, 
+			create_time, 
+			create_user,  
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_company_bank_card'),
+			#{companyId}, 
+			#{bankId}, 
+			#{bankName}, 
+			#{bankBranchName}, 
+			#{account},
+			#{provinceId},
+			#{cityId},
+			#{remark}, 
+			now(), 
+			#{createUser}, 
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+    		SELECT currval('seq_pscp_company_bank_card') as id;
+    	</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.portal.entity.CompanyBankCardEntity">
+		update pscp_company_bank_card 
+		<set>
+			<if test="companyId != null">company_id = #{companyId}, </if>
+			<if test="bankId != null">bank_id = #{bankId}, </if>
+			<if test="bankName != null">bank_name = #{bankName}, </if>
+			<if test="bankBranchName != null">bank_branch_name = #{bankBranchName}, </if>
+			<if test="account != null">account = #{account}, </if>
+			<if test="remark != null">remark = #{remark}, </if>
+			<if test="createTime != null">create_time = #{createTime}, </if>
+			<if test="createUser != null">create_user = #{createUser}, </if>
+			<if test="provinceId!=null">province_id=#{provinceId},</if>
+			<if test="cityId!=null">city_id=#{cityId},</if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_company_bank_card set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_company_bank_card set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="getBankCardByCompany" resultType="com.edianniu.pscp.portal.entity.CompanyBankCardEntity" parameterType="java.lang.Long">
+		select * from pscp_company_bank_card where company_id=#{companyId} and deleted=0
+	</select>
+</mapper>

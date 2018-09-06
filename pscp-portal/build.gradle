@@ -1,0 +1,188 @@
+apply plugin: 'war'
+apply plugin: 'eclipse'
+apply plugin: 'jetty'
+compileJava {
+    options.compilerArgs << '-XDignore.symbol.file'
+    options.fork = true
+	//println("$System.env.USER")
+	//println("detected JAVA_HOME=$System.env.JAVA_HOME")
+	//println("setting options.bootClasspath = $System.env.JAVA_HOME/jre/lib/rt.jar")
+    //options.bootClasspath = "/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/rt.jar"
+	def java_home = "$System.env.JAVA_HOME"
+	println(java_home)
+	if(java_home=='null'){
+		println("other")
+		options.bootClasspath = "/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/rt.jar"
+	}
+	else{
+		println("windows")
+		println("$System.env.USER")
+		println("detected JAVA_HOME=$System.env.JAVA_HOME")
+		println("setting options.bootClasspath = $System.env.JAVA_HOME/jre/lib/rt.jar")
+		options.bootClasspath = "$System.env.JAVA_HOME/jre/lib/rt.jar"
+	}
+	
+}
+
+/*eclipse {
+    module {
+        excludeDirs = [file(".gradle")]
+        [".eclipse", "target", "build"].each {
+            excludeDirs << file("$it")
+        }
+    }
+}
+jettyRun {
+    contextPath = '/'
+    reload = 'manual'
+    webDefaultXml = file('webdefault.xml')
+}*/
+httpPort = 8080
+stopPort = 8089
+stopKey = 'ss'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        flatDir dirs: "${gradle.gradleHomeDir}/customPlugins"
+    }
+
+    dependencies {
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.3'
+        classpath 'com.bmuschko:gradle-tomcat-plugin:2.0'
+    }
+}
+//apply plugin: 'tomcat'
+apply plugin: 'com.bmuschko.tomcat'
+tomcat {
+    httpPort = 8091
+    httpsPort = 8092
+    enableSSL = true
+}
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+repositories {
+    maven {
+        url "http://111.1.17.197:8080/nexus/content/groups/public"
+    }
+    mavenCentral()
+    ivy {
+        url "http://111.1.17.197:8080/nexus/content/groups/public"
+        layout "pattern", {
+            artifact "[organisation]/[module]/[revision]/[artifact]-[revision].xml"
+            artifact "[organisation]/[module]/[revision]/[artifact]-[revision](-[type]).[ext]"
+            m2compatible = true
+        }
+    }
+    flatDir { dirs "${System.env.JAVA_HOME}/jre/lib" }
+}
+
+dependencies {
+    components {
+        eachComponent { details ->
+            details.statusScheme = ["snapshot", "integration", "milestone", "release"]
+        }
+    }
+    def tomcatVersion = '7.0.11'
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+            "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+    }
+//    providedCompile name: 'rt'
+    /* spring */
+    compile("org.springframework:spring-context-support:${springframeworkVersion}")
+    compile("org.springframework:spring-aop:${springframeworkVersion}")
+    compile("org.springframework:spring-tx:${springframeworkVersion}")
+    compile("org.springframework:spring-webmvc:${springframeworkVersion}")
+    compile("org.springframework:spring-jdbc:${springframeworkVersion}")
+    compile("org.springframework:spring-web:${springframeworkVersion}")
+    compile("org.springframework:spring-test:${springframeworkVersion}")
+    /* junit */
+    compile("junit:junit:${junitVersion}")
+
+    /*mybatis*/
+    compile("org.mybatis:mybatis:${mybatisVersion}")
+    compile("org.mybatis:mybatis-spring:${mybatisSpringVersion}")
+    /* Logger */
+    compile("ch.qos.logback:logback-classic:${logbackClassicVersion}")
+    compile("org.slf4j:slf4j-api:${slf4jVersion}")
+    compile("org.slf4j:jcl-over-slf4j:${slf4jVersion}")
+
+    compile 'commons-logging:commons-logging:${commonsLoggingVersion}'
+    compile 'mysql:mysql-connector-java:5.1.36'
+    compile 'com.alibaba:druid:1.0.9'
+    compile 'commons-lang:commons-lang:${commonsLangVersion}'
+    compile 'commons-fileupload:commons-fileupload:1.3.1'
+    compile 'commons-io:commons-io:2.2'
+    compile 'org.apache.commons:commons-lang3:3.4'
+    compile "org.apache.commons:commons-pool2:${commonsPool2Version}"
+    compile "commons-digester:commons-digester:2.1"
+    compile("commons-codec:commons-codec:${commonsCodecVersion}")
+    compile("commons-configuration:commons-configuration:${commonsConfigurationVersion}")
+    /*dubbo*/
+    runtime 'com.edianniu.3rd:dubbo:2.5.3_netty4.0.18'
+    runtime 'org.javassist:javassist:3.18.2-GA'
+    compile "io.netty:netty-all:4.0.19.Final"
+    /**mis client**/
+    compile 'com.edianniu.pscp.mis:pscp-mis-client:3.8.28'
+    /**renter-mis client**/
+    compile 'com.edianniu.pscp.renter-mis:pscp-renter-mis-client:1.0.9'
+    /**message client**/
+    compile 'com.edianniu.pscp.message:pscp-message-client:3.20'
+    /**sps client**/
+    compile 'com.edianniu.pscp.sps:pscp-sps-client:1.4.27'
+    /**cs client**/
+    compile 'com.edianniu.pscp.cs:pscp-cs-client:1.1.43'
+    /*fastjson*/
+    compile 'com.alibaba:fastjson:1.2.6'
+    /*shiro*/
+    compile("org.apache.shiro:shiro-core:${shiroVersion}")
+    compile("org.apache.shiro:shiro-spring:${shiroVersion}")
+   /* compile("org.quartz-scheduler:quartz:${quartzVersion}") { transitive = false }*/
+    compile("com.github.axet:kaptcha:${kaptchaVersion}")
+    /* database driver */
+    compile("postgresql:postgresql:${postgresqlVersion}")
+    compile("redis.clients:jedis:${redisVersion}")
+    /* Freemarker瑙嗗浘鎵�闇�jar */
+    compile("org.freemarker:freemarker:${freemarkerVersion}")
+    /* J2EE */
+    /* compile("javax.servlet:jstl:1.2")*/
+    /*servlet*/
+    providedCompile("javax.servlet:javax.servlet-api:${servletVersion}")
+    /*providedCompile("javax.servlet.jsp:jsp-api:2.0")*/
+    /* JSP瑙嗗浘鎵�闇�jar*/
+    compile("taglibs:standard:${taglibsVersion}")
+    compile("jstl:jstl:${jstlVersion}")
+    /*Velocity瑙嗗浘鎵�闇�jar*/
+    compile("org.apache.velocity:velocity:${velocityVersion}")
+    compile("org.apache.velocity:velocity-tools:${velocityToolsVersion}") { transitive = false }
+
+    /* zookeeper */
+    /*compile ('com.github.sgroschupf:zkclient:0.1') { transitive = true }*/
+    compile 'com.101tec:zkclient:0.3'
+    compile('org.apache.zookeeper:zookeeper:3.3.6') { transitive = false }
+
+    compile("org.aspectj:aspectjrt:1.7.0")
+    compile("org.aspectj:aspectjweaver:1.7.0")
+
+    /* protostuff */
+    compile("com.dyuproject.protostuff:protostuff-core:1.1.1")
+    compile("com.dyuproject.protostuff:protostuff-runtime:1.1.1")
+
+    /*http*/
+    testCompile 'org.apache.httpcomponents:httpcore:4.4.3'
+    testCompile 'org.apache.httpcomponents:httpclient:4.5.1'
+    testCompile 'org.apache.httpcomponents:httpmime:4.5.1'
+    /* xstream */
+    /*compile 'com.thoughtworks.xstream:xstream:1.4.7'
+    compile 'com.drewnoakes:metadata-extractor:2.9.1'
+    compile 'com.adobe.xmp:xmpcore:5.1.2'*/
+	/* stc */
+    compile('skymobi.stc:stc-cache:1.0.3') { transitive = false }
+
+}

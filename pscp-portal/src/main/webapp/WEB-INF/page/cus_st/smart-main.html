@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>智能监控</title>
+    #parse("sys/header.html")
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="${rc.contextPath}/statics/plugins/element-ui@2.0.10/css/index.css">
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css">
+</head>
+
+<body>
+   <div id="rrpc" v-cloak>
+        <div class="smart-cus-in">
+            <section class="content">
+                <iframe src="smart-device.html" ref="ifame" class="imframe" scrolling="yes" frameborder="0"></iframe>
+            </section>
+        </div> 
+    </div>
+    <!-- 引入组件库 -->
+    <script src="${rc.contextPath}/statics/plugins/element-ui@2.0.10/js/index.js"></script>
+    <script src="${rc.contextPath}/statics/libs/axios.min.js"></script>
+    <script src="${rc.contextPath}/js/cus_st/smart-main.js?_${date.systemTime}"></script>
+</body>
+
+</html>

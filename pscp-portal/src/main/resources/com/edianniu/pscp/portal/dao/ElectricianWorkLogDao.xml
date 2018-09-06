@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.ElectricianWorkLogDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.portal.entity.ElectricianWorkLogEntity">
+		select * from pscp_electrician_work_log where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.portal.entity.ElectricianWorkLogEntity">
+        select * from pscp_electrician_work_log where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_work_log  where deleted=0
+	</select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.portal.entity.ElectricianWorkLogEntity">
+		insert into pscp_electrician_work_log
+		(
+			`id`, 
+			`electrician_work_order_id`, 
+			`work_order_id`, 
+			`electrician_id`, 
+			`content`, 
+			`company_id`, 
+			`create_time`, 
+			`create_user`, 
+			`modified_time`, 
+			`modified_user`, 
+			`deleted`
+		)
+		values
+		(
+			#{id}, 
+			#{electricianWorkOrderId}, 
+			#{workOrderId}, 
+			#{electricianId}, 
+			#{content}, 
+			#{companyId}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.portal.entity.ElectricianWorkLogEntity">
+        update pscp_electrician_work_log
+        <set>
+            <if test="electricianWorkOrderId != null">`electrician_work_order_id` = #{electricianWorkOrderId},</if>
+            <if test="workOrderId != null">`work_order_id` = #{workOrderId},</if>
+            <if test="electricianId != null">`electrician_id` = #{electricianId},</if>
+            <if test="content != null">`content` = #{content},</if>
+            <if test="companyId != null">`company_id` = #{companyId},</if>
+            <if test="createTime != null">`create_time` = #{createTime},</if>
+            <if test="createUser != null">`create_user` = #{createUser},</if>
+            <if test="modifiedTime != null">`modified_time` = #{modifiedTime},</if>
+            <if test="modifiedUser != null">`modified_user` = #{modifiedUser},</if>
+            <if test="deleted != null">`deleted` = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_electrician_work_log
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_electrician_work_log set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="queryListWorkLog" parameterType="map"
+            resultType="com.edianniu.pscp.portal.entity.ElectricianWorkLogEntity">
+        SELECT * FROM pscp_electrician_work_log
+        WHERE deleted = 0
+        AND work_order_id = #{workOrderId}
+        ORDER BY create_time DESC
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotalWorkLog" parameterType="map" resultType="int">
+        SELECT count(1) FROM pscp_electrician_work_log
+        WHERE deleted = 0
+         AND work_order_id = #{workOrderId}
+    </select>
+
+</mapper>

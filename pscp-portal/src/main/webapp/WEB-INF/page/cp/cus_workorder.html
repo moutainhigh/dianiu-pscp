@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>工单管理</title>
+    #parse("sys/header.html")
+    <style>
+        .form-horizontal {
+            width: 100%;
+        }
+
+        ul > li {
+            display: inline-block;
+        }
+
+        .fa.grey {
+            color: #737373;
+        }
+
+        .fa.yel {
+            color: #FAB54D;
+        }
+
+        .fa.red {
+            color: #DD2727;
+            font-size: 16px;
+        }
+
+        .elspan.red {
+            color: #DD2727;
+        }
+
+        #mapChoose,
+        #allmap {
+            width: 100%;
+            height: 100%;
+        }
+
+        .static-info .form-control-static {
+            font-size: 12px;
+            margin-left: 16.66666667%;
+            padding-left: 15px;
+        }
+
+        .record .form-control-static {
+            padding-left: 0;
+        }
+
+        h4 {
+            font-weight: bold;
+            margin: 1em 0 1em 1em;
+            font-size: 14px;
+        }
+
+        .form-control.identification-text {
+            display: inline-block;
+            width: auto;
+            padding: 0;
+            height: auto;
+        }
+
+        .upload-img {
+            margin-bottom: 5px;
+        }
+
+        .col-sm-12 {
+            padding: 0;
+        }
+
+        #defectDetail .col-sm-10,
+        #trainDetail .col-sm-10,
+        #inspectionDetail .col-sm-10 {
+            padding-left: 15px;
+        }
+
+        .evaluation .form-control-static {
+            padding-left: 25px;
+        }
+
+        .tool-item, .defect-item {
+            display: inline-block;
+            padding: 3px 6px;
+            color: #fff;
+            font-size: 13px;
+            border-radius: 5px;
+        }
+
+        .tool-item {
+            background-color: dodgerblue;
+        }
+
+        .defect-item {
+            background-color: royalblue;
+        }
+    </style>
+</head>
+
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList&&showDetailInfo">
+        <tabs>
+            <tab status="ongoing" name="进行中" selected="true" icon="fa-calendar-times-o"></tab>
+            <tab status="finished" name="已结束" icon="fa-star"></tab>
+        </tabs>
+        <div class="grid-btn">
+            <a class="btn btn-primary" @click="viewDetail"><i class="fa fa-eye"></i>&nbsp;查看</a>
+        </div>
+        <div class="grid-btn">
+            <div class="col-sm-2" style="padding-left: 0;">
+                <input type="text" class="form-control" placeholder="工单名称" v-model="q.name" @keyup.enter="query">
+            </div>
+            <div class="col-sm-2">
+                <input type="text" class="form-control" placeholder="服务商" v-model="q.companyName" @keyup.enter="query">
+            </div>
+            <div class="col-sm-2">
+                <select class="form-control" v-model="q.subStatus">
+                    <option :value="''" style="display:none;">状态</option>
+                    <option :value="item" v-for="item in subStatus">{{ item }}</option>
+                </select>
+            </div>
+            <div id="date-start" style="width: 20%;" class="input-group date form_datetime col-sm-3 query"
+                 data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                <input id="date-start-remove" class="form-control" size="16" type="text" readonly placeholder="开始日期">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            </div>
+            <div id="date-end" style="width: 20%;" class="input-group date form_datetime col-sm-3 query"
+                 data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                <input id="date-end-remove" class="form-control" size="16" type="text" readonly placeholder="结束日期">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+            </div>
+            <a class="btn btn-default" @click="query">查询</a>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="!showList" class="panel panel-default" contenteditable="false">
+        <div style="position: relative;">
+            <div class="panel-heading">工单信息详情</div>
+        </div>
+    </div>
+
+</div>
+<script type="text/x-template" id="page">
+    <ul class="pagination">
+        <li v-show="current != 1" @click="current-- && goto(current--)"><a>上一页</a></li>
+        <li v-for="index in pages" @click="goto(index)" :class="{'active':current == index}" :key="index">
+            <a>{{index}}</a>
+        </li>
+        <li v-show="allpage != current && allpage != 0 " @click="current++ && goto(current++)"><a>下一页</a></li>
+    </ul>
+</script>
+<script src="${rc.contextPath}/js/cp/cus_workorder.js?_${date.systemTime}"></script>
+</body>
+
+</html>

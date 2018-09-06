@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+    <bean id="cacheJedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal" value="${redis.cache.cfg.maxActive}"/>
+        <property name="maxIdle" value="${redis.cache.cfg.maxIdle}"/> 
+        <property name="maxWaitMillis" value="${redis.cache.cfg.maxWait}"/>
+        <property name="testOnBorrow" value="${redis.cache.cfg.testOnBorrow}"/>  
+        <!--<property name="maxTotal" value="500"/> 
+        <property name="maxIdle" value="100"/> 
+        <property name="maxWaitMillis" value="18000"/>-->
+       
+    </bean>
+
+    <bean id="cacheJedisPool" class="stc.skymobi.cache.redis.MasterSlavePool">
+        <constructor-arg index="0" ref="cacheJedisPoolConfig"/>
+        <constructor-arg value="${redis.cache.host}"/>
+        <constructor-arg value="${redis.cache.port}"/>
+        <constructor-arg value="5000"/>
+        <property name="redisName" value="cache"/> 
+    </bean>
+
+    <bean id="jedisUtil" class="stc.skymobi.cache.redis.JedisUtil">
+        <property name="jedisPool" ref="cacheJedisPool"/>
+    </bean>
+
+</beans>

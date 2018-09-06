@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.CompanyMeterDao">
+
+	
+	<select id="queryList" parameterType="map"
+			resultType="com.edianniu.pscp.portal.entity.CompanyMeterEntity">
+		SELECT m.id, m.name AS name, m.company_id, l.building_id FROM pscp_company_meter m
+		LEFT JOIN pscp_company_line l ON l.meter_id = m.id AND l.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0 
+		WHERE m.deleted = 0 
+		<if test="buildingIds != null">AND l.building_id IN
+			<foreach collection="buildingIds" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
+	</select>
+</mapper>

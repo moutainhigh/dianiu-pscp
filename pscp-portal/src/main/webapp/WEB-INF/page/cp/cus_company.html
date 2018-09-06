@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>我的服务商</title>
+  #parse("sys/header.html")
+  <style type="text/css">
+    .form-horizontal {
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .grid-btn .col-sm-2 {
+        width: 12.66666667%;
+      }
+      h4 {
+        margin: 0 0 2em 4em;
+      }
+    }
+
+    .input-group[class*=col-] {
+      float: left;
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="rrapp" v-cloak>
+    <div v-show="showList">
+      <div class="grid-btn">
+        <div class="col-sm-3" style="padding-left: 0;">
+          <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="服务商名称">
+        </div>
+        <div class="col-sm-2">
+          <select class="form-control" v-model="q.status" @keyup.enter="query">
+          	<option value="" selected="selected">状态</option>
+          	<option value="0">已邀请</option>
+          	<option value="1">已绑定</option>
+          	<option value="2">已拒绝</option>
+          </select>
+        </div>
+        <a class="btn btn-default" @click="query">查询</a>
+      </div>
+      
+      <table id="jqGrid"></table>
+      <div id="jqGridPager"></div>
+    </div>
+  </div>
+  <script src="${rc.contextPath}/js/cp/cus_company.js?_${date.systemTime}"></script>
+</body>
+
+</html>

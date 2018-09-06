@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>工程项目</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/TenantManagement.css">
+</head>
+
+<body>
+<div id="tenantManagement" v-cloak>
+    <!-- 租客管理信息页面 -->
+    <div v-show="showList && showadd && detailsPage && equipmentPage && seeDetails">
+        <div class="newTenant_btn">
+            <el-button type="primary" class="tenant_btn" @click="newTenant()">新建租客</el-button>
+        </div>
+        <div class="tenant_search">
+            <div class="row">
+                <div class="col-sm-2" style="padding-left:0;">
+                    <div class="input-group">
+                        <input type="text" class="form-control" v-model="q.mobile" placeholder="手机号码">
+                    </div>
+                </div>
+                <div class="col-sm-2" style="padding-left:0;">
+                    <div class="input-group">
+                        <input type="text" class="form-control" v-model="q.name" placeholder="企业名称">
+                    </div>
+                </div>
+                <!--<div class="col-sm-2" style="padding-left:0;">-->
+                <!--<div class="input-group">-->
+                <!--<input type="text" class="form-control" aria-label="..." v-model="q.contract" placeholder="联系人">-->
+                <!--</div>-->
+                <!--</div>-->
+                <div id="date-start" style="width:20%;" class="input-group date form_datetime col-sm-2 query"
+                     data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                    <input id="date-start-remove" class="form-control" size="16" type="text" placeholder="发布开始日期">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div id="date-end" style="width: 20%;" class="input-group date form_datetime col-sm-2 query" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                    <input id="date-end-remove" class="form-control" size="16" type="text" readonly placeholder="发布结束日期">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div class="submit_btn col-sm-2" style="padding-left:0;">
+                    <button type="button" class="btn btn-success submitBtn" @click="query">查询</button>
+                    <button type="button" class="btn btn-success submitBtn" @click="empty">重置</button>
+                </div>
+            </div>
+        </div>
+        <div class="tenant_list">
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+    </div>
+    <!--编辑租客信息-->
+    <div v-show="!detailsPage" class="seeDetails">
+        <form action="">
+            <div class="clearfix" style="padding:20px 0;">
+                <div class="col-lg-4" style="padding:0;">
+                    <div class="input-group">
+                        <span class="input-group-addon">租客名称</span>
+                        <input type="text" id="name" class="form-control" disabled="disabled">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" style="padding:20px 0;">
+                <div class="col-lg-4" style="padding:0;">
+                    <div class="input-group">
+                        <span class="input-group-addon">手机号码</span>
+                        <input type="text" id="mobile" class="form-control" disabled="disabled">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" style="padding:23px 0;">
+                <div class="col-lg-4" style="padding:0;">
+                    <div class="input-group">
+                        <span class="input-group-addon">联系人&nbsp;&nbsp;&nbsp;</span>
+                        <input type="text" id="contract" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" style="padding:23px 0;">
+                <div class="col-lg-4" style="padding:0;">
+                    <div class="input-group">
+                        <span class="input-group-addon">地址&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <input type="text" class="form-control" id="address">
+                    </div>
+                </div>
+            </div>
+        </form>
+        <div class="subBtn">
+            <el-button onclick="next()">下一步</el-button>
+            <el-button onclick="backshowlist()">返 回</el-button>
+        </div>
+    </div>
+    <!--编辑设备信息-->
+    <div v-show="!equipmentPage" class="seeDetails">
+        <h6>缴费方式</h6>
+        <div class="clearfix paymethod">
+            <div class="beforehand">
+                <i></i><span id="1">预交费用户</span>
+            </div>
+            <div class="monthlyKnot">
+                <i></i><span id="2">月结算用户</span>
+            </div>
+        </div>
+        <div class="clearfix" id="edgiveanAlarm" style="padding:20px 0;">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon" style=" border:none;">余额告警</span>
+                    <input type="text" class="form-control" value="" id="edamountLimit" placeholder="请设置金额"
+                           autocomplete="off">
+                </div>
+            </div>
+            <br>
+            <div style="width:200px;height: 30px;line-height:30px;text-align:center;color: #fb3000;font-size: 12px;">余额低于设置金额会自动告警</div>
+        </div>
+        <div class="clearfix" style="padding:20px 0;">
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <span class="input-group-addon">计费开始时间</span>
+                    <div class="input-group date form_datetime col-sm-2 query" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                        <input id="edstartTime" class="form-control" size="16" type="text" readonly style="width:150px;">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6" style="padding:0;">
+                <div class="input-group">
+                    <span class="input-group-addon">计费结束时间</span>
+                    <div class="input-group date form_datetime col-sm-2 query" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                        <input id="edendTime" class="form-control" size="16" type="text" readonly style="width:150px;">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix" id="edunitPrice" style="padding:20px 0;">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">单价</span>
+                    <input type="text" class="form-control" id="edbasePrice" autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <div class="clearfix" id="edtimeSharing" style="padding:20px 0;">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">尖单价</span>
+                    <input type="text" class="form-control" id="edapexPrice" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">峰单价</span>
+                    <input type="text" class="form-control" id="edpeakPrice" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">平单价</span>
+                    <input type="text" class="form-control" id="edflatPrice" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">谷单价</span>
+                    <input type="text" class="form-control" id="edvalleyPrice" autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <div id="addInfo" class="clearfix">
+            <h6 class="col-sm-3">绑定设备及电费配比</h6>
+        </div>
+        <div class="edhtmllist">
+
+        </div>
+        <div class="subBtn">
+            <el-button id="edconfigInfo">确定</el-button>
+            <el-button id="edbackshowList">返回</el-button>
+        </div>
+    </div>
+    <!-- 新建租客页面 -->
+    <div v-show="!showList" class="panel panel-default">
+        <div class="row">
+            <form action="">
+                <div class="clearfix" style="padding:20px 0;">
+                    <div class="col-lg-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">租客名称</span>
+                            <input type="text" class="form-control" v-model="tenant.name" placeholder="请输入租客名称">
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:20px 0;">
+                    <div class="col-lg-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">手机号码</span>
+                            <input type="text" class="form-control" v-model="tenant.mobile" placeholder="请输入手机号码"
+                                   @change="existing">
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:23px 0;">
+                    <div class="col-lg-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">联系人&nbsp;&nbsp;&nbsp;</span>
+                            <input type="text" class="form-control" v-model="tenant.contract" placeholder="请输入联系人姓名">
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:23px 0;">
+                    <div class="col-lg-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">登录密码</span>
+                            <input type="text" class="form-control existing" v-model="tenant.pwd" placeholder="请设置登陆密码">
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding:23px 0;">
+                    <div class="col-lg-4">
+                        <div class="input-group">
+                            <span class="input-group-addon">地址&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <input type="text" class="form-control" v-model="tenant.address" placeholder="请输入地址">
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="subBtn">
+                <el-button @click="addInfoList()">提交</el-button>
+                <el-button @click="newTenant()">返回</el-button>
+            </div>
+        </div>
+    </div>
+    <!--添加配置信息页面-->
+    <div v-show="!showadd" class="panel panel-default">
+        <h6>缴费方式</h6>
+        <div class="clearfix addpaymethod">
+            <div class="beforehand">
+                <i></i><span id="1">预交费用户</span>
+            </div>
+            <div class="monthlyKnot">
+                <i></i><span id="2">月结算用户</span>
+            </div>
+        </div>
+        <div class="clearfix" id="giveanAlarm" style="padding:20px 0;">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon" style=" border:none;">余额告警</span>
+                    <input type="text" class="form-control" value="" id="amountLimit" placeholder="请设置金额"
+                           autocomplete="off">
+                </div>
+            </div>
+            <br>
+            <div style="width:200px;height: 30px;line-height:30px;text-align:center;color: #fb3000;font-size: 12px;">余额低于设置金额会自动告警</div>
+        </div>
+        <div class="clearfix" style="padding:20px 0;">
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <span class="input-group-addon" style=" border:none;">计费开始时间</span>
+                    <div style="width:20%;" class="input-group date form_datetime col-sm-2 query"
+                         data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                        <input id="startTime" class="form-control" size="16" type="text" style="width:150px;">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="input-group">
+                    <span class="input-group-addon" style=" border:none;">计费结束时间</span>
+                    <div style="width:20%;" class="input-group date form_datetime col-sm-2 query"
+                         data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                        <input id="endTime" class="form-control" size="16" type="text" readonly style="width:150px;">
+                        <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="clearfix" id="unitPrice">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">单价</span>
+                    <input type="text" class="form-control" id="basePrice" autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <div class="clearfix" id="timeSharing" style="padding:20px 0;">
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">尖单价</span>
+                    <input type="text" class="form-control" id="apexPrice" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">峰单价</span>
+                    <input type="text" class="form-control" id="peakPrice" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">平单价</span>
+                    <input type="text" class="form-control" id="flatPrice" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-addon">谷单价</span>
+                    <input type="text" class="form-control" id="valleyPrice" autocomplete="off">
+                </div>
+            </div>
+        </div>
+        <h6>绑定设备及电费配比</h6>
+        <div class="htmllist">
+            <div class="clearfix" style="padding:20px 0;">
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">所属楼宇</span>
+                        <input type="text" class="form-control" id="buildingNum" value="" data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false" autocomplete="off">
+                        <ul class="dropdown-menu buildinglist" style="left:80px;right:0;">
+
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">选择设备</span>
+                        <input type="text" class="form-control" id="equipmentName" type="button" data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false" autocomplete="off">
+                        <ul class="dropdown-menu equipmentList" style="left:80px;right:0;">
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">电费占比</span>
+                        <input type="text" id="ratio" class="form-control">
+                        <span class="input-group-addon">%</span>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <a class="addHtml"><i class="fa fa-plus-square-o"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="subBtn">
+            <el-button id="configInfo">提交</el-button>
+            <el-button id="backshowList">返回</el-button>
+        </div>
+    </div>
+    <!--所有详情展示页-->
+    <div class="seeDetails" v-show="!seeDetails">
+        <form action="" disabled="disavled">
+            <div class="clearfix" style="padding:20px 0;">
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">租客名称</span>
+                        <input type="text" class="form-control" id="seename" readonly style="background: none;">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" style="padding:20px 0;">
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">手机号码</span>
+                        <input type="text" id="seemobile" class="form-control" readonly style="background: none;">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" style="padding:23px 0;">
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">联系人&nbsp;&nbsp;&nbsp;</span>
+                        <input type="text" id="seecontract" class="form-control" readonly style="background: none;">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" style="padding:23px 0;">
+                <div class="col-lg-6">
+                    <div class="input-group">
+                        <span class="input-group-addon">地址&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        <input type="text" readonly id="seeaddress" class="form-control" style="background:none;">
+                    </div>
+                </div>
+            </div>
+            <h6>缴费方式</h6>
+            <div class="clearfix seepaymethod">
+                <div class="seebeforehand">
+                    <i></i><span id="see1">预交费用户</span>
+                </div>
+                <div class="seemonthlyKnot">
+                    <i></i><span id="see2">月结算用户</span>
+                </div>
+            </div>
+            <div class="clearfix" id="seegiveanAlarm" style="padding:20px 0 10px 0">
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">余额告警</span>
+                        <input type="text" readonly id="seeamountLimit" class="form-control" autocomplete="off" style="background: none;">
+                    </div>
+                </div>
+                <br>
+                <div style="width:200px;height: 30px;line-height:30px;text-align:center;color: #fb3000;font-size: 12px;">余额低于设置金额会自动告警</div>
+            </div>
+            <div class="clearfix" style="padding:20px 0;">
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">计费开始时间</span>
+                        <input id="seestartTime" class="form-control" readonly type="text" readonly style="background: none;">
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">计费结束时间</span>
+                        <input id="seeendTime" readonly class="form-control" type="text" readonly style="background: none;">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" id="seeunitPrice" style="padding:20px 0;">
+                <div class="col-lg-4">
+                    <div class="input-group">
+                        <span class="input-group-addon">单价</span>
+                        <input type="text" readonly class="form-control" id="seebasePrice" autocomplete="off" style="background: none;">
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix" id="seetimeSharing" style="padding:20px 0;">
+                <div class="col-lg-3">
+                    <div class="input-group">
+                        <span class="input-group-addon">尖单价</span>
+                        <input type="text" readonly id="seeapexPrice" class="form-control" autocomplete="off" style="background: none;">
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="input-group">
+                        <span class="input-group-addon">峰单价</span>
+                        <input type="text" readonly id="seepeakPrice" class="form-control" autocomplete="off" style="background: none;">
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="input-group">
+                        <span class="input-group-addon">平单价</span>
+                        <input type="text" readonly id="seeflatPrice" class="form-control" autocomplete="off" style="background: none;">
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="input-group">
+                        <span class="input-group-addon">谷单价</span>
+                        <input type="text" readonly id="seevalleyPrice" class="form-control" autocomplete="off" style="background: none;">
+                    </div>
+                </div>
+            </div>
+            <h6>绑定设备及电费配比</h6>
+            <div class="seehtmllist">
+
+            </div>
+            <div class="subBtn">
+                <el-button id="back">返回</el-button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="${rc.contextPath}/js/cp/TenantManagement.js?_${date.systemTime}"></script>
+</body>
+</html>

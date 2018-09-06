@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>告警</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css?_${date.systemTime}">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <!--<div class="smart-all-title">-->
+            <!--<img src="${rc.contextPath}/statics/img/ad-test-3.png" class="smart-sur-avatar" />-->
+            <!--<span class="smart-sur-name">勇勇有限公司</span>-->
+        <!--</div>-->
+        <div class="chart-title" style="padding-left: 30px;line-height: 48px;">
+            <img class="chart-title-icon" src="${rc.contextPath}/statics/img/smartAlarm.png" style="max-width: 40px;" />
+            <span class="chart-title-span">告警</span>
+        </div>
+        <div class="smart-alarm-all-list">
+            <div class="smart-alarm-all-in">
+                <table>
+                    <tbody>
+                        <tr>
+                            <th>告警客户</th>
+                            <th>告警类型</th>
+                            <th>告警对象</th>
+                            <th>发生时间</th>
+                            <th>恢复时间</th>
+                            <th>持续时长</th>
+                            <th>告警描述</th>
+                            <th>处理状态</th>
+                        </tr>
+                        <tr v-for="item in alarmList">
+                            <td>{{ item.companyName }}</td>
+                            <td>{{ item.type }}</td>
+                            <td>{{ item.object }}</td>
+                            <td>{{ item.occurTime }}</td>
+                            <td>{{ item.revertTime }}</td>
+                            <td>{{ item.continueTime }}</td>
+                            <td>{{ item.description }}</td>
+                            <td><span v-if="item.dealStatus == 0">未处理</span><span v-else>已处理</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="smart-alarm-all-page">
+                <page></page>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/st/smart-alarm-all.js?_${date.systemTime}"></script>
+</body>
+
+</html>

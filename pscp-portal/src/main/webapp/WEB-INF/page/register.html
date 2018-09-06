@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>注册 - 电力服务云平台</title>
+    #parse("sys/header.html")
+    <link rel="icon" href="statics/img/favicon.ico">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bulma/0.3.2/css/bulma.min.css">
+    <link rel="stylesheet" href="statics/css/font-awesome.min.css">
+    <link rel="stylesheet" href="statics/css/main.css">
+    <script src="statics/libs/jquery.min.js"></script>
+    <script src="statics/libs/vue.min.js"></script>
+    <script src="statics/plugins/element-ui@2.0.10/js/index.js"></script>
+</head>
+<body>
+<div id="rrapp">
+    <header class="reg-head">
+        <a href="index.html">
+            <img class="reg-logo" src="statics/img/logo.png">
+        </a>
+        <div class="reg-head-btn">
+            <a class="button is-primary" href="login.html">登录</a>
+            <a class="button" href="index.html">首页</a>
+        </div>
+    </header>
+    <div class="reg-container">
+        <ul class="reg-nav">
+            <li class="reg-nav-li active"><span>注册</span></li>
+            <li class="reg-nav-li" :class="{'active':means === false}"><span>提交资料</span></li>
+            <li class="reg-nav-li"><span>审核</span></li>
+            <li class="reg-nav-li"><span>成功</span></li>
+        </ul>
+        <div class="reg-form" v-show="means">
+            <form class="form-horizontal">
+                <div v-show="register.error" class="col-sm-8 alert alert-danger alert-dismissible">
+                    <span><i class="fa fa-exclamation-triangle"></i> {{register.errorMsg}}</span>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" placeholder="请输入您的手机号码" v-model="register.userName">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" placeholder="请输入短信校验码" v-model="register.msgCode">
+                    </div>
+                    <div class="col-sm-5">
+                        <button type="button" class="btn" @click="sendRegisterMsg">获取验证码</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" placeholder="请输入密码" v-model="register.password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <input type="password" class="form-control" placeholder="请再次输入密码"
+                               v-model="register.passwordConfirm">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" :checked="isChecked" @click="changeCheck"> 电力服务用户服务协议
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-7 col-sm-5">
+                        <button type="button" class="button is-primary" :disabled="!isChecked" @click="registerUser">
+                            提交
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="regsub" v-show="!means">
+            <ul class="sub-nav">
+                <li class="sub-nav-li" @click="tabswitch" :class="{'active':isswitch === true}"><span>我是服务商</span></li>
+                <li class="sub-nav-li" @click="tabswitch2" :class="{'active':isswitch === false}"><span>我是客户</span></li>
+            </ul>
+            <div class="sub-content" v-show="isswitch">
+                <h6>基本信息</h6>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>企业名称:</div>
+                        <div class="col-sm-2">
+                            <input v-model="company.memberType" type="hidden"/>
+                            <input v-model="company.name" type="text" class="input form-control" name="企业名称"
+                                   placeholder="请输入企业名称" v-validate="'required|max:32'"/>
+                        </div>
+                        <div class="col-sm-2 control-label longCol"><span style="color: red;">*</span>平台用户名:</div>
+                        <div class="col-sm-2">
+                            <input type="text" v-model="company.userName" class="input form-control" name="平台用户名"
+                                   placeholder="请输入平台用户名" v-validate="'required|max:16'"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label upload-label"><span style="color: red;">*</span>营业执照:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.businessLicenceImgDo.imgUrl">
+                                        <img :src="company.businessLicenceImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('businessLicenceImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn"
+                                        @click="addImg('businessLicenceImgDo')"></button>
+                                <input id="businessLicenceImgDo" type="file" @change="onFileChange"
+                                       style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.businessLicenceImgDo.imgUrl" data-vv-name="营业执照"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 control-label upload-label longCol"><span style="color: red;">*</span>组织机构代码证:
+                        </div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.organizationCodeImgDo.imgUrl">
+                                        <img :src="company.organizationCodeImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('organizationCodeImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn"
+                                        @click="addImg('organizationCodeImgDo')"></button>
+                                <input id="organizationCodeImgDo" type="file" @change="onFileChange"
+                                       style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.organizationCodeImgDo.imgUrl"
+                                       data-vv-name="组织机构代码证"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>营业执照注册号:</div>
+                        <div class="col-sm-2">
+                            <input type="text" v-model="company.businessLicence" class="form-control"
+                                   placeholder="请输入营业执照注册号" data-vv-name="营业执照注册号" v-validate="'required|max:32'"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>联系人</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="company.contacts" placeholder="请输入联系人姓名"
+                                   data-vv-name="联系人" v-validate="'required|max:16'"/>
+                        </div>
+                        <div class="col-sm-1 control-label"><span style="color: red;">*</span>手机号码</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="company.mobile" placeholder="请输入手机号码"
+                                   data-vv-name="手机号码" v-validate="'required|mobile'"/>
+                        </div>
+                        <div class="col-sm-1 control-label"><span style="color: red;">*</span>座机号码</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="company.phone" placeholder="请输入座机号码"
+                                   data-vv-name="座机号码" v-validate="'required|max:16'"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>身份证正面:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.idCardFrontImgDo.imgUrl">
+                                        <img :src="company.idCardFrontImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('idCardFrontImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn"
+                                        @click="addImg('idCardFrontImgDo')"></button>
+                                <input id="idCardFrontImgDo" type="file" @change="onFileChange" style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.idCardFrontImgDo.imgUrl" data-vv-name="身份证正面"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 control-label "><span style="color: red;">*</span>身份证反面:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.idCardBackImgDo.imgUrl">
+                                        <img :src="company.idCardBackImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('idCardBackImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn" @click="addImg('idCardBackImgDo')"></button>
+                                <input id="idCardBackImgDo" type="file" @change="onFileChange"
+                                       style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.idCardBackImgDo.imgUrl" data-vv-name="身份证反面"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 10px 0;text-align: center;">
+                    <a class="btn btn-primary" @click="saveOrUpdate">提交审核</a>
+                </div>
+            </div>
+            <div class="sub-content" v-show="!isswitch">
+                <h6>基本信息</h6>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>企业名称:</div>
+                        <div class="col-sm-2">
+                            <input v-model="company.memberType" type="hidden"/>
+                            <input v-model="company.name" type="text" class="input form-control" name="企业名称"
+                                   placeholder="请输入企业名称" v-validate="'required|max:32'"/>
+                        </div>
+                        <div class="col-sm-2 control-label longCol"><span style="color: red;">*</span>平台用户名:</div>
+                        <div class="col-sm-2">
+                            <input type="text" v-model="company.userName" class="input form-control" name="平台用户名"
+                                   placeholder="请输入平台用户名" v-validate="'required|max:16'"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label upload-label"><span style="color: red;">*</span>营业执照:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.businessLicenceImgDo.imgUrl">
+                                        <img :src="company.businessLicenceImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('businessLicenceImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn"
+                                        @click="addImg('businessLicenceImgDo')"></button>
+                                <input id="businessLicenceImgDo" type="file" @change="onFileChange"
+                                       style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.businessLicenceImgDo.imgUrl" data-vv-name="营业执照"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 control-label upload-label longCol"><span style="color: red;">*</span>组织机构代码证:
+                        </div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.organizationCodeImgDo.imgUrl">
+                                        <img :src="company.organizationCodeImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('organizationCodeImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn"
+                                        @click="addImg('organizationCodeImgDo')"></button>
+                                <input id="organizationCodeImgDo" type="file" @change="onFileChange"
+                                       style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.organizationCodeImgDo.imgUrl"
+                                       data-vv-name="组织机构代码证"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>营业执照注册号:</div>
+                        <div class="col-sm-2">
+                            <input type="text" v-model="company.businessLicence" class="form-control"
+                                   placeholder="请输入营业执照注册号" data-vv-name="营业执照注册号" v-validate="'required|max:32'"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>公司地址:</div>
+                        <div class="col-sm-8" style="padding-left: 15px;">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    {{ province.name }}<span class="caret" v-if="!readonly&&!isAuthSuccess"></span>
+                                </button>
+                                <input type="hidden" v-model="company.provinceId" data-vv-name="省份"
+                                       v-validate="'required'"/>
+                                <ul class="dropdown-menu" v-if="!readonly&&!isAuthSuccess">
+                                    <li v-for=" province in provinces">
+                                        <a @click="getProvince(province.name,province.id)">{{ province.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    {{ city.name }}<span class="caret" v-if="!readonly&&!isAuthSuccess"></span>
+                                </button>
+                                <input type="hidden" v-model="company.cityId" data-vv-name="城市"
+                                       v-validate="'required'"/>
+                                <ul class="dropdown-menu" v-if="!readonly&&!isAuthSuccess">
+                                    <li v-for=" city in citys">
+                                        <a @click="getCity(city.name,city.id)">{{ city.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                        aria-haspopup="true" aria-expanded="false">
+                                    {{ area.name }}<span class="caret" v-if="!readonly&&!isAuthSuccess"></span>
+                                </button>
+                                <input type="hidden" v-model="company.areaId" data-vv-name="地区"
+                                       v-validate="'required'"/>
+                                <ul class="dropdown-menu" v-if="!readonly&&!isAuthSuccess">
+                                    <li v-for=" area in areas">
+                                        <a @click="getArea(area.name,area.id)">{{area.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <input type="text" v-model="company.address" class="input form-control" name="公司地址"
+                                   placeholder="请输入公司地址" v-validate="'required|max:32'"
+                                   style="width: auto;display: inline-block;"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>联系人</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="company.contacts" placeholder="请输入联系人姓名"
+                                   data-vv-name="联系人" v-validate="'required|max:16'"/>
+                        </div>
+                        <div class="col-sm-1 control-label"><span style="color: red;">*</span>手机号码</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="company.mobile" placeholder="请输入手机号码"
+                                   data-vv-name="手机号码" v-validate="'required|mobile'"/>
+                        </div>
+                        <div class="col-sm-1 control-label"><span style="color: red;">*</span>座机号码</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="company.phone" placeholder="请输入座机号码"
+                                   data-vv-name="座机号码" v-validate="'required|max:16'"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 20px 0;">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>身份证正面:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.idCardFrontImgDo.imgUrl">
+                                        <img :src="company.idCardFrontImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('idCardFrontImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn"
+                                        @click="addImg('idCardFrontImgDo')"></button>
+                                <input id="idCardFrontImgDo" type="file" @change="onFileChange" style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.idCardFrontImgDo.imgUrl" data-vv-name="身份证正面"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 control-label "><span style="color: red;">*</span>身份证反面:</div>
+                        <div class="col-sm-2">
+                            <div>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-if="company.idCardBackImgDo.imgUrl">
+                                        <img :src="company.idCardBackImgDo.imgUrl" class="upload-img"
+                                             @click="imgEnlarge"/>
+                                        <a v-show="!readonly&&!isAuthSuccess" class="img-remove-btn"
+                                           @click="delImg('idCardBackImgDo')">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div>
+                                <button type="button" class="upload-btn" @click="addImg('idCardBackImgDo')"></button>
+                                <input id="idCardBackImgDo" type="file" @change="onFileChange"
+                                       style="display: none;"
+                                       accept="image/gif,image/jpeg,image/jpg,image/png"/>
+                                <input type="hidden" v-model="company.idCardBackImgDo.imgUrl" data-vv-name="身份证反面"
+                                       v-validate="'required'"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="clearfix" style="padding: 10px 0;text-align: center;">
+                    <a class="btn btn-primary" @click="saveOrUpdate">提交审核</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="reg-foot">
+        <span>电牛科技版权所有 2004-2017 ICP证： 浙B2-20150087</span>
+    </footer>
+</div>
+<script>
+    Vue.prototype.imgEnlarge = function (e) {
+        var afterSrc = e.target.src;
+        var cont = '';
+        var last = afterSrc.lastIndexOf('_');
+        var imgName = afterSrc.substring(0, last);
+        var imgFormat = afterSrc.substring(last + 1, afterSrc.length).split('.')[1];
+        var size = afterSrc.substring(last + 1, afterSrc.length).split('.')[0];
+        var xSize = size.split('x')[0];
+        var ySize = size.split('x')[1];
+        if (xSize == ySize) {
+            afterSrc = imgName + '.' + imgFormat;
+        }
+        cont = '<div class="enlargeDiv"><img style="max-width: 700px;max-height: 450px;padding:15px;" src="' + afterSrc + '"></div>';
+        layer.open({
+            type: 1,
+            title: false,
+            scrollbar: false,
+            closeBtn: 2,
+            area: ['700px', '450px'],
+            content: cont
+        })
+    }
+    Vue.component('img-upload', {
+        template: imgstr,
+        props: ['id', 'data', 'length'],
+        computed: {
+            uploadAble: function () {
+                if (this.isArray(this.data)) {
+                    return this.data.length < this.length;
+                } else {
+                    return false;
+                }
+            },
+            showImg: function () {
+                if (this.isArray(this.data)) {
+                    return this.data.length > 0;
+                } else {
+                    return false;
+                }
+            }
+        },
+        methods: {
+            addImg: function () {
+                this.$refs.file.click();
+            },
+            onFileChange: function (e) {
+                var files = e.target.files || e.dataTransfer.files;
+                if (!files.length) return;
+                this.createImage(files);
+            },
+            createImage: function (files) {
+                var self = this;
+                if (typeof FileReader === 'undefined') {
+                    alert('您的浏览器不支持图片上传，请升级您的浏览器');
+                    return;
+                }
+                if (files[0].type.indexOf('image') == -1) {
+                    alert('仅支持图片上传');
+                    return;
+                }
+                var size = files[0].size / 1024 / 1024;
+                if (size > 2) {
+                    alert('图片不能超过2MB!')
+                    return;
+                }
+                var leng = files.length;
+                if (leng > 0) {
+                    var reader = new FileReader();
+                    reader.readAsDataURL(files[0]);
+                    reader.onload = function (e) {
+                        self.data.push({
+                            'fid': e.target.result
+                        });
+                    };
+                } else {
+                    return;
+                }
+                this.$refs.file.value = '';
+            },
+            delImg: function (index) {
+                this.data.splice(index, 1);
+                this.$refs.file.value = '';
+            },
+            isArray: function (o) {
+                return Object.prototype.toString.call(o) == '[object Array]';
+            }
+        }
+    });
+    var vm = new Vue({
+        el: '#rrapp',
+        data: {
+            isChecked: true,
+            wait: 60,
+            register: {
+                error: false,
+                errorMsg: '',
+                userName: '',
+                password: '',
+                passwordConfirm: '',
+                msgId: '',
+                msgCode: '',
+            },
+            isswitch: true,
+            means: true,
+            statusInVm: 'notStart',
+            readonly: true,
+            province: {
+                id: 0,
+                name: '请选择省份'
+            },
+            provinces: [],
+            city: {
+                id: 0,
+                name: '请选择城市'
+            },
+            citys: [],
+            area: {
+                id: 0,
+                name: '请选择地区'
+            },
+            areas: [],
+            company: {
+                name: '',
+                userName: '',
+                businessLicence: '',
+                contacts: '',
+                mobile: '',
+                memberType: 1,
+                phone: '',
+                address: '',
+                businessLicenceImgDo: {
+                    status: 0,
+                    imgId: null,
+                    imgUrl: null
+                },
+                organizationCodeImgDo: {
+                    status: 0,
+                    imgId: null,
+                    imgUrl: null
+                },
+                idCardFrontImgDo: {
+                    status: 0,
+                    imgId: null,
+                    imgUrl: null
+                },
+                idCardBackImgDo: {
+                    status: 0,
+                    imgId: null,
+                    imgUrl: null
+                },
+            },
+        },
+        methods: {
+            getProvince: function (name, id) {
+                if (id != 0) {
+                    vm.province.name = name;
+                    vm.province.id = id;
+                    vm.company.provinceId = id;
+                    vm.city.name = '请选择城市';
+                    vm.area.name = '请选择地区';
+                    vm.company.areaId = null;
+                    var self = this;
+                    data = {
+                        'provinceId': id
+                    };
+                    $.ajax({
+                        url: '../basearea/citys',
+                        type: 'post',
+                        data: data,
+                        dataType: 'json',
+                        contentType: "application/x-www-form-urlencoded",
+                        success: function (r) {
+                            if (r.code == 0) {
+                                self.citys = r.citys;
+                            } else {
+
+                            }
+                        }
+                    });
+
+                } else {
+
+                }
+
+            },
+            getCity: function (name, id) {
+                if (id != 0) {
+                    vm.city.name = name;
+                    vm.city.id = id;
+                    vm.company.cityId = id;
+                    vm.area.name = '请选择地区';
+                    vm.company.areaId = null;
+                    var self = this;
+                    $.ajax({
+                        url: '../basearea/areas',
+                        type: 'post',
+                        data: {
+                            'cityId': id
+                        },
+                        dataType: 'json',
+                        contentType: "application/x-www-form-urlencoded",
+                        success: function (r) {
+                            if (r.code == 0) {
+                                self.areas = r.areas;
+                            } else {
+
+                            }
+                        }
+                    });
+                }
+            },
+            getArea: function (name, id) {
+                vm.area.name = name;
+                vm.company.areaId = id;
+            },
+            time: function (e) {
+                var o = e.target;
+                if (vm.wait == 0) {
+                    o.removeAttribute('disabled');
+                    o.innerText = "获取验证码";
+                    vm.wait = 60;
+                } else {
+                    o.setAttribute('disabled', true);
+                    o.innerText = '等待' + vm.wait + "秒后重新获取";
+                    vm.wait--;
+                    setTimeout(function () {
+                        vm.time(e);
+                    }, 1000)
+                }
+            },
+            sendRegisterMsg: function (e) {
+                var getMobile = vm.register.userName;
+                if (!(/^1[3|4|5|7|8]\d{9}$/.test(getMobile))) {
+                    alert('手机号码有误！');
+                } else {
+                    var data = {
+                        mobile: getMobile,
+                        type: 0
+                    };
+                    $.ajax({
+                        type: "Post",
+                        url: "sys/user/getMsgCode",
+                        data: data,
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.success) {
+                                vm.time(e);
+                                vm.register.msgId = result.msg;
+                            } else {
+                                alert(result.msg);
+                            }
+                        }
+                    });
+                }
+            },
+            registerUser: function () {
+                if (vm.register.passwordConfirm != vm.register.password) {
+                    alert('确认密码与密码不一致');
+                    return false;
+                } else {
+                    var data = {
+                        userName: vm.register.userName,
+                        passwd: vm.register.password,
+                        msgId: vm.register.msgId,
+                        msgCode: vm.register.msgCode
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "sys/user/register",
+                        data: data,
+                        dataType: "json",
+                        success: function (result) {
+                            if (result.success) {
+//                                parent.location.href = 'main.html';
+                                vm.means = false
+                            } else {
+                                vm.register.error = true;
+                                vm.register.errorMsg = result.msg;
+                            }
+                        }
+                    })
+                }
+            },
+            changeCheck: function () {
+                this.isChecked = this.isChecked === false;
+            },
+            tabswitch() {
+                this.isswitch = true
+                this.company.memberType = 1
+            },
+            tabswitch2() {
+                this.isswitch = false
+                this.company.memberType = 2
+            },
+            Submissionofaudit() {
+                var data = this.company
+                $.ajax({
+                    url: 'cp/facilitator/save',
+                    type: 'POST',
+                    data: data,
+                    dataType: "json",
+                    success: function (res) {
+                        console.log(res)
+                    }
+                })
+            },
+            addImg: function (imgId) {
+                $('#' + imgId).trigger('click');
+                return false;
+            },
+            delImg: function () {
+                var imgId = arguments[0];
+                var index = arguments[1];
+                var length = imgId + 'Length';
+                if (index != null) {
+                    if (vm.isBase64(vm.company[imgId][index].imgUrl)) {
+                        vm.company[imgId].splice(index, 1);
+                    } else {
+                        vm.company[imgId][index].status = -1;
+                    }
+                    vm.getListLength(imgId);
+                } else {
+                    vm.company[imgId].status = -1;
+                    vm.company[imgId].imgUrl = '';
+                }
+                $('#' + imgId).val('');
+            },
+            onFileChange: function (e) {
+                var id = e.target.id;
+                var files = e.target.files || e.dataTransfer.files;
+                if (!files.length) return;
+                this.createImage(id, files);
+            },
+            createImage: function (id, files) {
+                if (typeof FileReader === 'undefined') {
+                    alert('您的浏览器不支持图片上传，请升级您的浏览器');
+                    return false;
+                }
+                var size = files[0].size / 1024 / 1024;
+                if (size > 2) {
+                    alert('图片不能超过2MB!')
+                    return;
+                }
+                var leng = files.length;
+                var img = vm.company[id];
+                if (this.isArray(img)) {
+                    for (var i = 0; i < leng; i++) {
+                        var reader = new FileReader();
+                        reader.readAsDataURL(files[i]);
+                        reader.onload = function (e) {
+                            vm.company[id].push({
+                                status: 1,
+                                imgId: '',
+                                imgUrl: e.target.result
+                            });
+                            vm.getListLength(id);
+                        };
+                    }
+                } else {
+                    if (leng > 0) {
+                        var reader = new FileReader();
+                        reader.readAsDataURL(files[0]);
+                        reader.onload = function (e) {
+                            vm.company[id].status = 1;
+                            vm.company[id].imgUrl = e.target.result;
+                        };
+                    }
+                }
+            },
+            isArray: function (o) {
+                return Object.prototype.toString.call(o) == '[object Array]';
+            },
+            isBase64: function (o) {
+                return o != null && (o.substring(0, 4) === 'data');
+            },
+            getListLength: function (imgId) {
+                var com = this.company;
+                var list = this.company[imgId];
+                var length = imgId + 'Length';
+                this[length] = 0;
+                for (i in list) {
+                    if (list[i].status != -1) {
+                        this[length]++;
+                    }
+                }
+                if (this[length] == 0) {
+                    this[length] = null;
+                }
+            },
+            imgEnlargeTem: function (e) {
+                var afterSrc = e.target.src;
+                var cont = '';
+                var last = afterSrc.lastIndexOf('_');
+                var imgName = afterSrc.substring(0, last);
+                var imgFormat = afterSrc.substring(last + 1, afterSrc.length).split('.')[1];
+                var size = afterSrc.substring(last + 1, afterSrc.length).split('.')[0];
+                var xSize = size.split('x')[0];
+                var ySize = size.split('x')[1];
+                if (xSize == ySize) {
+                    afterSrc = imgName + '.' + imgFormat;
+                }
+                cont = '<div class="enlargeDivTem"><img style="max-width: 850px;max-height: 1000px;padding:15px;" src="' + afterSrc + '"></div>';
+                layer.open({
+                    type: 1,
+                    title: false,
+                    closeBtn: 1,
+                    area: ['850px', '600px'],
+                    scrollbar: false,
+                    content: cont
+                })
+            },
+            saveOrUpdate: function () {
+                var data = this.company
+                console.log(data)
+                $.ajax({
+                    url: '../cp/facilitator/save',
+                    type: 'post',
+                    data: data,
+                    success: function (res) {
+                        console.log(res)
+                    }
+                })
+            },
+            reload: function () {
+                var self = this;
+                $.ajax({
+                    url: '../cp/facilitator/info',
+                    type: 'post',
+                    dataType: 'json',
+                    success: function (r) {
+                        if (r.code == 0) {
+                            self.status = r.company.status;
+                            if (self.status == 2) {
+                                self.isAuthSuccess = true;
+                            }
+                            self.changeInfoBtn = '修改信息';
+                            if (self.status == 0 || self.status == null) {
+                                self.readonly = false;
+                                self.notAuth = true;
+                                self.changeInfoBtn = '新增信息';
+                            }
+                            self.company = r.company;
+                            if (r.company != null) {
+                                self.memberType = r.company.memberType;
+                            }
+                            if (r.company.provinceName) {
+                                self.province.name = r.company.provinceName;
+                                $.ajax({
+                                    url: '../basearea/citys',
+                                    type: 'post',
+                                    data: {
+                                        'provinceId': r.company.provinceId
+                                    },
+                                    dataType: 'json',
+                                    contentType: "application/x-www-form-urlencoded",
+                                    success: function (r) {
+                                        if (r.code == 0) {
+                                            self.citys = r.citys;
+                                        } else {
+
+                                        }
+                                    }
+                                });
+                            }
+                            if (r.company.cityName) {
+                                self.city.name = r.company.cityName;
+                                $.ajax({
+                                    url: '../basearea/areas',
+                                    type: 'post',
+                                    data: {
+                                        'cityId': r.company.cityId
+                                    },
+                                    dataType: 'json',
+                                    contentType: "application/x-www-form-urlencoded",
+                                    success: function (r) {
+                                        if (r.code == 0) {
+                                            self.areas = r.areas;
+                                        } else {
+
+                                        }
+                                    }
+                                });
+                            }
+                            if (r.company.areaName) {
+                                self.area.name = r.company.areaName;
+                            }
+                            var imgId = 'enterpriseQualificationImgList';
+                            self.getListLength(imgId);
+                        } else {
+                            alert(r.msg);
+                        }
+                    }
+                });
+            },
+        },
+        created: function () {
+            if (localStorage.getItem('fromWallet')) {
+                localStorage.removeItem('fromWallet');
+                window.location.href = '../companybankcard/companybankcard.html';
+            }
+//            this.reload();
+            var self = this;
+            $.ajax({
+                url: '../basearea/provinces',
+                type: 'post',
+                dataType: 'json',
+                success: function (r) {
+                    if (r.code == 0) {
+                        self.provinces = r.provinces;
+                    }
+                }
+            });
+        },
+    });
+</script>
+</body>
+</html>

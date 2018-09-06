@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>峰谷利用</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css?_${date.systemTime}">
+    <style>
+        #peakvalleyLine,#childPeakvalleyLine {
+            width: 100%;
+            height: 400px;
+            padding: 12px 15px;
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <div class="smart-all-title">
+        <img src="${rc.contextPath}/statics/img/ad-test-3.png" class="smart-sur-avata"/>
+        <span class="smart-sur-name">{{ companyName }}</span>
+    </div>
+    <div class="smart-peakvalley-content row" style="padding:0;border-top: 0;">
+        <div class="chart-title" style="padding-left: 30px;line-height: 50px;position: relative;">
+            <img class="chart-title-icon" src="${rc.contextPath}/statics/img/threePoints.png" style="max-width: 40px;"/>
+            <span class="chart-title-span" v-if="switchValue">今日用电总费用{{ chargeOfToday }}元</span>
+            <span class="chart-title-span" v-else>今日用电总量{{ quantityOfToday }}kWh</span>
+            <div style="position: absolute;right: 15px;top: 0;">
+                <peak-toggle></peak-toggle>
+            </div>
+        </div>
+        <div class="col-sm-12" style="padding:0;position: relative;">
+            <div id="peakvalleyLine"></div>
+            <div class="smart-peak-legend">
+                <ul>
+                    <li>
+                        <i class="smart-peak-icon" style="background-color: #0494e7"></i>
+                        <span class="smart-peak-tip">平时段</span>
+                    </li>
+                    <li>
+                        <i class="smart-peak-icon" style="background-color: #1390a7"></i>
+                        <span class="smart-peak-tip">谷时段</span>
+                    </li>
+                    <li>
+                        <i class="smart-peak-icon" style="background-color: #f38226"></i>
+                        <span class="smart-peak-tip">尖时段</span>
+                    </li>
+                    <li>
+                        <i class="smart-peak-icon" style="background-color: #b62929"></i>
+                        <span class="smart-peak-tip">峰时段</span>
+                    </li>
+
+                    <li>
+                        <i class="smart-peak-line" style="background-color: #da4d3e"></i>
+                        <span class="smart-peak-tip">电费单价</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-title" style="padding-left: 30px;margin-top: 15px;line-height: 40px;margin: 15px 0;">
+        <img class="chart-title-icon" src="${rc.contextPath}/statics/img/balanceNo.png" style="max-width: 40px;"/>
+        <span class="chart-title-span">监测点用电量</span>&nbsp;&nbsp;<span class="chart-title-span">时段: {{ period }}</span>
+        <div class="smart-peakvalley-list">
+            <table>
+                <tbody>
+                <tr v-for="item in peakvalleyList" style="border-bottom: 1px solid #ddd;cursor: pointer;" @click="showChildChart(item.lineId,item.name)">
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.quantity }} KW</td>
+                    <td>{{ item.charge }} 元</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="smart-peakvalley-page">
+            <page></page>
+        </div>
+    </div>
+
+    <div id="childPeakChart" v-show="false">
+        <div class="smart-peakvalley-content row" style="padding:0;border-top: 0;">
+            <div class="chart-title" style="padding-left: 30px;line-height: 50px;position: relative;">
+                <img class="chart-title-icon" src="${rc.contextPath}/statics/img/threePoints.png" style="max-width: 40px;"/>
+                <span class="chart-title-span" v-if="childSwitchValue">今日用电总费用({{ childName }}){{ childChargeOfToday }}元</span>
+                <span class="chart-title-span" v-else>今日用电总量({{ childName }}){{ childQuantityOfToday }}kWh</span>
+                <div style="position: absolute;right: 25px;top: 0;">
+                    <child-peak-toggle ref="childPeak"></child-peak-toggle>
+                </div>
+            </div>
+            <div class="col-sm-12" style="padding:0;position: relative;">
+                <div id="childPeakvalleyLine"></div>
+                <div class="smart-peak-legend">
+                    <ul>
+                        <li>
+                            <i class="smart-peak-icon" style="background-color: #0494e7"></i>
+                            <span class="smart-peak-tip">平时段</span>
+                        </li>
+                        <li>
+                            <i class="smart-peak-icon" style="background-color: #1390a7"></i>
+                            <span class="smart-peak-tip">谷时段</span>
+                        </li>
+                        <li>
+                            <i class="smart-peak-icon" style="background-color: #f38226"></i>
+                            <span class="smart-peak-tip">尖时段</span>
+                        </li>
+                        <li>
+                            <i class="smart-peak-icon" style="background-color: #b62929"></i>
+                            <span class="smart-peak-tip">峰时段</span>
+                        </li>
+
+                        <li>
+                            <i class="smart-peak-line" style="background-color: #da4d3e"></i>
+                            <span class="smart-peak-tip">电费单价</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.bootcss.com/babel-standalone/7.0.0-beta.3/babel.min.js"></script>
+<script src="${rc.contextPath}/statics/libs/echarts.js"></script>
+<script src="${rc.contextPath}/js/st/smart-peakvalley.js?_${date.systemTime}"></script>
+</body>
+</html>

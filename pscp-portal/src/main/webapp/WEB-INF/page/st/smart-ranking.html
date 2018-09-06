@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>用能排行</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css?_${date.systemTime}">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="smart-all-title">
+            <img src="${rc.contextPath}/statics/img/ad-test-3.png" class="smart-sur-avatar" />
+            <span class="smart-sur-name">{{ companyName }}</span>
+        </div>
+        <div class="smart-ranking-content">
+            <div class="chart-title" style="padding-left: 35px;padding-top: 12px;">
+                <img class="chart-title-icon" src="${rc.contextPath}/statics/img/ranking.png" style="max-width: 40px;" />
+                <span class="chart-title-span">用能排行</span>
+                 <date-pick-month></date-pick-month>
+            </div>
+            <div class="col-sm-12" style="text-align: center;">
+                <div class="smart-ranking-pa" style="">
+                    <div class="smart-ranking-block" style="margin-left: 0;">
+                        <div class="smart-ranking-num-bg" style="background: url('${rc.contextPath}/statics/img/smart-ranking-second.png');background-size: 100% 100%;"></div>
+                        <span class="smart-ranking-num-title">{{ rank2.name }}</span>
+                        <br />
+                        <br />
+                        <span class="smart-ranking-num-cont">{{ rank2.quantity }}<span v-show="rank2.quantity">kW</span></span>
+                    </div>
+                    <div class="smart-ranking-block" style="margin-top: -50px;">
+                        <div class="smart-ranking-num-bg" style="background: url('${rc.contextPath}/statics/img/smart-ranking-first.png');background-size: 100% 100%;"></div>
+                        <span class="smart-ranking-num-title">{{ rank1.name }}</span>
+                        <br />
+                        <br />
+                        <span class="smart-ranking-num-cont">{{ rank1.quantity }}<span v-show="rank1.quantity">kW</span></span>
+                    </div>
+                    <div class="smart-ranking-block">
+                        <div class="smart-ranking-num-bg" style="background: url('${rc.contextPath}/statics/img/smart-ranking-third.png');background-size: 100% 100%;"></div>
+                        <span class="smart-ranking-num-title">{{ rank3.name }}</span>
+                        <br />
+                        <br />
+                        <span class="smart-ranking-num-cont">{{ rank3.quantity }}<span v-show="rank3.quantity">kW</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-title" style="padding-left: 35px;padding-top: 12px;">
+                <img class="chart-title-icon" src="${rc.contextPath}/statics/img/ranking.png" style="max-width: 40px;" />
+                <span class="chart-title-span">建筑月用电排行</span>
+                <div class="smart-ranking-list">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td>排名</td>
+                                <td>建筑</td>
+                                <td>用电量(kWh)</td>
+                                <td>上月用电量(kWh)</td>
+                            </tr>
+                            <tr v-for="item in rankList">
+                                <td>{{ item.rank }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.quantityOfThisMonth }}</td>
+                                <td>{{ item.quantityOfLastMonth }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <page></page>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/st/smart-ranking.js?_${date.systemTime}"></script>
+</body>
+
+</html>

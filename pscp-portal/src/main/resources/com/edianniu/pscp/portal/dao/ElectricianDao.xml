@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.ElectricianDao">
+	<sql id="pscp_electrician_member_columns">
+		e.id,
+		e.member_id as memberId,
+		e.user_name as userName,
+		e.id_card_no as idCardNo,
+		e.id_card_front_img as idCardFrontImg,
+		e.id_card_back_img as idCardBackImg,
+		e.company_id as companyId,
+		e.remark,
+		e.status as authStatus,
+		e.remark,
+		e.work_status as workStatus,
+		e.work_time as workTime,
+		e.create_time as createTime,
+		e.create_user as createUser,
+		e.modified_time as modifiedTime,
+		e.modified_user as modifiedUser,
+		e.deleted,
+		m.id as userId,
+		m.login_name as loginName,
+		m.mobile,
+		m.passwd,
+		m.tx_img as txImg,
+		m.nick_name as nickName,
+		m.sex,
+		m.age,
+		m.remark,
+		m.status,
+		m.is_customer as isCustomer,
+		m.is_facilitator as isFacilitator,
+		m.is_electrician as isElectrician,
+		m.is_admin as isAdmin
+
+	</sql>
+	<sql id="pscp_electrician_columns">
+		e.id,
+		e.member_id as memberId,
+		e.user_name as userName,
+		e.id_card_no as idCardNo,
+		e.id_card_front_img as idCardFrontImg,
+		e.id_card_back_img as idCardBackImg,
+		e.company_id as companyId,
+		e.remark,
+		e.status as authStatus,
+		e.remark,
+		e.work_status as workStatus,
+		e.work_time as workTime,
+        e.create_time as createTime,
+		e.create_user as createUser,
+		e.modified_time as modifiedTime,
+		e.modified_user as modifiedUser,
+		e.deleted
+	</sql>
+	<select id="queryObject" resultType="com.edianniu.pscp.portal.entity.ElectricianEntity">
+		select <include refid="pscp_electrician_member_columns"/> from pscp_electrician e,pscp_member m
+		where e.member_id=m.id and
+		e.deleted=0 and m.deleted=0 and  e.id = #{value}
+	</select>
+	<select id="getById" resultType="com.edianniu.pscp.portal.entity.ElectricianEntity">
+		select 
+		
+		<include refid="pscp_electrician_columns"/> 
+		
+		from
+		pscp_electrician e where e.id = #{value} and e.deleted=0
+	</select>
+	<select id="getByUid" resultType="com.edianniu.pscp.portal.entity.ElectricianEntity">
+		select 
+		
+		<include refid="pscp_electrician_columns"/> 
+		
+		from
+		pscp_electrician e where e.member_id = #{value} and e.deleted=0
+	</select>
+	<select id="queryList" resultType="com.edianniu.pscp.portal.entity.ElectricianEntity">
+		select 
+		<include refid="pscp_electrician_member_columns"/> 
+		from pscp_electrician e, pscp_member m
+		where e.member_id=m.id and m.is_electrician=1 and 
+		e.deleted=0 and m.deleted=0
+		<if test="companyId != null">
+			and e.company_id=#{companyId}
+		</if>
+		<if test="userName != null and userName.trim() != ''">
+			and e.user_name like concat('%',#{userName},'%') 
+		</if>
+		<if test="loginName != null and loginName.trim() != ''">
+			and m.login_name like concat('%',#{loginName},'%') 
+		</if>
+		<if test="mobile != null and mobile.trim() != ''">
+			and m.mobile like concat('%',#{mobile},'%') 
+		</if>
+		order by e.create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from
+		pscp_electrician e,pscp_member m
+		where e.member_id=m.id and m.is_electrician=1 and 
+		e.deleted=0 and m.deleted=0
+		<if test="companyId != null">
+			and e.company_id=#{companyId}
+		</if>
+		<if test="userName != null and userName.trim() != ''">
+			and e.user_name like concat('%',#{userName},'%') 
+		</if>
+		<if test="loginName != null and loginName.trim() != ''">
+			and m.login_name like concat('%',#{loginName},'%') 
+		</if>
+		<if test="mobile != null and mobile.trim() != ''">
+			and m.mobile like concat('%',#{mobile},'%') 
+		</if>
+	</select>
+
+	<insert id="save" parameterType="com.edianniu.pscp.portal.entity.ElectricianEntity">
+		insert into pscp_electrician
+		(
+		id,
+		member_id,
+		user_name,
+		id_card_no,
+		id_card_front_img,
+		id_card_back_img,
+		status,
+		remark,
+		work_status,
+		work_time,
+		company_id,
+		create_time,
+		create_user,
+		modified_time,
+		modified_user,
+		deleted
+		)
+		values
+		(
+		nextval('seq_pscp_electrician'),
+		#{memberId},
+		#{userName},
+		#{idCardNo},
+		#{idCardFrontImg},
+		#{idCardBackImg},
+		#{authStatus},
+		#{remark},
+		#{workStatus},
+		#{workTime},
+		#{companyId},
+		#{createTime},
+		#{createUser},
+		#{modifiedTime},
+		#{modifiedUser},
+		#{deleted}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.edianniu.pscp.portal.entity.ElectricianEntity">
+		update pscp_electrician
+		<set>
+		    id_card_front_img = #{idCardFrontImg},
+			id_card_back_img  = #{idCardBackImg},
+			<if test="userName != null">user_name = #{userName}, </if>
+			<if test="idCardNo != null">id_card_no = #{idCardNo}, </if>
+			<if test="authStatus != null">status = #{authStatus}, </if>
+			<if test="remark != null">remark = #{remark}, </if>
+			<if test="workStatus != null">work_status = #{workStatus}, </if>
+			<if test="workTime != null">work_time = #{workTime}, </if>
+			<if test="companyId != null">company_id = #{companyId}, </if>
+			<if test="createTime != null">create_time = #{createTime}, </if>
+			<if test="createUser != null">create_user = #{createUser}, </if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	<delete id="delete">
+		update pscp_electrician set
+		deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id
+		= #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_electrician set
+		deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id
+		in
+		<foreach item="id" collection="array" open="(" separator=","
+			close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

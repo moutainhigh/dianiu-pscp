@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>用电健康</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="smart-all-title">
+            <img src="${rc.contextPath}/statics/img/ad-test-3.png" class="smart-sur-avatar" />
+            <span class="smart-sur-name">{{ companyName }}</span>
+        </div>
+        <div class="smart-health-content row" style="padding: 0;">
+            <div class="chart-title" style="line-height: 62px;padding-left: 30px;">
+                <img class="chart-title-icon" src="${rc.contextPath}/statics/img/ranking.png" style="max-width: 40px;"/>
+                <span class="chart-title-span">用压健康</span>
+            </div>
+            <div>
+                <div class="col-sm-2">
+                    <div class="smart-health-div">
+                        <div class="threeLoadBorder first">
+                            <div id="firstLoad"></div>
+                        </div>
+                        <div class="threeLoadBorder second">
+                            <div id="secondLoad"></div>
+                        </div>
+                        <div class="threeLoadBorder third">
+                            <div id="thirdLoad"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-10">
+                    <div class="smart-health-div">
+                        <div id="voltageLine"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- <div class="chart-title" style="line-height:44px;padding-left: 30px;margin-top: 15px;">
+            <img class="chart-title-icon" src="${rc.contextPath}/statics/img/monitoringPoints.png" style="max-width: 40px;"/>
+            <span class="chart-title-span">监测点</span>
+        </div> -->
+    </div>
+    <script src="${rc.contextPath}/statics/libs/echarts.js"></script>
+    <script src="${rc.contextPath}/js/st/smart-health.js?_${date.systemTime}"></script>
+</body>
+
+</html>

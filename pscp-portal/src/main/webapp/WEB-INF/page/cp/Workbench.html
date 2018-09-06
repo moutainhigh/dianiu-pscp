@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>工作台</title>
+    #parse("sys/header.html")
+</head>
+
+<body>
+<div id="rrapp" v-cloak>
+    <div class="panel-heading">工作台>>>配电房>>>设备清单</div>
+    <div class="clearfix" style="padding: 10px 0 10px 0px;">
+        <div class="form-group">
+            <div class="col-sm-3">
+                <v-select multiple :options="page" label="name" placeholder="全部配电房"></v-select>
+                <input type="hidden" data-vv-name="配电房" v-validate="'required'">
+            </div>
+            <div class="col-sm-3">
+                <input type="button" class="btn btn-primary" value="新建配电房"/> &nbsp;&nbsp;
+            </div>
+        </div>
+    </div>
+    <div class="clearfix" style="padding: 10px 0 10px 15px;">
+        <tabs>
+            <tab name="设备清单" status="workbench_equipment.html" selected="true"></tab>
+            <tab name="操作记录" status="workbench_operation.html"></tab>
+            <tab name="巡视管理" status="workbench_Patrol.html"></tab>
+            <tab name="修试记录" status="workbench_Revision.html"></tab>
+            <tab name="缺陷记录" status="workbench_defect.html"></tab>
+            <tab name="安全用具" status="workbench_security.html"></tab>
+            <tab name="消防设备" status="workbench_Firecontrol.html"></tab>
+            <tab name="值班日志" status="workbench_Beonduty.html"></tab>
+        </tabs>
+    </div>
+    <section class="content">
+        <iframe :src="status" ref="ifame" class="imframe" scrolling="yes" frameborder="0" style="width: 100%;"></iframe>
+    </section>
+</div>
+<script src="${rc.contextPath}/js/cp/Workbench.js?_${date.systemTime}"></script>
+</body>
+
+</html>
+
+
+<!--<div class="form-group">
+    <label class="col-sm-2 control-label">全部配电房<span style="color: red;">*</span></label>
+    <div class="col-sm-5">
+        <v-select multiple :options="page.address" label="name" v-model="selectedRooms" placeholder="请选择配电房" :class="{'is-danger': errors.has('form-1.配电房')}"></v-select>
+        <input type="hidden" v-model="selectedRooms" data-vv-name="配电房" v-validate="'required'">
+    </div>
+    <div class="col-sm-3">
+        <input type="text" class="form-control" v-model="detail.roomsString" disabled="disabled">
+    </div>
+</div>-->

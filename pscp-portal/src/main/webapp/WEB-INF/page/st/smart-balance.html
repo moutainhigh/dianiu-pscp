@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>电流平衡</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css">
+    <style>
+        .three-phase-graphics-content-in{overflow: auto;max-height: 198px;margin: 6px 0}
+        .balance-child-list{ margin: 0;padding: 0;}
+        .balance-child-list > li {padding: 6px 20px;font-size: 16px;cursor: pointer; margin: 6px 0;color:#333;border-bottom: 1px solid #ddd;}
+        .child-balance-title{ color: #777;font-size: 16px;}
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="smart-all-title">
+            <img src="${rc.contextPath}/statics/img/ad-test-3.png" class="smart-sur-avatar" />
+            <span class="smart-sur-name">{{ companyName }}</span>
+        </div>
+        <div class="smart-balance-content">
+            <div class="three-phase-chart row" style="padding:0;">
+                <div class="chart-title" style="padding-left: 30px;line-height: 50px;">
+                    <img clasxs="chart-title-icon" src="${rc.contextPath}/statics/img/threePoints.png" style="max-width: 40px;" />
+                    <ele-select></ele-select>
+                </div>
+                <div class="col-sm-4">
+                    <div id="threePhaseRadar"></div>
+                </div>
+                <div class="col-sm-8">
+                    <div id="balanceLine" @click="toggleLine"></div>
+                </div>
+            </div>
+            <div class="chart-title" style="padding-left: 30px;margin-top: 15px;line-height: 40px;margin-bottom: 15px;">
+                <img class="chart-title-icon" src="${rc.contextPath}/statics/img/balanceNo.png" style="max-width: 40px;" />
+                <span class="chart-title-span">用电不平衡检测点</span>
+            </div>
+            <div class="row three-phase-graphics">
+                <div class="col-sm-4">
+                    <div class="three-phase-graphics-in a">
+                        <div class="three-phase-graphics-top a">
+                            A相失衡
+                        </div>
+                        <div class="three-phase-graphics-content">
+                            <div class="three-phase-graphics-content-in">
+                                <ul class="balance-child-list">
+                                    <li v-for="item in aUnbalancePointList" @click="showChildBalance(item.lineId,item.meterName)">{{ item.meterName }}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="three-phase-graphics-in b">
+                        <div class="three-phase-graphics-top b">
+                            B相失衡
+                        </div>
+                            <div class="three-phase-graphics-content">
+                                <div class="three-phase-graphics-content-in">
+                                    <ul class="balance-child-list">
+                                        <li v-for="item in bUnbalancePointList" @click="showChildBalance(item.lineId,item.meterName)">{{ item.meterName }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="three-phase-graphics-in c">
+                        <div class="three-phase-graphics-top c">
+                            C相失衡
+                        </div>
+                        <div class="three-phase-graphics-content">
+                            <div class="three-phase-graphics-content-in">
+                                <ul class="balance-child-list">
+                                    <li v-for="item in cUnbalancePointList" @click="showChildBalance(item.lineId,item.meterName)">{{ item.meterName }}</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="childBalanceChart" v-show="false">
+            <div class="three-phase-chart row" style="padding:0;">
+                <div class="chart-title" style="padding-left: 30px;line-height: 50px;">
+                    <img clasxs="chart-title-icon" src="${rc.contextPath}/statics/img/threePoints.png" style="max-width: 40px;" />
+                    <span class="child-balance-title">{{ meterName }}</span>
+                </div>
+                <div>
+                    <div class="col-sm-4">
+                        <div id="childThreePhaseRadar"></div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div id="childBalanceLine" @click="childToggleLine"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="${rc.contextPath}/statics/libs/echarts.js"></script>
+    <script src="${rc.contextPath}/js/st/smart-balance.js?_${date.systemTime}"></script>
+</body>
+
+</html>

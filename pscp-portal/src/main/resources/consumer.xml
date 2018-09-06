@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+    <dubbo:application name="pscp-portal"/>
+    <dubbo:registry address="${dubbo.registry.addresss}"/>
+    <!-- 文件服务 -->
+    <dubbo:reference id="fileUploadService" interface="com.edianniu.pscp.mis.service.dubbo.FileUploadService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 用户服务-->
+    <dubbo:reference id="userInfoService" interface="com.edianniu.pscp.mis.service.dubbo.UserInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 用户邀请服务-->
+    <dubbo:reference id="userInvitationInfoService" interface="com.edianniu.pscp.mis.service.dubbo.UserInvitationInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 钱包服务-->
+    <dubbo:reference id="walletInfoService" interface="com.edianniu.pscp.mis.service.dubbo.WalletInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 支付服务-->
+    <dubbo:reference id="payInfoService" interface="com.edianniu.pscp.mis.service.dubbo.PayInfoService" timeout="10000"
+                     retries="1" version="1.0" check="false"/>
+    <!-- 消息服务-->
+    <dubbo:reference id="messageInfoService" interface="com.edianniu.pscp.message.service.dubbo.MessageInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 区域选择服务-->
+    <dubbo:reference id="areaInfoService" interface="com.edianniu.pscp.mis.service.dubbo.AreaInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 公司服务-->
+    <dubbo:reference id="companyInfoService" interface="com.edianniu.pscp.mis.service.dubbo.CompanyInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+    <!-- 用户消息服务 -->
+    <dubbo:reference interface="com.edianniu.pscp.mis.service.dubbo.MemberMessageInfoService"
+                     id="memberMessageInfoService" timeout="10000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.mis.service.dubbo.WorkOrderDefectRecordInfoService"
+                     id="workOrderDefectRecordInfoService" timeout="10000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.mis.service.dubbo.WorkOrderReportInfoService"
+                     id="workOrderReportInfoService" timeout="10000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.mis.service.dubbo.MemberInvoiceInfoService"
+                     id="memberInvoiceInfoService" timeout="10000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.mis.service.dubbo.CompanyCustomerInfoService"
+                     id="companyCustomerInfoService" timeout="10000" retries="1" version="1.0" check="false"/>
+	
+    <!-- renter-mis服务dubbo接口 -->
+    <dubbo:reference interface="com.edianniu.pscp.renter.mis.service.dubbo.RenterInfoService"
+                     id="renterInfoService" timeout="10000" retries="1" version="1.0" check="false"/>
+
+    <!-- sps服务dubbo接口 -->
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.DataDictionaryDetailsInfoService"
+                     id="dataDictionaryDetailsInfoService" timeout="10000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.ElectricianResumeInfoService"
+                     id="electricianResumeInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.ElectricianWorkLogInfoService"
+                     id="electricianWorkLogInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.ElectricianWorkOrderInfoService"
+                     id="electricianWorkOrderInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.EngineeringProjectInfoService"
+                     id="engineeringProjectInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.PaymentInfoService"
+                     id="paymentInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.SocialWorkOrderInfoService"
+                     id="socialWorkOrderInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.SpsCertificateInfoService"
+                     id="certificateInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.SpsCompanyCustomerInfoService"
+                     id="spsCompanyCustomerInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.SpsElectricianCertificateInfoService"
+                     id="electricianCertificateInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.SpsElectricianInfoService"
+                     id="electricianInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.SpsToolEquipmentInfoService"
+                     id="toolEquipmentInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.WorkOrderEvaluateInfoService"
+                     id="workOrderEvaluateInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.WorkOrderInfoService"
+                     id="workOrderInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.NewsInfoService"
+                     id="newsInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.sps.service.dubbo.MemberInformationService"
+                     id="memberInformationService" timeout="120000" retries="1" version="1.0" check="false"/>
+
+    <!-- cs服务dubbo接口 -->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.NeedsInfoService"
+                     id="needsInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.CustomerNeedsOrderInfoService"
+                     id="customerNeedsOrderInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.ConfigureParamService"
+                     id="configureParamService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.RoomInfoService"
+                     id="roomInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.PowerInfoService"
+                     id="powerInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.ProjectInfoService"
+                     id="projectInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <!--设备清单-->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.EquipmentInfoService"
+                     id="equipmentInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <!--操作记录-->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.OperationRecordInfoService"
+                     id="operationRecordInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <!--安全设备-->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.SafetyEquipmentInfoService"
+                     id="safetyEquipmentInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <!--消防设施-->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.FirefightingEquipmentInfoService"
+                     id="firefightingEquipmentInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <!--安全设备/消防设施试验-->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.InspectingLogInfoService"
+                     id="inspectingLogInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <!--值班日志-->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.DutyLogInfoService"
+                     id="dutyLogInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+    <!--历史服务商-->
+    <dubbo:reference interface="com.edianniu.pscp.cs.service.dubbo.CompanyCustomerInfoService"
+                     id="csCompanyCustomerInfoService" timeout="120000" retries="1" version="1.0" check="false"/>
+</beans>

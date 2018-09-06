@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html id="sHtml">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>电力服务云平台</title>
+    <link rel="icon" href="${rc.contextPath}/statics/img/favicon.ico">
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/normalize.css">
+    <link rel="stylesheet" href="${rc.contextPath}/statics/plugins/vonic/vonic.min.css">
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/m_news.css?_${date.systemTime}">
+</head>
+
+<body>
+    <von-app></von-app>
+    <script src="${rc.contextPath}/statics/libs/polyfill.min.js"></script>
+    <script src="${rc.contextPath}/statics/libs/fastclick.js"></script>
+    <script src="${rc.contextPath}/statics/libs/axios.min.js"></script>
+    <script src="${rc.contextPath}/statics/libs/vue.min.js"></script>
+    <script src="${rc.contextPath}/statics/libs/vue-router.min.js"></script>
+    <script src="${rc.contextPath}/statics/plugins/vonic/vonic.min.js"></script>
+    <script>
+        'use strict';
+
+        var nav = ['<div>                       ', '    <header class="head">',
+            '        <a href="../m_index.html" class="logo-link"><img class="head-img" src="../statics/img/logo-news.png" /></a>',
+            '        <span class="head-nav" @click="toggleNavbar"><i></i></span>', '    </header>',
+            '    <transition name="fade">', '        <div class="navbar-customize" v-if="showNavbar">',
+            '            <ul>', '                <em></em>',
+            '                <li><a href="../m_index.html" class="nav-link">首页</a></li>',
+            '                <li :class="{\'active\':(this.$route.path==\'/\'||this.$route.path == \'/marketDetail\')}"><router-link class="nav-link" to="/">需求市场</router-link></li>',
+            '                <li :class="{\'active\':(this.$route.path==\'/news\'||this.$route.path == \'/newsDetail\')}"><router-link class="nav-link" to="/news">新闻资讯</router-link></li>',
+            '                <li :class="{\'active\':(this.$route.path==\'/annc\'||this.$route.path == \'/anncDetail\')}"><router-link class="nav-link" to="/annc">公告消息</router-link></li>',
+            '            </ul>', '        </div>', '    </transition>', '</div>'
+        ].join("");
+        var footer = ['<div>', '                    <footer>',
+            '                        <span>电牛科技版权所有 2004-2017 ICP证： 浙B2-20150087</span>',
+            '                    </footer>', '                </div>'
+        ].join("");
+
+        var indexStr = ['<div>', '                        <scroll class="page-content"',
+            '                                :on-refresh="onRefresh"',
+            '                                :on-infinite="onInfinite">',
+            '                            <router-link :key="index" v-for="(item, index) in items" :to="\'/marketDetail/\' + item.orderId">',
+            '                                <div class="market-inline" @click.native="onItemClick(index)">',
+            '                                    <h6 class="market-inline-title">{{ item.name }}</h6>',
+            '                                    <span class="market-time">发布时间: {{ item.publishTime }}</span>',
+            '                                    <br/>',
+            '                                    <span class="market-time">截止时间: {{ item.publishCutoffTime }}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="market-time">响应人数: {{ item.responseNumber }}</span>',
+            '                                </div>', '                            </router-link>',
+            '                          <div v-if="infiniteCount >= 2" slot="infinite" class="text-center">没有更多数据</div>',
+            '                        </scroll>', '                    </div>'
+        ].join("");
+        var Index = {
+            template: '<div>' + nav + indexStr + '</div>',
+            data: function data() {
+                return {
+                    items: [],
+                    infiniteCount: 0,
+                    page: 1,
+                    showNavbar: false
+                };
+            },
+            methods: {
+                onRefresh: function onRefresh(done) {
+                    var self = this;
+                    setTimeout(function () {
+                        self.items.splice(0, self.items.length);
+                        var data = 'page=1&limit=10';
+                        axios.get('../needs/market?' + data).then(function (r) {
+                            if (r.data.code == 0) {
+                                var arr = r.data.page.list;
+                                for (var i = 0; i < arr.length; i++) {
+                                    self.items.push(arr[i]);
+                                }
+                                self.reload();
+                                if (r.data.page.currPage == r.data.page.totalPage || r.data.page
+                                    .currPage > r.data.page.totalPage) {
+                                    self.infiniteCount = 2;
+                                }
+                            } else {
+                                console.log(r.data.msg);
+                            }
+                            done();
+                        }).catch(function (error) {
+                            console.log(error);
+                            done();
+                        });
+                    }, 1500);
+                },
+                onInfinite: function onInfinite(done) {
+                    var self = this;
+                    setTimeout(function () {
+                        if (self.infiniteCount < 2) {
+                            self.page++;
+                            var data = 'page=' + self.page + '&limit=10';
+                            axios.get('../needs/market?' + data).then(function (r) {
+                                if (r.data.code == 0) {
+                                    var arr = r.data.page.list;
+                                    for (var i = 0; i < arr.length; i++) {
+                                        self.items.push(arr[i]);
+                                    }
+                                    if (r.data.page.currPage == r.data.page.totalPage) {
+                                        self.infiniteCount = 2;
+                                    }
+                                } else {
+                                    self.infiniteCount = 2;
+                                    console.log(r.data.msg);
+                                }
+                                done();
+                            }).catch(function (error) {
+                                console.log(error);
+                                done();
+                            });
+                        }
+                    }, 1500);
+                },
+                onItemClick: function onItemClick(index) {
+                    console.log(index);
+                },
+                toggleNavbar: function toggleNavbar() {
+                    this.showNavbar = this.showNavbar == false;
+                },
+                reload: function reload() {
+                    this.infiniteCount = 0;
+                    this.page = 1;
+                    this.showNavbar = false;
+                }
+            },
+            mounted: function mounted() {
+                var self = this;
+                var data = 'page=1&limit=10';
+                axios.get('../needs/market?' + data).then(function (r) {
+                    if (r.data.code == 0) {
+                        var arr = r.data.page.list;
+                        self.totalPage = r.data.page.totalPage;
+                        for (var i = 0; i < arr.length; i++) {
+                            self.items.push(arr[i]);
+                        }
+                        if (r.data.page.currPage == r.data.page.totalPage || r.data.page.currPage > r.data
+                            .page.totalPage) {
+                            self.infiniteCount = 2;
+                        }
+                    } else {
+                        console.log(r.data.msg);
+                        self.infiniteCount = 2;
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            created: function created() {
+                if ('addEventListener' in document) {
+                    if (FastClick) {
+                        FastClick.attach(document.body);
+                    }
+                }
+                document.getElementById("sHtml").style.fontSize = window.innerWidth / 10 + "px";
+            }
+        };
+        var newsStr = ['<div>', '                            <scroll class="page-content"',
+            '                                    :on-refresh="onRefresh"',
+            '                                    :on-infinite="onInfinite">',
+            '                                <router-link :key="index" v-for="(item, index) in items" :to="\'/newsDetail/\' + item.id">',
+            '                                  <div class="news-inline" @click.native="onItemClick(index)">',
+            '                                    <div class="news-content">',
+            '                                        <div class="news-content-in">',
+            '                                            {{ item.title }}',
+            '                                        </div>',
+            '                                        <span class="news-time">{{ item.publishTime }}</span>',
+            '                                    </div>',
+            '                                    <div class="news-img" :style="\'background: url(\'+ item.coverPic +\');background-size: 100% 100%;\'">',
+            '                                    </div>', '                                  </div>',
+            '                                </router-link>',
+            '                              <div v-if="infiniteCount >= 2" slot="infinite" class="text-center">没有更多数据</div>',
+            '                            </scroll>', '                        </div>'
+        ].join("");
+        var News = {
+            template: '<div>' + nav + newsStr + '</div>',
+            data: function data() {
+                return {
+                    items: [],
+                    infiniteCount: 0,
+                    page: 1,
+                    showNavbar: false
+                };
+            },
+            methods: {
+                onRefresh: function(done) {
+                    var self = this;
+                    setTimeout(function () {
+                        self.items.splice(0, self.items.length);
+                        var data = 'page=1&limit=10';
+                        axios.get('industry?' + data).then(function (r) {
+                            if (r.data.code == 0) {
+                                var arr = r.data.page.list;
+                                self.totalPage = r.data.page.totalPage;
+                                for (var i = 0; i < arr.length; i++) {
+                                    self.items.push(arr[i]);
+                                }
+                                self.reload();
+                                if (r.data.page.currPage == r.data.page.totalPage || r.data.page
+                                    .currPage > r.data.page.totalPage) {
+                                    self.infiniteCount = 2;
+                                }
+                            } else {
+                                console.log(r.data.msg);
+                            }
+                            done();
+                        }).catch(function (error) {
+                            console.log(error);
+                            done();
+                        });
+                    }, 1500);
+                },
+                onInfinite: function onInfinite(done) {
+                    var self = this;
+                    setTimeout(function () {
+                        if (self.infiniteCount < 2) {
+                            self.page++;
+                            var data = 'page=' + self.page + '&limit=10';
+                            var self = self;
+                            axios.get('industry?' + data).then(function (r) {
+                                if (r.data.code == 0) {
+                                    var arr = r.data.page.list;
+                                    for (var i = 0; i < arr.length; i++) {
+                                        self.items.push(arr[i]);
+                                    }
+                                    if (r.data.page.currPage == r.data.page.totalPage) {
+                                        self.reload();
+                                    }
+                                } else {
+                                    console.log(r.data.msg);
+                                }
+                                done();
+                            }).catch(function (error) {
+                                console.log(error);
+                                done();
+                            });
+                        }
+                    }, 1500);
+                },
+                onItemClick: function onItemClick(index) {
+                    console.log(index);
+                },
+                toggleNavbar: function toggleNavbar() {
+                    this.showNavbar = this.showNavbar == false;
+                },
+                reload: function reload() {
+                    this.infiniteCount = 0;
+                    this.page = 1;
+                    this.showNavbar = false;
+                }
+            },
+            mounted: function mounted() {
+                var self = this;
+                var data = 'page=1&limit=10';
+                axios.get('industry?' + data).then(function (r) {
+                    if (r.data.code == 0) {
+                        var arr = r.data.page.list;
+                        self.totalPage = r.data.page.totalPage;
+                        for (var i = 0; i < arr.length; i++) {
+                            self.items.push(arr[i]);
+                        }
+                        if (r.data.page.currPage == r.data.page.totalPage || r.data.page.currPage > r.data
+                            .page.totalPage) {
+                            self.infiniteCount = 2;
+                        }
+                    } else {
+                        console.log(r.data.msg);
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            created: function created() {
+                if ('addEventListener' in document) {
+                    if (FastClick) {
+                        FastClick.attach(document.body);
+                    }
+                }
+                document.getElementById("sHtml").style.fontSize = window.innerWidth / 10 + "px";
+            }
+        };
+        var anncStr = ['<div>', '                                        <scroll class="page-content"',
+            '                                                :on-refresh="onRefresh"',
+            '                                                :on-infinite="onInfinite">',
+            '                                        <router-link :key="index" v-for="(item, index) in items" :to="\'/anncDetail/\' + item.id">',
+            '                                          <div class="annc-inline" @click.native="onItemClick(index)" >',
+            '                                            <div class="annc-content">',
+            '                                                <div class="annc-content-in">',
+            '                                                    {{ item.title }}',
+            '                                                </div>',
+            '                                            </div>',
+            '                                            <div class="annc-time">',
+            '                                                {{ item.publishTime }}',
+            '                                            </div>',
+            '                                          </div>',
+            '                                        </router-link>',
+            '                                          <div v-if="infiniteCount >= 2" slot="infinite" class="text-center">没有更多数据</div>',
+            '                                        </scroll>', '                                    </div>',
+            '                                </div>'
+        ].join("");
+        var Annc = {
+            template: '<div>' + nav + anncStr + '</div>',
+            data: function data() {
+                return {
+                    items: [],
+                    infiniteCount: 0,
+                    page: 1,
+                    showNavbar: false
+                };
+            },
+            methods: {
+                onRefresh: function onRefresh(done) {
+                    var self = this;
+                    setTimeout(function () {
+                        self.items.splice(0, self.items.length);
+                        var data = 'page=1&limit=15';
+                        axios.get('notice?' + data).then(function (r) {
+                            if (r.data.code == 0) {
+                                var arr = r.data.page.list;
+                                for (var i = 0; i < arr.length; i++) {
+                                    self.items.push(arr[i]);
+                                }
+                                self.reload();
+                                if (r.data.page.currPage == r.data.page.totalPage || r.data.page
+                                    .currPage > r.data.page.totalPage) {
+                                    self.reload();
+                                }
+                            } else {
+                                console.log(r.data.msg);
+                            }
+                            done();
+                        }).catch(function (error) {
+                            console.log(error);
+                            done();
+                        });
+                    }, 1500);
+                },
+                onInfinite: function onInfinite(done) {
+                    var self = this;
+                    setTimeout(function () {
+                        if (self.infiniteCount < 2) {
+                            self.page++;
+                            var data = 'page=' + self.page + '&limit=15';
+                            axios.get('notice?' + data).then(function (r) {
+                                if (r.data.code == 0) {
+                                    var arr = r.data.page.list;
+                                    self.totalPage = r.data.page.totalPage;
+                                    for (var i = 0; i < arr.length; i++) {
+                                        self.items.push(arr[i]);
+                                    }
+                                    if (r.data.page.currPage == r.data.page.totalPage) {
+                                        self.infiniteCount = 2;
+                                    }
+                                } else {
+                                    console.log(r.data.msg);
+                                }
+                                done();
+                            }).catch(function (error) {
+                                console.log(error);
+                                done();
+                            });
+                        }
+                    }, 1500);
+                },
+                onItemClick: function onItemClick(index) {
+                    console.log(index);
+                },
+                toggleNavbar: function toggleNavbar() {
+                    this.showNavbar = this.showNavbar == false;
+                },
+                reload: function reload() {
+                    this.infiniteCount = 0;
+                    this.page = 1;
+                    this.showNavbar = false;
+                }
+            },
+            mounted: function mounted() {
+                var self = this;
+                var data = 'page=1&limit=15';
+                axios.get('notice?' + data).then(function (r) {
+                    if (r.data.code == 0) {
+                        var arr = r.data.page.list;
+                        self.totalPage = r.data.page.totalPage;
+                        for (var i = 0; i < arr.length; i++) {
+                            self.items.push(arr[i]);
+                        }
+                        if (r.data.page.currPage == r.data.page.totalPage || r.data.page.currPage > r.data
+                            .page.totalPage) {
+                            self.infiniteCount = 2;
+                        }
+                    } else {
+                        console.log(r.data.msg);
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+            },
+            created: function created() {
+                if ('addEventListener' in document) {
+                    if (FastClick) {
+                        FastClick.attach(document.body);
+                    }
+                }
+                document.getElementById("sHtml").style.fontSize = window.innerWidth / 10 + "px";
+            }
+        };
+        var marketDetailStr = ['<div class="page has-navbar">',
+            '                                    <div class="page-content">',
+            '                                        <div class="market-detail-in">',
+            '                                            <h6>{{ marketDetailInfo.name }}</h6>',
+            '                                            <span class="market-marketDetailInfo.detail-num">需求编号:&nbsp;&nbsp;{{ marketDetailInfo.orderId }}</span>',
+            '                                            <br />',
+            '                                            <div class="market-detail-content">',
+            '                                                {{ marketDetailInfo.describe }}',
+            '                                            </div>',
+            '                                            <div>',
+            '                                                <img class="market-detail-img" v-for="item in marketDetailInfo.attachmentList" :src="item.fid" />',
+            '                                            </div>',
+            '                                            <div class="market-content-list">',
+            '                                                <div>',
+            '                                                    发布截止时间: <span class="market-content-right">{{ marketDetailInfo.publishCutoffTime }}</span>',
+            '                                                </div>',
+            '                                                <div>',
+            '                                                    发布时间: <span class="market-content-right">{{ marketDetailInfo.publishTime }}</span>',
+            '                                                </div>',
+            '                                                <div>',
+            '                                                    工作时间: <span class="market-content-right">{{ marketDetailInfo.workingStartTime }} 至 {{ marketDetailInfo.workingEndTime }}</span>',
+            '                                                </div>',
+            '                                            </div>',
+            '                                            <div class="market-response-btn">',
+            '                                                <a class="button button-calm button-block" href="../statics/mobile-download/download.html?fromSur">响应</a>',
+            '                                            </div>', '                                        </div>'
+        ].join("");
+        var MarketDetail = {
+            template: '<div>' + nav + marketDetailStr + footer + '</div></div></div>',
+            data: function data() {
+                return {
+                    showNavbar: false,
+                    marketDetailInfo: {
+                        attachmentList: []
+                    }
+                };
+            },
+            methods: {
+                toggleNavbar: function toggleNavbar() {
+                    this.showNavbar = this.showNavbar == false;
+                }
+            },
+            created: function created() {
+                if ('addEventListener' in document) {
+                    if (FastClick) {
+                        FastClick.attach(document.body);
+                    }
+                }
+                document.getElementById("sHtml").style.fontSize = window.innerWidth / 10 + "px";
+            },
+            mounted: function mounted() {
+                var self = this;
+                axios.post('../wap/needs/' + self.$route.params.orderId).then(function (r) {
+                    if (r.data.code == 0) {
+                        self.marketDetailInfo = JSON.parse(r.data.result);
+                    } else {
+                        alert('系统异常,请稍后再试!');
+                    }
+                });
+            }
+        };
+
+        var newsDetailStr = ['<div class="page has-navbar">',
+            '                                    <div class="page-content">',
+            '                                     <div class="news-detail">',
+            '                                        <h6>{{ newsDetailInfo.title }}</h6>',
+            '                                        <span class="news-detail-time">{{ newsDetailInfo.publishTime }}</span>',
+            '                                        <div class="news-detail-content" v-html="newsDetailInfo.content">',
+            '                                        </div>', '                                     </div>'
+        ].join("");
+        var NewsDetail = {
+            template: '<div>' + nav + newsDetailStr + footer + '</div></div></div>',
+            data: function data() {
+                return {
+                    showNavbar: false,
+                    newsDetailInfo: {}
+                };
+            },
+            methods: {
+                toggleNavbar: function toggleNavbar() {
+                    this.showNavbar = this.showNavbar == false;
+                }
+            },
+            created: function created() {
+                if ('addEventListener' in document) {
+                    if (FastClick) {
+                        FastClick.attach(document.body);
+                    }
+                }
+                document.getElementById("sHtml").style.fontSize = window.innerWidth / 10 + "px";
+            },
+            mounted: function mounted() {
+                var self = this;
+                axios.post('../wap/news/' + self.$route.params.id).then(function (r) {
+                    if (r.data.code == 0) {
+                        self.newsDetailInfo = JSON.parse(r.data.result);
+                    } else {
+                        alert('系统异常,请稍后再试!');
+                    }
+                });
+            }
+
+        };
+        var anncDetailStr = ['<div class="page has-navbar">',
+            '                                    <div class="page-content">',
+            '                                     <div class="annc-detail">',
+            '                                        <h6>{{ anncDetailInfo.title }}</h6>',
+            '                                        <span class="annc-detail-time">{{ anncDetailInfo.publishTime }}</span>',
+            '                                        <div class="annc-detail-content" v-html="anncDetailInfo.content">',
+            '                                        </div>', '                                     </div>'
+        ].join("");
+        var AnncDetail = {
+            template: '<div>' + nav + anncDetailStr + footer + '</div></div></div>',
+            data: function data() {
+                return {
+                    showNavbar: false,
+                    anncDetailInfo: {}
+                };
+            },
+            methods: {
+                toggleNavbar: function toggleNavbar() {
+                    this.showNavbar = this.showNavbar == false;
+                }
+            },
+            created: function created() {
+                if ('addEventListener' in document) {
+                    if (FastClick) {
+                        FastClick.attach(document.body);
+                    }
+                }
+                document.getElementById("sHtml").style.fontSize = window.innerWidth / 10 + "px";
+            },
+            mounted: function mounted() {
+                var self = this;
+                axios.post('../wap/news/' + self.$route.params.id).then(function (r) {
+                    if (r.data.code == 0) {
+                        self.anncDetailInfo = JSON.parse(r.data.result);
+                    } else {
+                        alert('系统异常,请稍后再试!');
+                    }
+                });
+            }
+        };
+
+        var routes = [{
+            path: '/',
+            component: Index
+        }, {
+            path: '/news',
+            component: News
+        }, {
+            path: '/annc',
+            component: Annc
+        }, {
+            path: '/marketDetail/:orderId',
+            component: MarketDetail
+        }, {
+            path: '/newsDetail/:id',
+            component: NewsDetail
+        }, {
+            path: '/anncDetail/:id',
+            component: AnncDetail
+        }];
+
+        Vue.use(Vonic.app, {
+            routes: routes
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html id="sHtml">
+<head>
+	<meta charset="utf-8">
+	<meta name="format-detection" content="telephone=no">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>电牛电力云平台</title>
+	<link rel="icon" href="../img/favicon.ico">
+	<link rel="stylesheet" href="../css/normalize.css">
+	<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+	<div id="app" class="container" v-cloak>
+		<div class="icon">
+			<img src="img/ele-icon.png" v-if="myRole == 'ele'" />
+			<img src="img/sur-icon.png" v-else-if="myRole == 'sur'" />
+			<img src="img/cus-icon.png" v-else />
+			<br />
+			<span v-if="myRole == 'ele'">电牛运维-电工</span>
+			<span v-else-if="myRole == 'sur'">电牛运维-服务商</span>
+			<span v-else>电牛运维-客户</span>
+		</div>
+		<div class="bg"></div>
+		<div class="download" v-if="myRole == 'ele'">
+			<a class="download-btn" href="https://itunes.apple.com/cn/app/id1239640949" v-if="myDevice == 'iPhone'" target="_blank">下载</a>
+			<a class="download-btn" href="http://m.edianniu.cn/apk/dnelectrician-release.apk" v-else target="_blank">下载</a>
+		</div>
+		<div class="download" v-else-if="myRole == 'sur'">
+			<a class="download-btn" href="https://itunes.apple.com/cn/app/id1268999114" v-if="myDevice == 'iPhone'" target="_blank">下载</a>
+			<a class="download-btn" href="http://m.edianniu.cn/apk/dnfacilitator-release.apk" v-else target="_blank">下载</a>
+		</div>
+		<div class="download" v-else>
+			<a class="download-btn" href="https://itunes.apple.com/cn/app/id1272523560" v-if="myDevice == 'iPhone'" target="_blank">下载</a>
+			<a class="download-btn" href="http://m.edianniu.cn/apk/dncustomer-release.apk" v-else target="_blank">下载</a>
+		</div>
+	</div>
+
+	<script src="../libs/fastclick.js"></script>
+	<script src="../libs/vue.min.js"></script>
+	<script src="js/main.js"></script>
+</body>
+</html>

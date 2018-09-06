@@ -1,0 +1,62 @@
+a{color: #333;text-decoration: none;}
+body{position: relative;}
+.head{font-size:12px;background-color:#293047;color:#fff;width:100%;height:1.5rem;line-height:1.5rem;margin:0;padding:0;z-index:9999;position: fixed;}
+.head-nav{position:absolute;right:.85rem;z-index:21;display:inline-block;}
+.head-nav i{position:relative;display:inline-block;width:.6rem;height:.08rem;color:#fff;text-transform:uppercase;background:#fff;transition:all .2s ease-out;}
+.head-nav i::before,.head-nav i::after{content:'';width:.6rem;height:.08rem;background:#fff;position:absolute;left:0;transition:0.2s;}
+.head-nav i::before{top:-.22rem;}
+.head-nav i::after{bottom:-.22rem;}
+.head-nav.active i{background:transparent;}
+.head-nav.active i::before{top:0;transform:rotateZ(45deg);}
+.head-nav.active i::after{bottom:0;transform:rotateZ(-45deg);}
+.navbar-customize{position:fixed;z-index:9999;width:2.25rem;right:.3rem;text-align:right;top: 1.4rem;}
+.navbar-customize ul{margin:0;padding:0;margin-top:.2rem;border:none;z-index:9999;}
+.navbar-customize ul em{width:0;height:0;border-left:.3rem solid transparent;border-right:.3rem solid transparent;border-bottom:.5rem solid #000;position:absolute;display:block;opacity:.65;top:-.3rem;right:.55rem;z-index:99999;}
+.navbar-customize ul li{font-size:.35rem;padding:.3rem .3rem;list-style:none;color:#fff;background:rgba(0,0,0,.65);border:none;margin:0;text-align: center;}
+.navbar-customize ul li.active{background:rgba(0,153,204,.9);}
+.nav-link{color: #fff;text-decoration: none;width: 100%;display: inline-block;}
+.logo-link{text-decoration: none;}
+.head-img{max-width:3rem;vertical-align:middle;margin-left:.3rem;}
+.scroll{top:.7rem;}
+.pull-to-refresh-layer{height:1rem;}
+
+
+
+.market-inline{width: 9rem;margin: 0 auto .3rem;box-shadow: 1px 2px 4px 2px #ddd;border-radius: 5px;font-size: 13px;background-color: #fff;padding: .2rem .3rem;}
+.market-inline h6.market-inline-title{height: .75rem;line-height: .75rem;font-size: .5rem;text-align: left;}
+.market-time{font-size: .35rem;color: #999999;line-height: 1.5;}
+
+.market-detail-in{margin: .75rem .3rem 0;}
+.market-detail-in>h6{font-size: .5rem;color: #333;font-weight: 500;}
+.market-detail-in-num{font-size: 12px;color:#999;}
+.market-detail-content{text-align: justify;text-indent: 2em;padding: .2rem 0;min-height: 3rem;background-color: #fff;margin: .3rem 0;box-shadow: 1px 2px 4px 2px #ddd;}
+.market-detail-img{max-width: 3rem;max-height:3rem;margin-bottom: .2rem;display: inline-block;}
+.market-content-list{line-height: 2;}
+.market-content-right{float: right;}
+.market-response-btn{margin-top: .5rem;}
+.market-response-btn button{background-color: #1aa1e6;}
+
+.news-inline{width: 9rem;height:2.5rem;margin: 0 auto .3rem;box-shadow: 1px 2px 4px 2px #ddd;border-radius: 3px;font-size: 13px;background-color: #fff;}
+.news-content{width: 60%;height:100%;float: left;position: relative;}
+.news-content-in{padding: .2rem .3rem;box-sizing: border-box;height: 65%;text-align: left;font-size: .45rem;overflow: hidden;text-overflow: ellipsis;}
+.news-img{width: 40%;height:100%;float: left;border-radius: 3px;}
+.news-time{position: absolute;bottom: .2rem;left: .3rem;font-size: 12px;color: #999999;}
+
+.news-detail{margin: .75rem .3rem 0;}
+.news-detail>h6{font-size: .5rem;color: #333;font-weight: 500;}
+.news-detail-time{font-size: 12px;color:#999;}
+.news-detail-content{text-align: justify;margin: .3rem 0;}
+.news-detail-content img{max-width: 100%}
+
+.annc-inline{width: 9rem;height:1rem;margin: 0 auto .3rem;box-shadow: 1px 2px 4px 2px #ddd;border-radius: 3px;font-size: 12px;background-color: #fff;line-height: 1rem;}
+.annc-content{width: 80%;float: left;font-size: 13px;}
+.annc-content-in{max-height:1rem;box-sizing: border-box;padding-left: .3rem;overflow: hidden;}
+.annc-content img{max-width: 100%;}
+.annc-time{width: 20%;float: left;font-size: 12px;color: #999999;}
+
+.annc-detail{margin: .75rem .3rem 0;}
+.annc-detail>h6{font-size: .5rem;color: #333;font-weight: 500;}
+.annc-detail-time{font-size: 12px;color:#999;}
+.annc-detail-content{text-align: justify;margin: .3rem 0;}
+
+footer{text-align: center; color: #999999; margin-left: 0;font-size: .3rem;height: 1rem;line-height: 1rem;}

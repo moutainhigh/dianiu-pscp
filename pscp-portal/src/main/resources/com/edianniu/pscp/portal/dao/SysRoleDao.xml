@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.portal.dao.SysRoleDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.portal.entity.SysRoleEntity">
+		select * from pscp_sys_role where id = #{value} and deleted=0
+	</select>
+	<select id="getByIdAndCompanyId" resultType="int">
+		select count(*) from pscp_sys_role where id = #{id} and company_id=#{companyId} and deleted=0
+	</select>
+	
+	 <select id="queryList" resultType="com.edianniu.pscp.portal.entity.SysRoleEntity">
+		select * from pscp_sys_role 
+		<where>
+		    deleted=0
+		    <if test="companyId != null">
+				and company_id=#{companyId} 
+			</if> 
+			<if test="name != null and name.trim() != ''">
+				and name like concat('%',#{name},'%') 
+			</if>
+		</where>
+		order by create_time desc 
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_sys_role
+		<where>
+		    deleted=0 
+		    <if test="companyId != null">
+				and company_id=#{companyId} 
+			</if> 
+			<if test="name != null and name.trim() != ''">
+				and name like concat('%',#{name},'%') 
+			</if>
+		</where>
+	</select>
+	
+	<insert id="save" parameterType="com.edianniu.pscp.portal.entity.SysRoleEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into pscp_sys_role
+		(
+			name, 
+			remark,
+			company_id,
+			create_user,
+			create_time,
+			deleted
+		)
+		values
+		(
+			#{name}, 
+			#{remark},
+			#{companyId},
+			#{createUser},
+			#{createTime},
+			#{deleted}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.portal.entity.SysRoleEntity">
+		update pscp_sys_role 
+		<set> 
+			<if test="name != null">name = #{name}, </if>
+			<if test="remark != null">remark = #{remark}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="deleteBatch">
+		update pscp_sys_role set deleted=-1,modified_time=now(),modified_user=#{modifiedUser} where deleted=0 and  id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+		;
+		update pscp_sys_role_menu set deleted=-1,modified_time=now(),modified_user=#{modifiedUser}   where deleted=0 and  role_id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+		;
+		update pscp_sys_member_role set deleted=-1,modified_time=now(),modified_user=#{modifiedUser}  where deleted=0 and  role_id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+	</delete>
+	
+
+</mapper>

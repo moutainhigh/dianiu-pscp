@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    <title>支付测试页面</title>
+    #parse("sys/header.html")
+    <style>
+    .form-control-static {
+        padding: 10px 25px;
+        color: #333;
+    }
+    </style>
+</head>
+	<body>
+	$request.getRemoteAddr()  <br/>
+	$request.getRemoteHost()  <br/>
+	微信支付提示问题：<br/>
+	1）商家存在未配置的参数，请联系商家解决 需要使用pay.edianniu.cn域名进行访问<br/>
+	2）网络环境未能通过安全验证，请稍后再试  主要是下单的IP和调起支付app的IP不一样<br/>
+	  支付类型:<select id="payType">
+	  <option value="0">余额</option>
+	  <option value="1">支付宝</option>
+	  <option value="2">微信支付</option>
+	  <option value="3">银联支付</option>
+	  </select><br/>
+	   支付类型:<select id="payMethod">
+	  <option value="APP">APP</option>
+	  <option value="PC">PC网站</option>
+	  <option value="WAP">手机网站</option>
+	  </select><br/>
+	 支付来源:<select id="appPkg">
+	  <option value="com.edianniu.pscp.renter">WAP</option>
+	  </select><br/>
+	  订单类型:<select id="orderType">
+	  <option value="1">充值</option>
+	  <option value="2">订单</option>
+	  <option value="3">社会电工工单结算</option>
+	  <option value="4">响应需求订单缴纳保证金</option>
+	  <option value="5">项目结算</option>
+	  <option value="6">电费结算</option>
+	  </select><br/>
+	 uid:<input type="text" name="uid" id="uid" value="1383"/><br/>
+	 token:<input type="text" name="token" id="token" value="98524321"/><br/>
+	   支付类型(包名):<select id="appPkg">
+	 <option value="com.edianniu.pscp.renter">租客端</option>
+	 </select><br/>
+	 支付金额:<input type="text" name="amount" id="amount" value="0.1"/><br/>
+	 订单ID:<input type="text" name="orderIds" id="orderIds" value=""/>批量支付以逗号隔开<br/>
+	 支付成功返回URL地址:<input type="text" name="returnUrl" id="returnUrl" value="" style="width:80%"/><br/>
+	发票信息:<select id="needInvoice">
+	  <option value="0">不需要开票</option>
+	  <option value="1">需要开票</option>
+	  </select><br/>
+	 <input type="button" name="payBt" value="立即支付" onclick="goPay();"/>
+	 <input type="button" name="payBt2" value="开始支付(跨域)" onclick="startPay();"/>
+	 <br/><br/>
+	  选择支付类型:<div id="payTypeDiv">
+	  </div><br/>
+	 <input type="button" name="payBt2" value="准备支付(跨域)" onclick="preparePay();"/>
+	 <div id="alipay"></div>
+	</body>
+    <script type="text/javascript">
+    function goPay(){
+    	var payType=$("#payType").val();
+    	var payMethod=$("#payMethod").val();
+    	var orderType=$("#orderType").val();
+    	var amount=$("#amount").val();;
+    	var orderIds=$("#orderIds").val();
+    	top.location.href = 'prepare/?payType='+payType+"&payMethod="+payMethod+"&orderType="+orderType+"&amount="+amount+"&orderIds="+orderIds;
+    }
+    function startPay(){
+    	var payType=$("#payType").val();
+    	var payMethod=$("#payMethod").val();
+    	var orderType=$("#orderType").val();
+    	var amount=$("#amount").val();;
+    	var orderIds=$("#orderIds").val();
+    	var appPkg=$("#appPkg").val();
+    	var uid=$("#uid").val();
+    	var token=$("#token").val();
+    	var orderId=$("#orderId").val();
+    	var needInvoice=$("#needInvoice").val();
+    	var extendParams=$("#extendParams").val();
+    	var data= {"uid" : uid,"token":token,
+    			   "orderId":orderId,"orderIds":orderIds,
+    			   "amount":amount,"payType":payType,"appPkg":appPkg,
+    			   "orderType":orderType,"needInvoice":needInvoice,"extendParams":extendParams};
+    	$.ajax({
+            type: "POST",
+            url: "http://115.199.252.223:5004/pay/start",
+            data: JSON.stringify(data),
+            success: function(result) {
+                if (result.resultCode==200) {
+                	alert(JSON.stringify(result))
+                	for(var i in result.payTypeInfos){
+                	var desc=result.payTypeInfos[i].description;
+                	if(result.payTypeInfos[i].type=='walletpay'){
+                		desc="("+result.walletAmount+")"+desc;
+                	}	
+                	$("#payTypeDiv").append('<input name=payType1 id=payType1 type=radio value='+result.payTypeInfos[i].type+'>'+result.payTypeInfos[i].name+','+desc+'</option>');
+                		
+                	}
+                	
+                } else {
+                    alert(result.resultMessage);
+                }
+            }
+        });
+    }
+    function preparePay(){
+    	//var payType=$("#payType1").val();
+    	var payType=$("input[id='payType1']:checked").val();
+    	if(payType=='walletpay')payType=0;
+    	if(payType=='alipay')payType=1;
+    	if(payType=='wxpay')payType=2;
+    	if(payType=='unionpay')payType=3;
+    	var payMethod=$("#payMethod").val();
+    	var orderType=$("#orderType").val();
+    	var amount=$("#amount").val();;
+    	var orderIds=$("#orderIds").val();
+    	var appPkg=$("#appPkg").val();
+    	var uid=$("#uid").val();
+    	var token=$("#token").val();
+    	var orderId=$("#orderId").val();
+    	var needInvoice=$("#needInvoice").val();
+    	var extendParams=$("#extendParams").val();
+    	var returnUrl=$("#returnUrl").val();
+    	var data= {"uid" : uid,"token":token,
+    			   "orderId":orderId,"orderIds":orderIds,
+    			   "amount":amount,"payType":payType,"appPkg":appPkg,
+    			   "orderType":orderType,"needInvoice":needInvoice,
+    			   "extendParams":extendParams,"returnUrl":returnUrl};
+    	$.ajax({
+            type: "POST",
+            url: "http://115.199.252.223:5004/pay/prepare",
+            data: JSON.stringify(data),
+            success: function(result) {
+                if (result.resultCode==200) {
+                	if(payType==1){//支付宝
+                		$("#alipay").append(result.alipay.params);
+                	}
+                	else if(payType==2){//微信
+                		window.location.href=result.weixinpay.mwebUrl;
+                	}
+                	//alert(JSON.stringify(result))
+                } else {
+                    alert(result.resultMessage);
+                }
+            }
+        });
+    }
+    </script>
+</html>

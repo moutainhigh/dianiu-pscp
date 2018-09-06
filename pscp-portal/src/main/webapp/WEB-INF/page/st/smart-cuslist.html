@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>智能监控</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/smart-main.css?_${date.systemTime}">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="smart-cus-list">
+            <div class="smart-cus-slot">
+                <div class="smart-cus-line" v-for="(item,index) in customerList" @click.stop="toDevice(item.companyId)">
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td rowspan="2" v-show="false">服务商头像</td>
+                                <td>{{ item.companyName }}</td>
+                                <td>当前负荷</td>
+                                <td>今日最高负荷</td>
+                                <td>今日用电量</td>
+                            </tr>
+                            <tr>
+                                <td><span class="label label-danger">{{ item.warningsNum }}处异常</span></td>
+                                <td>{{ item.loadOfNow }}kW</td>
+                                <td>{{ item.maxLoadOfToday }}kW</td>
+                                <td>{{ item.electricQuantity }}kWh</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="no-content-div" v-show="customerList && customerList.length == 0">
+                    <img src="${rc.contextPath}/statics/img/no-content.png" /><br />
+                    <span class="no-content-span">&nbsp;&nbsp;&nbsp;暂无内容</span>
+                </div>
+            </div>
+            <page></page>
+        </div>
+        
+    </div>
+
+        <script src="${rc.contextPath}/js/st/smart-cuslist.js?_${date.systemTime}"></script>
+</body>
+
+</html>
