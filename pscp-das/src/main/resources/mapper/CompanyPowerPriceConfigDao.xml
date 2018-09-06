@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.das.meter.dao.CompanyPowerPriceConfigDao">
+	<select id="getByCompanyId"
+            resultType="com.edianniu.pscp.das.meter.domain.CompanyPowerPriceConfig">
+        SELECT
+        id,
+    	type,
+    	voltage_level,
+    	charge_mode,
+    	base_price,
+    	apex_price,
+    	peak_price,
+    	flat_price,
+    	valley_price,
+    	apex_time_interval,
+    	peak_time_interval,
+    	flat_time_interval,
+    	valley_time_interval,
+    	base_charge_mode,
+    	standard_adjust_rate,
+    	transformer_capacity_price,
+    	max_capacity_price,
+    	transformer_capacity,
+    	max_capacity,
+    	charge_time_interval	          
+        FROM pscp_company_power_price_config t
+        WHERE t.company_id =#{companyId} and t.deleted=0
+    </select>
+</mapper>

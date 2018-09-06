@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.das.meter.dao.MeterLogDao">
+<insert id="save"
+            parameterType="com.edianniu.pscp.das.meter.domain.MeterLog">
+        INSERT INTO pscp_meter_log(
+        id,
+		meter_id,
+		type,
+		sub_term_code,
+		data,
+        report_time,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES (
+        nextval('seq_pscp_meter_log'),
+        #{meterId},
+		#{type},
+		#{subTermCode},
+		#{data},
+        #{reportTime},
+        now(),
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_meter_log') as id;
+        </selectKey>
+    </insert>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="5 seconds">
+    <springProperty scope="context" name="logLevel" source="logging.level"/>
+
+    <contextName>pscp-das</contextName>
+    <jmxConfigurator/>
+    <!-- direct log messages to stdout -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %5p |-%c{35}:%L - %m %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.dir}/logs/das.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${user.dir}/logs/bak/das.%d{yyyy-MM-dd}.%i.log.gz</FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>1024MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %highlight(%5p) %green(|-%c{35}:%L) - %m %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="errorFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.dir}/logs/error.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${user.dir}/logs/bak/error.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %5p |-%c{35}:%L - %m %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="badPerformanceSQLLogger" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${user.dir}/logs/sql-warn.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${user.dir}/logs/bak/sql-warn.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %5p |-%c{35}:%L - %m %n</pattern>
+        </encoder>
+    </appender>
+    <!-- 数据仓库抽取日志文件格式 -->
+	<appender name="dwLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		  <File>${user.dir}/logs/meterlog-dw.log</File>
+		  <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			   <FileNamePattern>${user.dir}/logs/1__meterlog-dw__%d{yyyy-MM-dd}__%d{yyyyMMdd}000000__%d{yyyyMMdd}235959__0.log</FileNamePattern>
+			   <MaxHistory>7</MaxHistory>   
+		  </rollingPolicy>
+		  <layout class="ch.qos.logback.classic.PatternLayout">
+		    <pattern>%msg%n</pattern>
+		  </layout>
+	 </appender>
+	 <logger name="com.edianniu.pscp.das.meter.log.DWLogger" level="info">
+        <appender-ref ref="dwLogAppender"/>
+     </logger>
+    <logger name="com.edianniu.pscp.das" level="${logLevel}"/>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="file"/>
+    </appender>
+
+    <root level="${logLevel}">
+        <appender-ref ref="ASYNC"/>
+        <appender-ref ref="errorFile"/>
+        <appender-ref ref="stdout"/>
+    </root>
+</configuration>

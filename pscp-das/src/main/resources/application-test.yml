@@ -1,0 +1,49 @@
+logging:
+  level: info
+#datasource
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.1.251:1921/pscpdev
+    username: pscpdev
+    password: pscpdev2017
+    driver-class-name: org.postgresql.Driver
+    max-idle: 10
+    max-wait: 10000
+    min-idle: 1
+    initial-size: 1
+    validation-query: SELECT 1
+    test-on-borrow: false
+    test-while-idle: true
+    time-between-eviction-runs-millis: 18800
+mybatis:
+  mapper-locations: classpath:mapper/*Dao.xml
+  config-location: classpath:mybatis/mybatis-config.xml 
+  #type-aliases-package: com.edianniu.pscp.das.meter.domain
+#cache
+redis:
+  cache:
+    host: 192.168.1.251
+    port: 6380
+    cfg:
+      maxActive: 400
+      maxIdle: 30000
+      maxWait: 10000
+      testOnBorrow: true
+      timeout: 10000
+#kafka meterlog
+kafka.meterlog:
+  consumer:
+    bootstrap.servers: 192.168.1.251:9092,192.168.1.251:9093,192.168.1.251:9094,192.168.1.251:9095
+    group.id: group_test
+    enable.auto.commit: false
+    auto.commit.interval.ms: 3000
+    max.poll.interval.ms: 3000
+    max.poll.records: 100
+    session.timeout.ms: 30000
+  topic:
+    name: test_meter_log_0
+dubbo:
+  port: 28809
+  address: zookeeper://192.168.1.251:2182
+#
+current.unbalance.standard: 0.8
