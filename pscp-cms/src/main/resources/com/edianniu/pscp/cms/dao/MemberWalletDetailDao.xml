@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.MemberWalletDetailDao">
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.MemberWalletDetail">
+		    select 
+			wd.*,
+			m.mobile,
+			m.login_name,
+			m.is_admin,
+			m.is_customer,
+			m.is_electrician,
+			m.is_facilitator,
+			m.company_id,
+			(select user_name from pscp_electrician e where e.member_id=m.id and e.deleted=0 and e.status=2) as user_name,
+			(select name from pscp_company c where  c.id=m.company_id and c.deleted=0 and c.status=2) as company_name
+			from pscp_member_wallet_detail wd left JOIN pscp_member m on wd.uid=m.id
+			where m.deleted=0 and wd.deleted=0 and wd.id=#{value}
+	</select>
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.MemberWalletDetail" parameterType="map">
+		select * from 
+		(
+			select 
+			wd.*,
+			m.mobile,
+			m.login_name,
+			m.is_admin,
+			m.is_customer,
+			m.is_electrician,
+			m.is_facilitator,
+			m.company_id,
+			(select user_name from pscp_electrician e where e.member_id=m.id and e.deleted=0 and e.status=2) as user_name,
+			(select name from pscp_company c where  c.id=m.company_id and c.deleted=0 and c.status=2) as company_name
+			from pscp_member_wallet_detail wd left JOIN pscp_member m on wd.uid=m.id
+			where m.deleted=0 and wd.deleted=0
+		)t1 
+		<where>
+		   	 t1.deleted=0
+			<if test="loginName != null and loginName.trim() != ''">
+				and t1.login_name like concat('%',#{loginName},'%') 
+			</if>
+			<if test="orderId != null and orderId.trim() != ''">
+				and t1.order_id=#{orderId}
+			</if>
+			<if test="mobile != null and mobile.trim() != ''">
+				and t1.mobile like concat('%',#{mobile},'%') 
+			</if>
+			<if test="memberName != null and memberName.trim() != ''">
+				and (t1.user_name like concat('%',#{memberName},'%') or t1.company_name like concat('%',#{memberName},'%'))
+			</if>
+			<if test="createTimeStart != null">
+				and t1.create_time &gt;= #{createTimeStart}
+			</if>
+			<if test="createTimeEnd != null">
+				and t1.create_time &lt;= #{createTimeEnd}
+			</if>		
+			 <if test="type != null">
+				and t1.type =#{type}
+			 </if>			
+		</where>
+		order by t1.create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+	<select id="queryTotal" resultType="int" parameterType="map">
+		select count(1) from 
+		(
+			select 
+			wd.*,
+			m.mobile,
+			m.login_name,
+			m.is_admin,
+			m.is_customer,
+			m.is_electrician,
+			m.is_facilitator,
+			m.company_id,
+			(select user_name from pscp_electrician e where e.member_id=m.id and e.deleted=0 and e.status=2) as user_name,
+			(select name from pscp_company c where  c.id=m.company_id and c.deleted=0 and c.status=2) as company_name
+			from pscp_member_wallet_detail wd left JOIN pscp_member m on wd.uid=m.id
+			where m.deleted=0 and wd.deleted=0
+		)t1 
+		<where>
+		   	 t1.deleted=0
+			 <if test="loginName != null and loginName.trim() != ''">
+				and t1.login_name like concat('%',#{loginName},'%') 
+			</if>
+			<if test="orderId != null and orderId.trim() != ''">
+				and t1.order_id=#{orderId}
+			</if>
+			<if test="mobile != null and mobile.trim() != ''">
+				and t1.mobile like concat('%',#{mobile},'%') 
+			</if>
+			<if test="memberName != null and memberName.trim() != ''">
+				and (t1.user_name like concat('%',#{memberName},'%') or t1.company_name like concat('%',#{memberName},'%'))
+			</if>
+			<if test="createTimeStart != null">
+				and t1.create_time &gt;= #{createTimeStart}
+			</if>
+			<if test="createTimeEnd != null">
+				and t1.create_time &lt;= #{createTimeEnd}
+			</if>		
+			 <if test="type != null">
+				and t1.type =#{type}
+			 </if>			
+		</where>
+	</select>
+</mapper>

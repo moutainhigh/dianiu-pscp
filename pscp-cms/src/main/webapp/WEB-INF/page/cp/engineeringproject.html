@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>${comments}</title>
+    #parse("sys/header.html")
+    <style type="text/css">
+    .form-horizontal {
+        width: 100%;
+    }
+    
+    @media (min-width: 768px) {
+        .grid-btn .col-sm-2 {
+            width: 12.66666667%;
+        }
+        h4 {
+            margin: 0 0 2em 4em;
+        }
+    }
+    
+    .input-group[class*=col-] {
+        float: left;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <tabs>
+                <tab status="ongoing" name="进行中" selected="true" icon="fa-star-half-o"></tab>
+                <tab status="end" name="已结束" icon="fa-star"></tab>
+            </tabs>
+            <div class="grid-btn">
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="项目名称">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.cpName" @keyup.enter="query" placeholder="业主单位">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.cpContact" @keyup.enter="query" placeholder="联系人">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.cpContactMobile" @keyup.enter="query" placeholder="手机号码">
+                </div>
+                <div id="date-start" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="项目开始日期" v-model="q.startTime" />
+                    <span id="date-start-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div id="date-end" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="项目结束日期" v-model="q.endTime" />
+                    <span id="date-end-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn" style="padding-left: 15px;">
+                #if($shiro.hasPermission("engineeringproject:save"))
+                <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a> #end 
+                <a class="btn btn-primary" @click="jumpOrder"><i class="fa fa-trash-o"></i>&nbsp;派单</a>
+                #if($shiro.hasPermission("engineeringproject:update"))
+                <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a> #end
+                 #if($shiro.hasPermission("engineeringproject:delete"))
+                <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a> #end
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal" data-vv-scope="form-1">
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">项目名称<span style="color: red;">*</span></div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" v-model="engineeringProject.name" placeholder="项目名称" data-vv-name="项目名称" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.项目名称')}" />
+                        <span v-show="errors.has('form-1.项目名称')" class="help is-danger">{{ errors.first('form-1.项目名称') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">设备描述<span style="color: red;">*</span></div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" v-model="engineeringProject.description" placeholder="设备描述" data-vv-name="设备描述" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.设备描述')}" />
+                        <span v-show="errors.has('form-1.设备描述')" class="help is-danger">{{ errors.first('form-1.设备描述') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">选择客户<span style="color: red;">*</span></div>
+                    <div class="col-sm-6">
+                        <button @click="btnCustomer" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('form-1.选择客户')}">
+                            <span>{{ customerLabel }} </span><span class="caret"></span>
+                        </button>
+                        <input type="hidden" v-model="engineeringProject.customerId" data-vv-name="选择客户" v-validate="'required'" />
+                        <ul class="dropdown-menu">
+                            <li v-for="(item,index) in customers">
+                                <a @click="chooseCustomer(index)">{{item.cpContact}}</a>
+                            </li>
+                        </ul>
+                        <a class="btn btn-primary" @click="addCustomer" style="margin-left: 15px;"><i class="fa fa-plus"></i>&nbsp;新增客户</a>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">项目开始时间<span style="color: red;">*</span></div>
+                    <div class="col-sm-2">
+                        <input id="project-start" class="form-control form_datetime" size="16" type="text" readonly data-date-format="yyyy-mm-dd" placeholder="项目开始日期" v-model="engineeringProject.startTime" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">项目结束时间<span style="color: red;">*</span></div>
+                    <div class="col-sm-2">
+                        <input id="project-end" class="form-control form_datetime" size="16" type="text" readonly data-date-format="yyyy-mm-dd" placeholder="项目结束时间" v-model="engineeringProject.endTime" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">是否现场勘测<span style="color: red;">*</span></div>
+                    <div class="col-sm-2 radio">
+                        <label>
+                            <input type="radio" :checked="engineeringProject.sceneInvestigation" @click="sceneToTrue" :disabled="engineeringProject.sceneInvestigation !=0 "><span>是</span>
+                        </label>
+                        <label>
+                            <input type="radio" :checked="!engineeringProject.sceneInvestigation" @click="sceneToFalse" :disabled="engineeringProject.sceneInvestigation !=0 "><span>否</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label upload-label">合同<span style="color: red;">*</span></div>
+                    <div class="col-sm-2">
+                        <div>
+                            <ul class="upload-ul">
+                                <li class="upload-li" v-show="engineeringProject.contractFileIdImgDo.imgUrl">
+                                    <img :src="engineeringProject.contractFileIdImgDo.imgUrl" class="upload-img" />
+                                    <a class="img-remove-btn" @click="delImg('contractFileIdImgDo')">
+                                        <span class="glyphicon glyphicon-remove"></span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <button :class="{'is-danger': errors.has('form-1.合同')}" type="button" class="upload-btn" v-show="!engineeringProject.contractFileIdImgDo.imgUrl" @click="addImg('contractFileIdImgDo')"></button>
+                            <input id="contractFileIdImgDo" type="file" @change="onFileChange" style="display: none;" accept="image/gif,image/jpeg,image/jpg,image/png" />
+                            <input type="hidden" v-model="engineeringProject.contractFileIdImgDo.imgUrl" data-vv-name="合同" v-validate="'required'" />
+                            <span v-show="errors.has('form-1.合同')" class="help is-danger">{{ errors.first('form-1.合同') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"></div>
+                    <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" /> &nbsp;&nbsp;
+                    <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                </div>
+            </form>
+        </div>
+        <div id="addCustomer" class="panel panel-default" style="display: none;">
+            <form class="form-horizontal" data-vv-scope="form-2">
+                <input type="hidden" class="form-control" v-model="companyCustomer.id" />
+                <input type="hidden" class="form-control" v-model="companyCustomer.memberId" placeholder="$shiro.getUser().getUserId()" />
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">注册手机号<span style="color: red;">*</span></div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="companyCustomer.mobile" placeholder="账号" data-vv-name="注册账号" v-validate="'required|mobile'" :class="{'is-danger': errors.has('form-2.注册账号')}" />
+                        <span v-show="errors.has('form-2.注册账号')" class="help is-danger">{{ errors.first('form-2.注册账号') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">业主单位负责人<span style="color: red;">*</span></div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="companyCustomer.cpContact" placeholder="业主单位负责人" data-vv-name="业主单位负责人" v-validate="'required|max:8'" :class="{'is-danger': errors.has('form-2.业主单位负责人')}" />
+                        <span v-show="errors.has('form-2.业主单位负责人')" class="help is-danger">{{ errors.first('form-2.业主单位负责人') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">业主单位<span style="color: red;">*</span></div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="companyCustomer.cpName" placeholder="业主单位" data-vv-name="业主单位" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-2.业主单位')}" />
+                        <span v-show="errors.has('form-2.业主单位')" class="help is-danger">{{ errors.first('form-2.业主单位') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">联系人手机号码<span style="color: red;">*</span></div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="companyCustomer.cpContactMobile" placeholder="联系人手机号码" data-vv-name="联系人手机号码" v-validate="'required|mobile'" :class="{'is-danger': errors.has('form-2.联系人手机号码')}" />
+                        <span v-show="errors.has('form-2.联系人手机号码')" class="help is-danger">{{ errors.first('form-2.联系人手机号码') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">业主单位联系电话<span style="color: red;">*</span></div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="companyCustomer.cpPhone" placeholder="业主单位联系电话" data-vv-name="业主单位联系电话" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-2.业主单位联系电话')}" />
+                        <span v-show="errors.has('form-2.业主单位联系电话')" class="help is-danger">{{ errors.first('form-2.业主单位联系电话') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-3 control-label">业主地址<span style="color: red;">*</span></div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="companyCustomer.cpAddress" placeholder="业主地址" data-vv-name="业主地址" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-2.业主地址')}" />
+                        <span v-show="errors.has('form-2.业主地址')" class="help is-danger">{{ errors.first('form-2.业主地址') }}</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/engineeringproject.js?_${date.systemTime}"></script>
+</body>
+
+</html>

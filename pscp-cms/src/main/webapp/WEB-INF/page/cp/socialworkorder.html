@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>社会工单</title>
+    #parse("sys/header.html")
+    <style>
+    h4 {
+        font-weight: bold;
+        margin: 1em 0 1em 1em;
+        font-size: 13px;
+    }
+    
+    .form-horizontal {
+        width: 100%;
+    }
+    
+    .query-hidden {
+        visibility: hidden;
+    }
+    
+    table,
+    th {
+        text-align: center;
+    }
+    
+    .form-horizontal .checkbox,
+    .form-horizontal .radio {
+        min-height: auto;
+    }
+    
+    .form-group {
+        margin-bottom: 0;
+    }
+    
+    .col-sm-6 {
+        padding-left: 2em;
+        margin-bottom: 3em;
+    }
+    
+    .col-sm-6 p {
+        margin-left: 2em;
+        font-size: 12px;
+    }
+    
+    #resume {
+        display: none;
+    }
+    
+    .fa.red {
+        color: #DD2727;
+        font-size: 16px;
+        cursor: pointer;
+    }
+    
+    .elspan.red {
+        color: #DD2727;
+    }
+    
+    table {
+        margin-bottom: 25px;
+    }
+    
+    img {
+        vertical-align: inherit;
+    }
+    
+    .upload-img {
+        margin-bottom: 0;
+    }
+    
+    .form-control-static {
+        padding-left: 2em;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <tabs>
+                <tab status="unpublish" name="未支付" selected="true" icon="fa-calendar-times-o"></tab>
+                <tab status="recruiting" name="招募中" icon="fa-calendar-check-o"></tab>
+                <tab status="recruitend" name="已招募" icon="fa fa-star-half-o"></tab>
+                <tab status="finished" name="已完成" icon="fa-star"></tab>
+                <tab status="liquidated" name="已结算" icon="fa-check-square-o"></tab>
+            </tabs>
+            <div class="grid-btn">
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="请输入工单名称" v-model="q.name" @keyup.enter="query">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="请输入项目名称" v-model="q.projectName" @keyup.enter="query">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="请输入业主单位" v-model="q.customerName" @keyup.enter="query">
+                </div>
+                <div id="startTime" 　style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="发布开始日期" v-model="q.startTime" >
+                    <span id="startTimeRemove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div id="endTime" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="发布结束日期" v-model="q.endTime">
+                    <span id="endTimeRemove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <a class="btn btn-default" @click="query" :class="{'query-hidden' : (statusInVm == 'finished'||statusInVm == 'liquidated')}">查询</a>
+            </div>
+            <div class="grid-btn" v-show="statusInVm == 'finished'||statusInVm == 'liquidated'">
+                <div id="finishStartTime" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="完成开始日期" v-model="q.finishStartTime">
+                    <span id="finishStartTimeRemove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div id="finishEndTime" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="完成结束日期" v-model="q.finishStartTime">
+                    <span id="finishEndTimeRemove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn" style="padding-left: 15px;">
+                <a class="btn btn-primary" v-show="statusInVm == 'unpublish' || statusInVm == 'recruiting'" @click="cancel"><i class="fa fa-trash-o"></i>&nbsp;取消</a>
+                <a class="btn btn-primary" @click="viewDetail"><i class="fa fa-eye"></i>&nbsp;查看</a>
+                <a class="btn btn-primary" @click="listPay" v-show="statusInVm == 'unpublish'"><i class="fa fa-credit-card"></i>&nbsp;支付</a>
+                <a class="btn btn-primary" @click="orderPay" v-show="statusInVm == 'finished'"><i class="fa fa-pencil-square-o"></i>&nbsp;结算</a>
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div>
+                        <div class="col-sm-6">
+                            <h4>工单信息</h4>
+                            <p class="form-control-static"><span>工单编号&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.orderId }}</span></p>
+                            <p class="form-control-static"><span>客户姓名&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.contacts }}</span></p>
+                            <p class="form-control-static"><span>项目名称&nbsp;:&nbsp;</span><span>{{ orderDetail.project.name }}</span></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>业主信息</h4>
+                            <p class="form-control-static"><span>业主单位&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.name }}</span></p>
+                            <p class="form-control-static"><span>业主单位负责人&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.contacts }}</span></p>
+                            <p class="form-control-static"><span>业主单位联系电话&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.contactNumber }}</span></p>
+                            <p class="form-control-static"><span>业主单位联系地址&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.address }}</span></p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-6">
+                            <h4>承修单位信息</h4>
+                            <p class="form-control-static"><span>承修单位&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.name }}</span></p>
+                            <p class="form-control-static"><span>承修单位负责人&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.contacts }}</span></p>
+                            <p class="form-control-static"><span>承修联系电话&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.contactNumber }}</span></p>
+                            <p class="form-control-static"><span>承修单位地址&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.address }}</span></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>检修详情</h4>
+                            <p class="form-control-static"><span>工单名称&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.name }}</span></p>
+                            <p class="form-control-static"><span>检修时间&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.startTime }}</span></p>
+                            <p class="form-control-static"><span>项目负责人&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrderLeader.name }}</span></p>
+                            <p class="form-control-static"><span>工单描述&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.content }}</span></p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div v-show="!showListRe" class="col-sm-12" style="padding-left: 15px;">
+                        <h4>响应社会电工信息</h4>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th><span>电工资质&nbsp;:&nbsp;</span><span>{{ orderDetail.details.certificate}}</span></th>
+                                <th><span>费用&nbsp;:&nbsp;</span><span>{{ orderDetail.details.fee}}(元/人/天)</span></th>
+                                <th><span>招募时间&nbsp;:&nbsp;</span><span>{{ orderDetail.details.startTime}}———{{ orderDetail.details.endTime}}</span></th>
+                                <th>电工简历</th>
+                                <th>操作</th>
+                                <th>确定人数</th>
+                            </tr>
+                            <tr v-for="(item,index) in orderDetail.socialElectricianList">
+                                <td colspan="3">{{ item.electricianname}} </td>
+                                <td><a class="btn btn-primary btn-xs" @click="getResumeInfo(item.electricianid)">查看</a></td>
+                                <td>
+                                    <div class="radio" style="padding-top: 0;">
+                                        <label>
+                                            <input type="radio" :name="'opetate' + index" @click="statusUnkown(item)" :checked="item.status == -1||item.status == 0" :disabled="item.status != 0" />
+                                            <span>待确认</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" :name="'opetate' + index" @click="statusPass(item)" :checked="item.status == 1||item.status == 2||item.status == 3||item.status == 4||item.status == 5" :disabled="item.status != 0" /><span>符合</span>
+                                        </label>
+                                        <label>
+                                            <input type="radio" :name="'opetate' + index" @click="statusFail(item)" :checked="item.status == -1" :disabled="item.status != 0" /><span>不符合</span>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td v-show="!index" :rowspan="orderDetail.socialElectricianList.length">{{ orderDetail.details.recruitNumber}}</td>
+                            </tr>
+                        </table>
+                        <div class="col-sm-12" style="margin-bottom: 15px;margin-top: 15px;text-align: center;">
+                            <input v-show="statusInVm != 'unpublish'&&needAuth" type="button" class="btn btn-primary" value="确认" @click="confirmOprate" /> &nbsp;&nbsp;
+                            <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                        </div>
+                    </div>
+                    <div v-show="!showListPay" class="col-sm-12" style="padding-left: 15px;">
+                        <h4>社会电工</h4>
+                        <div class="col-sm-12">
+                            <div v-for="(item,index) in orderDetail.electricianWorkOrderList" :key="index" :is="'socialWorkOrderList'" :vmdata="item" :index="index" @push-electrican-data="getElectricanData">
+                            </div>
+                            <div class="col-sm-12" style="margin-bottom: 15px;margin-top: 15px;text-align: center;">
+                                <input type="button" class="btn btn-primary" value="结算" @click="settlement" /> &nbsp;&nbsp;
+                                <input type="button" class="btn btn-warning" value="返回" @click="reload" />
+                            </div>
+                        </div>
+                    </div>
+            </form>
+            </div>
+            <div id="payType" style="display: none;" class="pay-type">
+                <div class="radio">
+                    <img src="${rc.contextPath}/statics/img/pay-wallet.png">
+                    <label>
+                        <input type="radio" :checked="payType===0||!payType" @click="chooseBalance"><span>余额</span><span style="color: #f60;font-size: 16px;">{{ amount }}</span>元
+                    </label>
+                </div>
+                <div class="radio">
+                    <img src="${rc.contextPath}/statics/img/alipay.png">
+                    <label>
+                        <input type="radio" :checked="payType===1" @click="chooseAlipay"><span>支付宝</span></label>
+                </div>
+                <div class="radio">
+                    <img src="${rc.contextPath}/statics/img/wepay.png">
+                    <label>
+                        <input type="radio" :checked="payType===2" @click="chooseWeChat"><span>微信支付</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div id="resume" style="display: none;">
+            <div class="col-sm-12">
+                <h4>个人信息</h4>
+                <p class="form-control-static"><span>姓名&nbsp;:&nbsp;</span><span>{{ resumeInfo.electricianInfo.userName }}</span></p>
+                <p class="form-control-static">
+                    <span>性别&nbsp;:&nbsp;</span>
+                    <span v-show="resumeInfo.electricianInfo.sex == 1">男</span>
+                    <span v-show="resumeInfo.electricianInfo.sex == 2">女</span>
+                    <span v-show="resumeInfo.electricianInfo.sex == 0">未设置</span>
+                </p>
+                <p class="form-control-static"><span>最高学历&nbsp;:&nbsp;</span><span>{{ resumeInfo.personalInfo.diploma }}</span></p>
+                <p class="form-control-static"><span>工作年限&nbsp;:&nbsp;</span><span>{{ resumeInfo.personalInfo.workingYears }}</span></p>
+                <p class="form-control-static"><span>所在城市&nbsp;:&nbsp;</span><span>{{ resumeInfo.personalInfo.city }}</span></p>
+                <p class="form-control-static"><span>联系电话&nbsp;:&nbsp;</span><span>{{ resumeInfo.electricianInfo.mobile }}</span></p>
+                <hr />
+            </div>
+            <div class="col-sm-12">
+                <h4>工作经历</h4>
+                <div v-for="(item,index) in resumeInfo.workExperiences">
+                    <p class="form-control-static"><span>公司名称&nbsp;:&nbsp;</span><span>{{ item.companyName }}</span></p>
+                    <p class="form-control-static"><span>工作时期&nbsp;:&nbsp;</span><span>{{ item.startTime }}——{{ item.endTime }}</span></p>
+                    <p class="form-control-static"><span>工作内容&nbsp;:&nbsp;</span><span>{{ item.workContent }}</span></p>
+                    <hr />
+                </div>
+            </div>
+            <div class="col-sm-12">
+                <h4>期望费用</h4>
+                <p class="form-control-static"><span>{{ resumeInfo.personalInfo.expectedFee }}</span></p>
+                <hr />
+            </div>
+            <div class="col-sm-12">
+                <h4>电工证书</h4>
+                <div>
+                    <ul class="upload-ul" style="padding-left: 2em;">
+                        <li class="upload-li" v-for=" (item,index) in resumeInfo.certificateImageList">
+                            <img :src="imgIp + item.fileid" class="upload-img" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="payTypeList" style="display: none;" class="pay-type">
+            <div class="radio">
+                <img src="${rc.contextPath}/statics/img/pay-wallet.png">
+                <label>
+                    <input type="radio" :checked="payType===0||!payType" @click="chooseBalance"><span>余额</span> <span style="color: #f60;font-size: 18px;">{{ amount }}</span>元
+                </label>
+            </div>
+            <div class="radio">
+                <img src="${rc.contextPath}/statics/img/alipay.png">
+                <label>
+                    <input type="radio" :checked="payType===1" @click="chooseAlipay"><span>支付宝</span></label>
+            </div>
+            <div class="radio">
+                <img src="${rc.contextPath}/statics/img/wepay.png">
+                <label>
+                    <input type="radio" :checked="payType===2" @click="chooseWeChat"><span>微信支付</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/socialworkorder.js?_${date.systemTime}"></script>
+</body>
+
+</html>

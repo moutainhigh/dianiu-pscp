@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.ElectricianCertificateDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.ElectricianCertificateEntity">
+		select * from pscp_electrician_certificate where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.ElectricianCertificateEntity">
+		select * from pscp_electrician_certificate where deleted=0 order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	<select id="getElectricianCertificates" resultType="com.edianniu.pscp.cms.entity.ElectricianCertificateEntity">
+		select * from pscp_electrician_certificate where deleted=0 and electrician_id=#{electricianId};
+		
+	</select>
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_certificate  where deleted=0
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.ElectricianCertificateEntity">
+		insert into pscp_electrician_certificate
+		(
+			id, 
+			electrician_id, 
+			certificate_id, 
+			order_num, 
+			status, 
+			remark, 
+			create_time, 
+			create_user, 		
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_electrician_certificate'), 
+			#{electricianId}, 
+			#{certificateId}, 
+			#{orderNum}, 
+			#{status}, 
+			#{remark}, 
+			now(), 
+			#{createUser}, 
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			select currval('seq_pscp_electrician_certificate') as id
+		</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.ElectricianCertificateEntity">
+		update pscp_electrician_certificate 
+		<set>
+			<if test="electricianId != null">electrician_id = #{electricianId}, </if>
+			<if test="certificateId != null">certificate_id = #{certificateId}, </if>
+			<if test="orderNum != null">order_num = #{orderNum}, </if>
+			<if test="status != null">status = #{status}, </if>
+			<if test="remark != null">remark = #{remark}, </if>			
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_electrician_certificate set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_electrician_certificate set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

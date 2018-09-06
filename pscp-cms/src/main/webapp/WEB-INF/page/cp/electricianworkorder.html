@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>电工工单管理</title>
+    #parse("sys/header.html")
+    <style>
+    h4 {
+        font-weight: bold;
+        margin: 0 0 1em 1em;
+        font-size: 13px;
+    }
+    
+    .form-horizontal {
+        width: 100%;
+    }
+    
+    .col-sm-6 {
+        padding-left: 2em;
+        margin-bottom: 3em;
+    }
+    
+    .col-sm-6 p {
+        margin-left: 2em;
+        font-size: 12px;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <tabs>
+                <tab status="unconfirm" name="未确认" selected="true" icon="fa-calendar-times-o"></tab>
+                <tab status="ongoing" name="进行中" icon="fa-calendar-check-o"></tab>
+                <tab status="unsettlement" name="待结算" icon="fa-star-half-o"></tab>
+                <tab status="finished" name="已完成" icon="fa-star"></tab>
+            </tabs>
+            <div class="grid-btn">
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.userName" @keyup.enter="query" placeholder="电工名称">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="电工手机号">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="工单名称">
+                </div>
+                <div class="col-sm-3" style="width: 20%;">
+                    <select v-model="q.customerId" class="form-control" @change="chooseCustomerId">
+                        <option selected value="0">选择客户</option>
+                        <option v-for="customer in companyCustomers" v-bind:value="customer.id">
+                            {{ customer.cpName}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-sm-3" style="width: 20%;">
+                    <select v-model="q.projectId" class="form-control">
+                        <option selected value="0">选择项目</option>
+                        <option v-for="project in companyProjects" v-bind:value="project.id">
+                            {{ project.name}}
+                        </option>
+                    </select>
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn" style="padding-left: 15px;">
+                #if($shiro.hasPermission("cp:workorder:electrician:info"))
+                <a class="btn btn-primary" @click="viewDetail"><i class="fa fa-eye"></i>&nbsp;查看</a> #end
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList&&showOrderDetail" class="panel panel-default">
+            <!-- <div class="panel-heading"><input type="button" class="btn btn-warning" @click="reload" value="返回"/>{{title}}</div> -->
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div>
+                        <div class="col-sm-6">
+                            <h4>工单信息</h4>
+                            <p class="form-control-static"><span>工单编号&nbsp;:{{orderDetail.orderId}}</span><span></span></p>
+                            <p class="form-control-static"><span>客户姓名&nbsp;:{{orderDetail.customerName}}</span><span></span></p>
+                            <p class="form-control-static"><span>项目名称&nbsp;:{{orderDetail.projectName}}</span><span></span></p>
+                            <p class="form-control-static"><span>发布时间&nbsp;:{{orderDetail.pubTime}}</span><span></span></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>承修单位信息</h4>
+                            <p class="form-control-static"><span>承修单位&nbsp;:{{companyInfo.name}}</span><span></span></p>
+                            <p class="form-control-static"><span>承修单位负责人&nbsp;:{{companyInfo.leader}}</span><span></span></p>
+                            <p class="form-control-static"><span>承修联系电话&nbsp;:{{companyInfo.contactTel}}</span><span></span></p>
+                            <p class="form-control-static"><span>承修单位地址&nbsp;:{{companyInfo.address}}</span><span></span></p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-6">
+                        	<h4>业主信息</h4>
+                            <p class="form-control-static"><span>业主单位&nbsp;:{{customerInfo.name}}</span><span></span></p>
+                            <p class="form-control-static"><span>业主单位负责人&nbsp;:{{customerInfo.leader}}</span><span></span></p>
+                            <p class="form-control-static"><span>业主单位联系电话&nbsp;:{{customerInfo.contactTel}}</span><span></span></p>
+                            <p class="form-control-static"><span>业主单位联系地址&nbsp;:{{customerInfo.address}}</span><span></span></p>
+                           
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>检修详情</h4>
+                            <p class="form-control-static"><span>工单名称&nbsp;:{{orderDetail.name}}</span><span></span></p>
+                            <p class="form-control-static"><span>检修时间&nbsp;:{{orderDetail.workTime}}</span><span></span></p>
+                            <p class="form-control-static"><span>项目负责人&nbsp;:{{orderDetail.projectLeader}}</span><span></span></p>
+                            <p class="form-control-static"><span>工单描述&nbsp;:{{orderDetail.content}}</span><span></span></p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-6">
+                            <h4>危险有害因素辨别</h4>
+                            <p class="form-control-static">
+                                <label v-for="hf in orderDetail.hazardFactor" v-if="hf.checked==1">
+                                    <input type="checkbox" checked disabled><span class="label label-danger" style="margin-right: 5px;"> {{hf.name}}</span>
+                                </label>
+                            </p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>安全措施</h4>
+                            <p class="form-control-static">
+                                <label v-for="sm in orderDetail.safetyMeasures" v-if="sm.checked==1" style="display: block;font-weight: normal;">
+                                    <input type="checkbox" checked disabled><span>{{sm.name}}</span>
+                                </label>
+                            </p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-6">
+                            <h4>携带机械或设备</h4>
+                            <p class="form-control-static">
+                                <span v-for="ct in orderDetail.carryingTools" class="label label-success" style="margin-right: 5px;">
+                                {{ct.name}}
+                            </span>
+                            </p>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-8" style="text-align: center;">
+                        <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div v-show="!showList&&showElectricianInfo" class="panel panel-default">
+            <div class="panel-heading">
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">资质&nbsp;:</div>
+                        <div class="col-sm-10">
+                            <span v-for="certificate in electricianInfo.certificates">
+                        {{certificate.name}}
+                       </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"></div>
+                        &nbsp;&nbsp;
+                        <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/electricianworkorder.js?_${date.systemTime}"></script>
+</body>
+
+</html>

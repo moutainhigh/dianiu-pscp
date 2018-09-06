@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>电工管理</title>
+    #parse("sys/header.html")
+</head>
+<style>
+.form-horizontal {
+    width: 100%;
+}
+
+.form-control-static {
+    margin-left: 45px;
+}
+
+.upload-ul {
+    margin-left: 50px;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+h4 {
+    font-weight: bold;
+    margin: 1em 0 1em 1em;
+    font-size: 13px;
+}
+</style>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <tabs>
+                <tab status="1" name="审核中" selected="true" icon="fa-star-half-o"></tab>
+                <tab status="2" name="审核通过" icon="fa-calendar-check-o"></tab>
+                <tab status="-1" name="审核失败" icon="fa-calendar-times-o"></tab>
+            </tabs>
+            <div class="grid-btn">
+                <div class="form-group col-sm-2" style="padding-left: 0;">
+                    <input type="text" class="form-control" v-model="q.userName" @keyup.enter="query" placeholder="电工名字">
+                </div>
+                <div class="form-group col-sm-2">
+                    <input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="手机号码">
+                </div>
+                <a class="btn btn-default" @click="query">查询</a> 
+                #if($shiro.hasPermission("electrician:audit"))
+                <a class="btn btn-primary" @click="getInfo" v-show="statusInVm == 1"><i class="fa fa-check-square-o"></i>&nbsp;审核</a>
+                #end 
+                #if($shiro.hasPermission("electrician:info"))
+                <a class="btn btn-primary" @click="getInfo" v-show="statusInVm != 1"><i class="fa fa-eye"></i>&nbsp;查看</a> 
+                #end
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <p class="form-control-static"><span style="color: red;">*</span>手机号:&nbsp;&nbsp;{{ electrician.mobile }}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <p class="form-control-static"><span style="color: red;">*</span>姓名:&nbsp;&nbsp;{{ electrician.userName }}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <p class="form-control-static"><span style="color: red;">*</span>性别:&nbsp;&nbsp;
+                            <span v-show="electrician.sex == 1">男</span>
+                            <span v-show="electrician.sex == 2">女</span>
+                            <span v-show="electrician.sex == 0">保密</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <p class="form-control-static"><span style="color: red;">*</span>年龄:&nbsp;&nbsp;{{ electrician.age }}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <p class="form-control-static"><span style="color: red;">*</span>身份证号码:&nbsp;{{ electrician.idCardNo }}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <p class="form-control-static"><span style="color: red;">*</span>身份证正面:&nbsp;</p>
+                        <ul class="upload-ul">
+                            <li class="upload-li" v-if="electrician.idCardFrontImgDo.imgUrl">
+                                <img :src="electrician.idCardFrontImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4">
+                        <p class="form-control-static"><span style="color: red;">*</span>身份证反面:&nbsp;&nbsp;</p>
+                        <ul class="upload-ul">
+                            <li class="upload-li" v-if="electrician.idCardBackImgDo.imgUrl">
+                                <img :src="electrician.idCardBackImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <p class="form-control-static"><span style="color: red;">*</span>电工证:&nbsp;&nbsp;</p>
+                        <ul class="upload-ul">
+                            <li id="testhaha" class="upload-li" v-for="(img,index) in electrician.certificateImgList" v-show="img.status!=-1">
+                                <img :src="img.imgUrl" class="upload-img" @click="imgEnlarge" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-sm-12 checkbox">
+                        <p class="form-control-static">
+                            <span style="color: red;">*</span>特种作业操作证:
+                        </p>
+                        <p class="form-control-static" style="padding-left: 25px;">
+                            <label v-for="(item,index) in electrician.certificates" v-if="item.type == 1">
+                                <input type="checkbox" :checked="item.selected" @click="setCertificate(index)" :disabled="statusInVm != 1" /><span>{{ item.name }}</span>
+                            </label>
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12 checkbox">
+                        <p class="form-control-static">
+                            <span style="color: red;">*</span>电工进网作业许可证:
+                        </p>
+                        <p class="form-control-static" style="padding-left: 25px;">
+                            <label v-for="(item,index) in electrician.certificates" v-if="item.type == 2">
+                                <input type="checkbox" :checked="item.selected" @click="setCertificate(index)" :disabled="statusInVm != 1" /><span>{{ item.name }}</span>
+                            </label>
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12 checkbox">
+                        <p class="form-control-static">
+                            <span style="color: red;">*</span>职业资格证书:
+                        </p>
+                        <p class="form-control-static" style="padding-left: 25px;">
+                            <label v-for="(item,index) in electrician.certificates" v-if="item.type == 3">
+                                <input type="checkbox" :checked="item.selected" @click="setCertificate(index)" :disabled="statusInVm != 1" /><span>{{ item.name }}</span>
+                            </label>
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-8">
+                        <p class="form-control-static"><span style="color: red;">*</span>审核失败原因:&nbsp;&nbsp;
+                            <textarea rows="3" class="form-control" v-model="electrician.remark" :readonly="statusInVm != 1" style="margin-left: 25px;"></textarea>
+                        </p>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 35px;margin-top: 30px;">
+                    <div class="col-sm-11 control-label" style="text-align: center;">
+                        <input type="button" class="btn btn-success" v-show="statusInVm == 1" value="审核通过" @click="audit(2)" /> &nbsp;&nbsp;
+                        <input type="button" class="btn btn-danger" v-show="statusInVm == 1" value="审核不通过" @click="audit(-1)" /> &nbsp;&nbsp;
+                        <input type="button" class="btn btn-warning" value="返回" @click="reload" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="resume" style="display: none;">
+            <div class="col-sm-12">
+                <h4>个人信息</h4>
+                <p class="form-control-static"><span>姓名&nbsp;:&nbsp;</span><span>{{ resumeInfo.electricianInfo.userName }}</span></p>
+                <p class="form-control-static">
+                    <span>性别&nbsp;:&nbsp;</span>
+                    <span v-show="resumeInfo.electricianInfo.sex == 1">男</span>
+                    <span v-show="resumeInfo.electricianInfo.sex == 2">女</span>
+                    <span v-show="resumeInfo.electricianInfo.sex == 0">未设置</span>
+                </p>
+                <p class="form-control-static"><span>联系电话&nbsp;:&nbsp;</span><span>{{ resumeInfo.electricianInfo.mobile }}</span></p>
+                <p class="form-control-static" v-show="resumeInfo.personalInfo.diploma"><span>最高学历&nbsp;:&nbsp;</span><span>{{ resumeInfo.personalInfo.diploma }}</span></p>
+                <p class="form-control-static" v-show="resumeInfo.personalInfo.workingYears"><span>工作年限&nbsp;:&nbsp;</span><span>{{ resumeInfo.personalInfo.workingYears }}</span></p>
+                <p class="form-control-static" v-show="resumeInfo.personalInfo.city"><span>所在城市&nbsp;:&nbsp;</span><span>{{ resumeInfo.personalInfo.city }}</span></p>
+                
+                <hr />
+            </div>
+            <div class="col-sm-12" v-show="resumeInfo.workExperiences && resumeInfo.workExperiences.length > 0">
+                <h4>工作经历</h4>
+                <div v-for="(item,index) in resumeInfo.workExperiences">
+                    <p class="form-control-static"><span>公司名称&nbsp;:&nbsp;</span><span>{{ item.companyName }}</span></p>
+                    <p class="form-control-static"><span>工作时期&nbsp;:&nbsp;</span><span>{{ item.startTime }}——{{ item.endTime }}</span></p>
+                    <p class="form-control-static"><span>工作内容&nbsp;:&nbsp;</span><span>{{ item.workContent }}</span></p>
+                    <hr />
+                </div>
+            </div>
+            <div class="col-sm-12" v-show="resumeInfo.personalInfo.expectedFee">
+                <h4>期望费用</h4>
+                <p class="form-control-static"><span>{{ resumeInfo.personalInfo.expectedFee }}</span></p>
+                <hr />
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/electrician.js?_${date.systemTime}"></script>
+</body>
+
+</html>

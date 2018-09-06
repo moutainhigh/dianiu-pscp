@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>${comments}</title>
+    #parse("sys/header.html")
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <div>
+                <ul class="nav nav-tabs">
+                    <li>
+                        <a href="../smstemplate/smstemplate.html"><i class="fa fa-paper-plane-o" ></i>短信模板</a>
+                    </li>
+                    <li class="active">
+                        <a><i class="fa fa-hourglass" ></i>短信记录</a>
+                    </li>
+                </ul>
+                <div class="grid-btn">
+                    <div class="col-sm-2" style="padding-left: 0;">
+                        <input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="请输入手机号码">
+                    </div>
+                    <a class="btn btn-default" @click="query">查询</a>
+                </div>
+
+            </div>
+
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="col-sm-2">短信ID:</div>
+                    <div class="col-sm-10">
+                        {{smsSendLog.msgId}}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2">手机号码:</div>
+                    <div class="col-sm-10">
+                        {{smsSendLog.mobile}}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2">短信内容:</div>
+                    <div class="col-sm-10">
+                        {{smsSendLog.content}}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2">发送时间:</div>
+                    <div class="col-sm-10">
+                        {{smsSendLog.createTime}}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-4"></div>
+                    <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/smssendlog.js?_${date.systemTime}"></script>
+</body>
+
+</html>

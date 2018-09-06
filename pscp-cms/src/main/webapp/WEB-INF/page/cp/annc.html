@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>资讯与公告管理</title>
+    #parse("sys/header.html")
+    <style>
+    .form-horizontal {
+        width: 100%;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <div>
+                <ul class="nav nav-tabs">
+                    <li>
+                        <a href="news.html"><i class="fa fa-paper-plane-o" ></i>资讯管理</a>
+                    </li>
+                    <li class="active">
+                        <a><i class="fa fa-hourglass" ></i>公告管理</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="grid-btn">
+                <a class="btn btn-primary" @click="add">
+                	<i class="fa fa-plus"></i>&nbsp;新增
+                </a>
+                <a class="btn btn-primary" @click="update">
+                	<i class="fa fa-pencil-square-o"></i>&nbsp;修改
+                </a>
+                <a class="btn btn-primary" @click="changeStatus">
+                    <i class="fa fa-filter"></i>&nbsp;上/下线
+                </a>
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        <span style="color: red;">*</span>
+                        <span>标题</span>
+                    </div>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" placeholder="请输入标题" v-model="news.title" data-vv-name="标题" v-validate="'required|max:128'" :class="{'is-danger': errors.has('标题')}" />
+                        <span v-show="errors.has('标题')" class="help is-danger">{{ errors.first('标题') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        <span style="color: red;">*</span>
+                        <span>内容简介</span>
+                    </div>
+                    <div class="col-sm-10">
+                        <textarea rows="3" class="form-control" placeholder="请输入内容简介" v-model="news.description" data-vv-name="内容" v-validate="'required'" :class="{'is-danger': errors.has('内容')}"></textarea>
+                        <span v-show="errors.has('内容')" class="help is-danger">{{ errors.first('内容') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        <span style="color: red;">*</span>
+                        <span>上下线:</span>
+                    </div>
+                    <div class="col-sm-10">
+                        <label class="radio-inline">
+                            <input type="radio" :checked="news.status == 1" @click="news.status = 1">上线
+                        </label>
+                        <label class="radio-inline">
+                          <input type="radio" :checked="news.status == 0" @click="news.status = 0">下线
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        <span style="color: red;">*</span>
+                        <span>排序号:</span>
+                    </div>
+                    <div class="col-sm-10">
+                        <input class="form-control" type="text" placeholder="数字越大,优先级越高" v-model="news.orderNum" data-vv-name="排序号" v-validate="'required|numeric'" :class="{'is-danger': errors.has('排序号')}" />
+                        <span v-show="errors.has('排序号')" class="help is-danger">{{ errors.first('排序号') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        <span style="color: red;">*</span>
+                        <span>内容:</span>
+                    </div>
+                    <div class="col-sm-10">
+                        <div id="editor">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12 control-label" style="text-align: center;">
+                        <input type="button" class="btn btn-primary" value="确定" @click="save" /> &nbsp;&nbsp;
+                        <input type="button" class="btn btn-warning" value="返回" @click="reload" />
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="${rc.contextPath}/js/cp/annc.js?_${date.systemTime}"></script>
+</body>
+
+</html>

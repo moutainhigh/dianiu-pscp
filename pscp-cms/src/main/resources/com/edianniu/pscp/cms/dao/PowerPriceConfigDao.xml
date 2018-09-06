@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.PowerPriceConfigDao">
+	
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.PowerPriceConfigEntity">
+		INSERT INTO pscp_company_power_price_config(
+			id,
+			type,
+			voltage_level,
+			charge_mode,
+			base_price,
+			apex_price,
+			peak_price,
+			flat_price,
+			valley_price,
+			apex_time_interval,
+			peak_time_interval,
+			flat_time_interval,
+			valley_time_interval,
+			base_charge_mode,
+			transformer_capacity_price,
+			max_capacity_price,
+			transformer_capacity,
+			max_capacity,
+			standard_adjust_rate,
+			charge_time_interval,
+			company_id,
+			create_time,
+			create_user,
+			deleted
+		)
+		VALUES(
+			nextval('seq_pscp_company_power_price_config'),
+			#{type},
+			#{voltageLevel},
+			#{chargeMode},
+			#{basePrice},
+			#{apexPrice},
+			#{peakPrice},
+			#{flatPrice},
+			#{valleyPrice},
+			#{apexTimeInterval},
+			#{peakTimeInterval},
+			#{flatTimeInterval},
+			#{valleyTimeInterval},
+			#{baseChargeMode},
+			#{transformerCapacityPrice},
+			#{maxCapacityPrice},
+			#{transformerCapacity},
+			#{maxCapacity},
+			#{standardAdjustRate},
+			#{chargeTimeInterval},
+			#{companyId},
+			#{createTime},
+			#{createUser},
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_company_power_price_config') AS id;
+		</selectKey>
+	</insert>
+	
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.PowerPriceConfigEntity">
+		UPDATE pscp_company_power_price_config
+		<set>
+			<if test="type != null">type = #{type},</if>
+			<if test="voltageLevel != null">voltage_level = #{voltageLevel},</if>
+			<if test="chargeMode != null">charge_mode = #{chargeMode},</if>
+			<if test="basePrice != null">base_price = #{basePrice},</if>
+			<if test="apexPrice != null">apex_price = #{apexPrice},</if>
+			<if test="peakPrice != null">peak_price = #{peakPrice},</if>
+			<if test="flatPrice != null">flat_price = #{flatPrice},</if>
+			<if test="valleyPrice != null">valley_price = #{valleyPrice},</if>
+			<if test="apexTimeInterval != null and apexTimeInterval.trim() != ''">apex_time_interval = #{apexTimeInterval},</if>
+			<if test="peakTimeInterval != null and peakTimeInterval.trim() != ''">peak_time_interval = #{peakTimeInterval},</if>
+			<if test="flatTimeInterval != null and flatTimeInterval.trim() != ''">flat_time_interval = #{flatTimeInterval},</if>
+			<if test="valleyTimeInterval != null and valleyTimeInterval.trim() != ''">valley_time_interval = #{valleyTimeInterval},</if>
+			<if test="baseChargeMode != null">base_charge_mode = #{baseChargeMode},</if>
+			<if test="transformerCapacityPrice != null">transformer_capacity_price = #{transformerCapacityPrice},</if>
+			<if test="maxCapacityPrice != null">max_capacity_price = #{maxCapacityPrice},</if>
+			<if test="transformerCapacity != null">transformer_capacity = #{transformerCapacity},</if>
+			<if test="maxCapacity != null">max_capacity = #{maxCapacity},</if>
+			<if test="standardAdjustRate != null">standard_adjust_rate = #{standardAdjustRate},</if>
+			<if test="chargeTimeInterval != null">charge_time_interval = #{chargeTimeInterval},</if>
+			<if test="companyId != null">company_id = #{companyId},</if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+			<if test="modifiedUser != null and modifiedUser.trim() != ''">modified_user = #{modifiedUser},</if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		WHERE deleted = 0 AND id = #{id}
+	</update>
+	
+	<select id="queryObject" parameterType="java.lang.Long"
+			resultType="com.edianniu.pscp.cms.entity.PowerPriceConfigEntity">
+		SELECT * FROM pscp_company_power_price_config
+		WHERE deleted = 0 AND company_id = #{companyId}
+	</select>
+	
+	
+</mapper>

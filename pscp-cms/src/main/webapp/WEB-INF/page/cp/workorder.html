@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>工单管理</title>
+    #parse("sys/header.html")
+    <style>
+    .form-horizontal {
+        width: 100%;
+    }
+    
+    ul>li {
+        display: inline-block;
+    }
+    
+    .fa.grey {
+        color: #737373;
+    }
+    
+    .fa.yel {
+        color: #FAB54D;
+    }
+    
+    .fa.red {
+        color: #DD2727;
+        font-size: 16px;
+    }
+    
+    .elspan.red {
+        color: #DD2727;
+    }
+    
+    #mapChoose,
+    #allmap {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .form-control-static {
+        padding-left: 16.66666667%;
+        font-size: 12px;
+    }
+    .record .form-control-static{
+        padding-left: 0;
+    }
+    
+    h4 {
+        font-weight: bold;
+        margin: 1em 0 1em 1em;
+        font-size: 14px;
+    }
+    
+    .form-control.identification-text {
+        display: inline-block;
+        width: auto;
+        padding: 0;
+        height: auto;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList&&showDetailInfo">
+            <tabs>
+                <tab status="unconfirm" name="未确认" selected="true" icon="fa-calendar-times-o"></tab>
+                <tab status="confirmed" name="已确认" icon="fa-calendar-check-o"></tab>
+                <tab status="started" name="已开始" icon="fa-star-half-o"></tab>
+                <tab status="completed" name="已完成" icon="fa-star"></tab>
+            </tabs>
+            <div class="grid-btn">
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="请输入工单名称" v-model="q.name" @keyup.enter="query">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="请输入项目名称" v-model="q.projectName" @keyup.enter="query">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="请输入业主单位" v-model="q.customerName" @keyup.enter="query">
+                </div>
+                <div id="date-start" style="width: 20%;" class="input-group date form_datetime col-sm-3 query" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                    <input id="date-start-remove" class="form-control" size="16" type="text" readonly placeholder="发布开始日期">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div id="date-end" style="width: 20%;" class="input-group date form_datetime col-sm-3 query" data-date-format="yyyy-mm-dd" data-link-field="dtp_input1">
+                    <input id="date-end-remove" class="form-control" size="16" type="text" readonly placeholder="发布结束日期">
+                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn" style="padding-left: 15px;">
+                #if($shiro.hasPermission("cp:workorder:save"))
+                <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;派单</a> #end #if($shiro.hasPermission("cp:workorder:update"))
+                <a v-if="statusInVm != 'completed'" class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a> #end #if($shiro.hasPermission("cp:workorder:recruit"))
+                <a v-if="statusInVm != 'completed'" class="btn btn-primary" @click="recruit"><i class="fa fa-id-badge"></i>&nbsp;招募社电</a> #end
+                <a v-if="statusInVm == 'completed'" class="btn btn-primary" @click="getRecord"><i class="fa fa-asterisk"></i>&nbsp;工作记录</a>
+                <a v-if="statusInVm == 'completed'" class="btn btn-primary" @click="evaluate"><i class="fa fa-hand-o-up"></i>&nbsp;工作评价</a>
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList" class="panel panel-default" contenteditable="false">
+            <div style="position: relative;">
+                <div class="panel-heading">工单信息详情</div>
+                <form class="form-horizontal" data-vv-scope="form-1">
+                    <h4>业主信息</h4>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>工单编号:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.orderId" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>选择客户:</div>
+                        <div class="col-sm-2">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" @click="getCustomers" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :disabled="updateReadonly||havingCustomer" :class="{'is-danger': errors.has('form-1.客户信息')}">
+                                    {{ workorder.customerInfo.contact }}<span class="caret"></span>
+                                </button>
+                                <input type="hidden" v-model="workorder.customerInfo.contact" data-vv-name="客户信息" v-validate="'required'">
+                                <ul class="dropdown-menu">
+                                    <li v-for="(item,index) in customers">
+                                        <a @click="changeCustomerInfo(index)">{{ item.contact }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>选择项目:</div>
+                        <div class="col-sm-2">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" @click="getProjects" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :disabled="updateReadonly||havingCustomer" :class="{'is-danger': errors.has('form-1.项目信息')}">
+                                    {{ workorder.projectInfo.name }}<span class="caret"></span>
+                                </button>
+                                <input type="hidden" v-model="workorder.projectInfo.id" data-vv-name="项目信息" v-validate="'required'">
+                                <ul class="dropdown-menu" v-for="(item,index) in projects">
+                                    <li>
+                                        <a @click="changeProjectInfo(index)">{{ item.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>业主单位:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.customerInfo.name" readonly />
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>业主单位负责人:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.customerInfo.contact" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>业主单位联系电话:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.customerInfo.phone" readonly />
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>业主单位联系地址:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.customerInfo.address" readonly />
+                        </div>
+                    </div>
+                    <hr />
+                    <h4>承修单位信息</h4>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>承修单位:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.facilitator.name" readonly />
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>承修单位负责人:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.facilitator.contacts" readonly />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>承修单位联系电话:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="workorder.facilitator.phone" readonly />
+                        </div>
+                    </div>
+                    <hr />
+                    <h4>工单信息</h4>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>工单名称:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" placeholder="请输入工单名称" v-model="workorder.name" data-vv-name="工单名称" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.工单名称')}" />
+                            <span v-show="errors.has('form-1.工单名称')" class="help is-danger">{{ errors.first('form-1.工单名称') }}</span>
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>检修日期:</div>
+                        <div class="col-sm-2">
+                            <input id="fixStartDate" class="form-control form_datetime fix" size="16" type="text" readonly data-date-format="yyyy-mm-dd" placeholder="请输入检修开始日期" :class="{'is-danger': errors.has('form-1.检修开始日期')}" :value="workorder.startTime" />
+                            <input type="hidden" v-model="workorder.startTime" data-vv-name="检修开始日期" v-validate="'required'" />
+                        </div>
+                        <div class="col-sm-2">
+                            <input id="fixEndDate" class="form-control form_datetime fix" size="16" type="text" readonly data-date-format="yyyy-mm-dd" placeholder="请输入检修结束日期" :class="{'is-danger': errors.has('form-1.检修结束日期')}" :value="workorder.endTime" />
+                            <input type="hidden" v-model="workorder.endTime" data-vv-name="检修结束日期" v-validate="'required'" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>工作地点:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" placeholder="请输入工作地点" v-model="workorder.address" data-vv-name="工作地点" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.工作地点')}" />
+                            <span v-show="errors.has('form-1.工作地点')" class="help is-danger">{{ errors.first('form-1.工作地点') }}</span>
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>选择地点:</div>
+                        <div class="col-sm-2">
+                            <button type="button" class="btn btn-primary" @click="chooseMap"><i class="fa fa-map-marker" aria-hidden="true"></i></button>
+                            <span v-if="workorder.longitude" class="control-label" v-text="workorder.longitude + ',' + workorder.latitude "></span>
+                            <span v-show="errors.has('form-1.选择地点')" class="help is-danger">{{ errors.first('form-1.选择地点') }}</span>
+                            <input type="hidden" v-model="workorder.longitude" data-vv-name="选择地点" v-validate="'required'">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>项目负责人:</div>
+                        <div class="col-sm-2">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('form-1.项目负责人')}">
+                                    {{ leaderIdLabel }}<span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li v-for="(item,index) in electricianOptions">
+                                        <a @click="chooseLeader(index)">{{ item.name }}</a>
+                                    </li>
+                                </ul>
+                                <input type="hidden" v-model="workorder.leaderId" data-vv-name="项目负责人" v-validate="'required'">
+                            </div>
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>工单描述:</div>
+                        <div class="col-sm-2">
+                            <textarea class="form-control" rows="3" v-model="workorder.content" placeholder="请输入工单描述" data-vv-name="工单描述" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.工单描述')}"></textarea>
+                            <span v-show="errors.has('form-1.工单描述')" class="help is-danger">{{ errors.first('form-1.工单描述') }}</span>
+                        </div>
+                    </div>
+                    <hr />
+                </form>
+                <form class="form-horizontal">
+                    <div v-for="(item,index) in workorder.electricianWorkOrderList" :key="index" :is="item.component.componentName" :index="index" :mydata="item.component" v-if="item.component.status != -1" @add-overhaul="listenAdd" @remove-overhaul="listenRemove" @push-overhaul-data="getOverhaulData">
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">危险有害因素辨别:</div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-6 checkbox">
+                            <label v-for="(item,index) in workorder.identifications" style="margin-bottom: 5px;">
+                                <input type="checkbox" :checked="item.checked === 1" @click="checkIdentification(index,workorder.identifications.length)"><span> {{ item.name }} </span>
+                                <input class="form-control identification-text" type="text" v-if="index === (workorder.identifications.length - 1) && workorder.identifications[workorder.identifications.length-1].checked === 1" v-model="workorder.identificationText" />
+                            </label>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">安全措施:</div>
+                    </div>
+                    <div class="form-group" v-for="(item,index) in workorder.safetyMeasures" style="margin-bottom: 5px;">
+                        <div class="col-sm-2">
+                        </div>
+                        <div class="col-sm-10 checkbox">
+                            <label>
+                                <input type="checkbox" :checked="item.checked === 1" @click="checkMeasure(index,workorder.safetyMeasures.length)"><span>{{ item.name }}</span>
+                            </label>
+                            <textarea class="form-control measure-textarea" rows="3" v-show="index === (workorder.safetyMeasures.length - 1)&&workorder.safetyMeasures[workorder.safetyMeasures.length-1].checked === 1" v-model="workorder.measureText"></textarea>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">携带机械或设备:</div>
+                        <div class="col-sm-2">
+                            <v-select multiple :options="toolequipmentOptions" v-model="workorder.toolequipmentInfo" placeholder="请选择携带机械或设备" label="name"></v-select>
+                            <!-- <input type="hidden" v-model="workorder.toolequipmentInfo" data-vv-name="携带机械或设备" v-validate="'required'" >
+                            <span v-show="errors.has('form-1.携带机械或设备')" class="help is-danger">{{ errors.first('form-1.携带机械或设备') }}</span> -->
+                        </div>
+                    </div>
+                    <div>
+                        <hr v-if="!updateReadonly" />
+                        <div class="form-group" v-if="!updateReadonly">
+                            <div class="col-sm-2 control-label">派单社会电工:</div>
+                            <div class="col-sm-2 radio">
+                                <label>
+                                    <input type="radio" @click="havingToTrue" name="isHaving" :checked="isHaving == 1"><span>是</span>
+                                </label>
+                                <label>
+                                    <input type="radio" @click="havingToFalse" name="isHaving" :checked="isHaving == 0"><span>否</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div v-if="isHaving">
+                            <div v-for="(item,index) in workorder.recruitList" :key="index" :is="item.component.componentName" :options="certificateOptions" :index="index" :mydata="item.component" v-if="item.component.status != -1" :isreadonly="updateReadonly" @add-electrican="listenAddElectrican" @remove-electrican="listenRemoveElectrican" @push-electrican-data="getElectricanData" @push-quantity="listenQuantity" @push-fee="listenFee" @push-start="listenStart" @push-end="listenEnd">
+                            </div>
+                            <div class="form-group" v-if="!updateReadonly">
+                                <div class="col-sm-2 control-label">
+                                    <span style="color: red;">*</span>预支付费用:
+                                </div>
+                                <div class="col-sm-2">
+                                    <input type="text" class="form-control" v-model="allFee" readonly />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-show="!showSocialWorkOrder" class="form-group">
+                        <div>
+                            <hr>
+                            <h4>社会工单招募信息</h4>
+                            <div v-for="(item,index) in socialWorkOrderView">
+                                <p class="form-control-static"><span>标题&nbsp;:&nbsp;</span><span style="font-weight: 700;font-size: 14px;">{{ item.title }}</span></p>
+                                <p class="form-control-static"><span>电工资质&nbsp;:&nbsp;</span><span v-for="(smallItem,myindex) in item.qualifications" class="label label-success" style="margin-right: 5px;">{{ smallItem }}</span></p>
+                                <p class="form-control-static"><span>人数&nbsp;:&nbsp;</span><span>{{ item.quantity }}</span></p>
+                                <p class="form-control-static"><span>费用(元/人/天)&nbsp;:&nbsp;</span><span class="label label-danger">{{ item.fee }}</span></p>
+                                <p class="form-control-static"><span>需求描述&nbsp;:&nbsp;</span><span>{{ item.content }}</span></p>
+                                <p class="form-control-static"><span>工作日期&nbsp;:&nbsp;</span><span>{{ item.beginWorkTime }}——{{ item.endWorkTime }}</span></p>
+                                <p class="form-control-static"><span>派单截止日期&nbsp;:&nbsp;</span><span>{{ item.expiryTime }}</span></p>
+                                <hr v-if="!(index == socialWorkOrderView.length - 1)">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-12" style="text-align: center;margin-top: 15px;">
+                    <input type="button" class="btn btn-primary" value="保存" @click="save" />
+                    <input type="button" class="btn btn-warning" value="返回" @click="reload" />
+                </div>
+            </div>
+        </div>
+        <div v-show="!showDetailInfo" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <div>
+                        <div class="col-sm-6">
+                            <h4>工单信息</h4>
+                            <p class="form-control-static"><span>工单编号&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.orderId }}</span></p>
+                            <p class="form-control-static"><span>客户姓名&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.contacts }}</span></p>
+                            <p class="form-control-static"><span>项目名称&nbsp;:&nbsp;</span><span>{{ orderDetail.projectVO.name }}</span></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>业主信息</h4>
+                            <p class="form-control-static"><span>业主单位&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.name }}</span></p>
+                            <p class="form-control-static"><span>业主单位负责人&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.contacts }}</span></p>
+                            <p class="form-control-static"><span>业主单位联系电话&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.contactNumber }}</span></p>
+                            <p class="form-control-static"><span>业主单位联系地址&nbsp;:&nbsp;</span><span>{{ orderDetail.customer.address }}</span></p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-6">
+                            <h4>承修单位信息</h4>
+                            <p class="form-control-static"><span>承修单位&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.name }}</span></p>
+                            <p class="form-control-static"><span>承修单位负责人&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.contacts }}</span></p>
+                            <p class="form-control-static"><span>承修联系电话&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.contactNumber }}</span></p>
+                            <p class="form-control-static"><span>承修单位地址&nbsp;:&nbsp;</span><span>{{ orderDetail.facilitator.address }}</span></p>
+                        </div>
+                        <div class="col-sm-6">
+                            <h4>工单详情</h4>
+                            <p class="form-control-static"><span>工单名称&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.name }}</span></p>
+                            <p class="form-control-static"><span>检修日期&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.startTime }}——{{ orderDetail.workOrder.endTime }} </span></p>
+                            <p class="form-control-static"><span>工作地点&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.address }}</span></p>
+                            <p class="form-control-static"><span>地点经纬度&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.latitude }},{{ orderDetail.workOrder.longitude }}</span></p>
+                            <p class="form-control-static"><span>项目负责人&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrderLeader.name }}</span></p>
+                            <p class="form-control-static"><span>工单描述&nbsp;:&nbsp;</span><span>{{ orderDetail.workOrder.content }}</span></p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-12">
+                            <h4>检修信息</h4>
+                            <div v-for=" item in orderDetail.companyWorkOrder">
+                                <p class="form-control-static"><span>检修名称&nbsp;:&nbsp;</span><span>{{ item.projectName }}</span></p>
+                                <p class="form-control-static"><span>检修人员&nbsp;:&nbsp;</span><span v-for="child in item.electrician">{{child.name}}&nbsp;&nbsp;</span></p>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <h4>危险有害因素辨别</h4>
+                            <p class="form-control-static">
+                                <label v-for="hf in orderDetail.hazardFactorIdentifications" v-show="hf.checked==1">
+                                    <input type="checkbox" checked disabled><span class="label label-danger" style="margin-right: 5px;"> {{hf.name}}</span>
+                                </label>
+                            </p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-12">
+                            <h4>安全措施</h4>
+                            <p class="form-control-static">
+                                <label v-for="sf in orderDetail.safetyMeasures" v-show="sf.checked==1" style="display: block;">
+                                    <input type="checkbox" checked disabled><span style="margin-right: 5px;"> {{sf.name}}</span>
+                                </label>
+                            </p>
+                        </div>
+                        <div class="col-sm-12">
+                            <h4>携带机械或设备</h4>
+                            <p class="form-control-static">
+                                <span v-for="ct in orderDetail.carryingTools" class="label label-success" style="margin-right: 5px;">
+                                {{ct.name}}
+                            </span>
+                            </p>
+                        </div>
+                        <hr>
+                    </div>
+                    <div>
+                        <div class="col-sm-12">
+                            <h4>社会工单招募信息</h4>
+                            <div v-for="(item,index) in orderDetail.socialWorkOrderList" style="margin-bottom: 25px;">
+                                <p class="form-control-static"><span>标题&nbsp;:&nbsp;</span><span style="font-weight: 700;font-size: 14px;">{{ item.title }}</span></p>
+                                <p class="form-control-static"><span>电工资质&nbsp;:&nbsp;</span><span>{{ item.qualifications }}</span></p>
+                                <p class="form-control-static"><span>人数&nbsp;:&nbsp;</span><span>{{ item.quantity }}</span></p>
+                                <p class="form-control-static"><span>费用(元/人/天)&nbsp;:&nbsp;</span><span class="label label-danger">{{ item.fee }}</span></p>
+                                <p class="form-control-static"><span>需求描述&nbsp;:&nbsp;</span><span>{{ item.content }}</span></p>
+                                <p class="form-control-static"><span>工作日期&nbsp;:&nbsp;</span><span>{{ item.beginWorkTime }}——{{ item.endWorkTime }}</span></p>
+                                <p class="form-control-static"><span>派单截止日期&nbsp;:&nbsp;</span><span>{{ item.expiryTime }}</span></p>
+                                <hr v-if="!(index == orderDetail.socialWorkOrderList.length -1)">
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="!showListRecord&&showPage">
+                        <div class="col-sm-12">
+                            <h4>电工工作记录</h4>
+                            <div v-for="item in workRecord">
+                                <div class="col-sm-4 record" style="padding-left: 16.666667%">
+                                    <p class="form-control-static">电工姓名&nbsp;:&nbsp;{{ item.electricianName }}</p>
+                                    <p class="form-control-static">创建日期&nbsp;:&nbsp;{{ item.createTime }}</p>
+                                    <p class="form-control-static">工作描述&nbsp;:&nbsp;{{ item.content }}</p>
+                                    <p class="form-control-static">现场图片&nbsp;:&nbsp;
+                                        <ul class="upload-ul" v-if="item.attachmentList.length > 0" style=" display: inline-block;padding-left: 16.666667%">
+                                            <li class="upload-li" v-for="img in item.attachmentList">
+                                                <img :src="imgIp + img.fid" class="upload-img" />
+                                            </li>
+                                        </ul>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-10" style="text-align: right;margin-right: 25px;">
+                            <page v-show="showPage"></page>
+                        </div>
+                    </div>
+                    <div v-show="!showEvaluation">
+                        <div class="col-sm-12">
+                            <h4>工单评价</h4>
+                            <p class="form-control-static">
+                                <span>服务态度&nbsp;:&nbsp;</span>
+                                <i class="fa red" v-for="(item,index) in 5" :class="{'fa-star': index < evaluation.serviceQuality,'fa-star-o': index >= evaluation.serviceQuality}"></i>&nbsp;&nbsp;&nbsp;
+                                <span v-show="evaluation.serviceQuality == 1" class="elspan red">失望</span>
+                                <span v-show="evaluation.serviceQuality == 2" class="elspan red">不满</span>
+                                <span v-show="evaluation.serviceQuality == 3" class="elspan red">一般</span>
+                                <span v-show="evaluation.serviceQuality == 4" class="elspan red">满意</span>
+                                <span v-show="evaluation.serviceQuality == 5" class="elspan red">惊喜</span></span>
+                            </p>
+                            <p class="form-control-static">
+                                <span>服务速度&nbsp;:&nbsp;</span>
+                                <i class="fa red" v-for="(item,index) in 5" :class="{'fa-star': index < evaluation.serviceSpeed,'fa-star-o': index >=evaluation.serviceSpeed}"></i> &nbsp;&nbsp;&nbsp;
+                                <span v-show="evaluation.serviceSpeed == 1" class="elspan red">失望</span>
+                                <span v-show="evaluation.serviceSpeed == 2" class="elspan red">不满</span>
+                                <span v-show="evaluation.serviceSpeed == 3" class="elspan red">一般</span>
+                                <span v-show="evaluation.serviceSpeed == 4" class="elspan red">满意</span>
+                                <span v-show="evaluation.serviceSpeed == 5" class="elspan red">惊喜</span>
+                            </p>
+                            <p class="form-control-static">
+                                <span>评价描述&nbsp;:&nbsp;</span>
+                                <span>{{ evaluation.content }}</span>
+                            </p>
+                            <p class="form-control-static">
+                                <span>评价图片&nbsp;:&nbsp;</span>
+                                <ul class="upload-ul" v-if="evaluationImgListLength > 0">
+                                    <li class="upload-li" v-for="(img,index) in evaluation.evaluationImgList" v-if="img.status!=-1">
+                                        <img :src="img.imgUrl" class="upload-img" />
+                                    </li>
+                                </ul>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12" style="text-align: center;margin-top: 15px;">
+                            <input type="button" class="btn btn-warning" value="返回" @click="reload" />
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="mapChoose" style="display: none;">
+            <div id="allmap"></div>
+        </div>
+        <div id="payType" style="display: none;" class="pay-type">
+            <div class="radio">
+                <img src="${rc.contextPath}/statics/img/pay-wallet.png">
+                <label>
+                    <input type="radio" :checked="payType===0||!payType" @click="chooseBalance"><span>余额</span><span style="color: #f60;font-size: 16px;">{{ amount }}</span>元
+                </label>
+            </div>
+            <div class="radio">
+                <img src="${rc.contextPath}/statics/img/alipay.png">
+                <label>
+                    <input type="radio" :checked="payType===1" @click="chooseAlipay"><span>支付宝</span></label>
+            </div>
+            <div class="radio">
+                <img src="${rc.contextPath}/statics/img/wepay.png">
+                <label>
+                    <input type="radio" :checked="payType===2" @click="chooseWeChat"><span>微信支付</span>
+                </label>
+            </div>
+        </div>
+    </div>
+    <script type="text/x-template" id="page">
+        <ul class="pagination">
+            <li v-show="current != 1" @click="current-- && goto(current)"><a>上一页</a></li>
+            <li v-for="index in pages" @click="goto(index)" :class="{'active':current == index}" :key="index">
+                <a>{{index}}</a>
+            </li>
+            <li v-show="allpage != current && allpage != 0 " @click="current++ && goto(current++)"><a>下一页</a></li>
+        </ul>
+    </script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=fNvowSBXwhZgg7YkLsP1PHFy"></script>
+    <script src="${rc.contextPath}/js/cp/workorder.js?_${date.systemTime}"></script>
+</body>
+
+</html>

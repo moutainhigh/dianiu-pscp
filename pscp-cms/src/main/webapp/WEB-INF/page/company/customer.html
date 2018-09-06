@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>客户管理</title>
+    #parse("sys/header.html")
+</head>
+<style>
+.form-horizontal {
+    width: 100%;
+}
+
+.form-horizontal input.form-control {
+    border: none;
+}
+
+.col-sm-2 {
+    padding-left: 0;
+}
+
+.upload-ul {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-left: 50px;
+}
+
+.form-control-static {
+    padding-left: 45px;
+    /* display: inline-block; */
+}
+.form-group{
+    margin-bottom: 0;
+}
+</style>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <tabs>
+                <tab status="1" name="审核中" selected="true" icon="fa-star-half-o"></tab>
+                <tab status="2" name="审核通过" icon="fa-calendar-check-o"></tab>
+                <tab status="-1" name="审核失败" icon="fa-calendar-times-o"></tab>
+            </tabs>
+            <div class="grid-btn">
+            	<div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.memberMobile" @keyup.enter="query" placeholder="登录手机号">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="公司名称">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.contacts" @keyup.enter="query" placeholder="联系人">
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="联系人手机号">
+                    <input type="hidden" class="form-control" v-model="q.memberType" value="customer">
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn">
+                #if($shiro.hasPermission("company:audit"))
+                <a class="btn btn-primary" @click="companyInfo" v-show="statusInVm == 1"><i class="fa fa-check-square-o"></i>&nbsp;审核</a>
+                #end
+                #if($shiro.hasPermission("company:info"))
+                <a class="btn btn-primary" @click="companyInfo" v-show="statusInVm != 1"><i class="fa fa-eye"></i>&nbsp;查看</a> 
+                #end
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList">
+            <div class="panel panel-default">
+                <form class="form-horizontal">
+                    <div class="form-part">
+                        <h4>基本信息</h4>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>企业名称&nbsp;:&nbsp;{{ company.name }}</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>平台用户名&nbsp;:&nbsp;{{ company.userName }}</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>营业执照&nbsp;:&nbsp;</p>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-show="company.businessLicenceImgDo.imgUrl">
+                                        <img :src="company.businessLicenceImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>组织机构代码证&nbsp;:&nbsp;</p>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-show="company.organizationCodeImgDo.imgUrl">
+                                        <img :src="company.organizationCodeImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>营业执照注册号&nbsp;:&nbsp;{{ company.businessLicence }}</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-12">
+                                <p class="form-control-static"><span style="color: red;">*</span>企业承修资质&nbsp;:&nbsp;</p>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-for="(img,index) in company.enterpriseQualificationImgList" v-show="img.status!=-1">
+                                        <img :src="img.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>公司地址&nbsp;:&nbsp; {{ province.name }}{{ city.name }}{{ area.name }}&nbsp;&nbsp; {{ company.address }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static">官网地址&nbsp;:&nbsp;
+                                    <a :href="company.website" target="_blank">{{ company.website }}</a>
+                                </p>
+                            </div>
+                        </div>
+                        <hr class="hr" />
+                        <h4>联系方式</h4>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>联系人&nbsp;:&nbsp;{{ company.contacts }}</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>手机号码&nbsp;:&nbsp;{{ company.mobile }}</p>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>座机号码&nbsp;:&nbsp;{{ company.phone }}</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>企业申请公函&nbsp;:&nbsp;</p>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-show="company.applicationLetterFidImgDo.imgUrl">
+                                        <img :src="company.applicationLetterFidImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>委托人/法人身份证正面&nbsp;:&nbsp;</p>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-show="company.idCardFrontImgDo.imgUrl">
+                                        <img :src="company.idCardFrontImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-sm-4">
+                                <p class="form-control-static"><span style="color: red;">*</span>委托人/法人身份证反面&nbsp;:&nbsp;</p>
+                                <ul class="upload-ul">
+                                    <li class="upload-li" v-show="company.idCardBackImgDo.imgUrl">
+                                        <img :src="company.idCardBackImgDo.imgUrl" class="upload-img" @click="imgEnlarge" />
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-8">
+                                <p class="form-control-static"><span style="color: red;">*</span> 委托人/法人身份证号码&nbsp;:&nbsp;
+                                     <textarea rows="1" class="form-control" v-model="company.idCardNo" :readonly="statusInVm != 1" style="width: 100%;"></textarea>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-8">
+                                <p class="form-control-static"><span style="color: red;">*</span> 审核失败原因&nbsp;:&nbsp;
+                                     <textarea rows="3" class="form-control" v-model="company.remark" :readonly="statusInVm != 1" style="width: 100%;"></textarea>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-11 control-label" style="text-align: center;margin-bottom: 15px;">
+                                <input type="button" class="btn btn-success" value="审核通过" v-show="statusInVm == 1" @click="audit(2)" /> &nbsp;&nbsp;
+                                <input type="button" class="btn btn-danger" value="审核不通过" v-show="statusInVm == 1" @click="audit(-1)" /> &nbsp;&nbsp;
+                                <input type="button" class="btn btn-warning" value="返回" @click="reload" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/company/company.js?_${date.systemTime}&memberType=customer"></script>
+</body>
+
+</html>

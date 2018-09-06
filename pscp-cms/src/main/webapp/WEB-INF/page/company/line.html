@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>线路</title>
+    #parse("sys/header.html")
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="!showAdd&&!showUpdate">
+            <div>
+                <ul class="nav nav-tabs">
+                    <li>
+                        <a href="${rc.contextPath}/companyBuilding/index.html">
+                            <i class="fa fa-building-o"></i>客户楼宇</a>
+                    </li>
+                    <li>
+                        <a href="${rc.contextPath}/companyEquipment/index.html">
+                            <i class="fa fa-plug"></i>客户设备</a>
+                    </li>
+                    <li>
+                        <a href="${rc.contextPath}/companyMeter/index.html">
+                            <i class="fa fa-pinterest-p"></i>采集点管理</a>
+                    </li>
+                    <li class="active">
+                        <a href="${rc.contextPath}/companyLine/index.html">
+                            <i class="fa fa-link"></i>客户路线</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="grid-btn">
+                <div class="form-group col-sm-2" style="padding-left: 0;">
+                    <select class="form-control" v-model="q.companyName" @change="query">
+                        <option :value="''">请选择客户</option>
+                        <option :value="item.name" v-for="item in companyNameOptions">{{ item.name }}</option>
+                    </select>
+                </div>
+                <div class="form-group col-sm-2">
+                    <input type="text" class="form-control" v-model="q.mobile" @keyup.enter="query" placeholder="请输入手机号码">
+                </div>
+
+                <a class="btn btn-default" @click="query">查询</a>
+                <a class="btn btn-primary" @click="add">
+                    <i class="fa fa-plus"></i>&nbsp;新增线路</a>
+            </div>
+
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+
+        <div v-if="showAdd" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal" style="width: 100%;" data-vv-scope="form-1">
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">线路名称
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" v-model="detail.name" placeholder="请输入线路名称" data-vv-name="名称" v-validate="'required|max:50'"
+                            :class="{'is-danger': errors.has('form-1.名称')}" />
+                        <span v-show="errors.has('form-1.名称')" class="help is-danger">名称不能为空哦!</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">所属客户
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <select class="form-control" v-model="detail.companyId" @change="getOptions" :class="{'is-danger': errors.has('form-1.所属客户')}">
+                            <option :value="''">请选择所属客户</option>
+                            <option :value="item.id" v-for="item in companyNameOptions">{{ item.name }}</option>
+                        </select>
+                        <input type="hidden" v-model="detail.companyId" data-vv-name="所属客户" v-validate="'required'" />
+                        <span v-show="errors.has('form-1.所属客户')" class="help is-danger">所属客户不能为空！</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">所属线路
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" v-model="detail.parentName" @click="lineTree" placeholder="请选择所属线路" readonly style="background-color: #fff;">
+                        <input type="hidden" v-model="detail.parentId" data-vv-name="线路" v-validate="'required'" />
+                        <span v-show="errors.has('form-1.线路')" class="help is-danger">所属线路不能为空!</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">所属采集点
+                    </div>
+                    <div class="col-sm-5">
+                        <select class="form-control" v-model="detail.meterId">
+                            <option :value="''">请选择所属采集点</option>
+                            <option :value="item.id" v-for="item in meterOptions">{{ item.name }}</option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">绑定类型
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5" v-show="!bindTypeReadonly">
+                        <select class="form-control" v-model="detail.bindType" @change="getEquipOrBuildOptions">
+                            <option :value="''">请选择绑定类型</option>
+                            <option :value="item.bindType" v-for="item in bindOptions" v-if="item.bindType!=0">{{ item.bindTypeName }}</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-5" v-show="bindTypeReadonly">
+                        <input type="text" class="form-control" value="主线" readonly />
+                    </div>
+                </div>
+
+                <div class="form-group" v-show="!bindTypeReadonly">
+                    <div class="col-sm-2 control-label">所属楼宇/设备
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <select class="form-control" v-model="detail.bindId">
+                            <option :value="''">请选择所属楼宇/设备</option>
+                            <option :value="item.id" v-for="item in equipOrBuildOptions">{{ item.name }}</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group" v-if="bindTypeReadonly">
+					<div class="col-sm-2 control-label">属性
+						<span class="red">*</span>
+					</div>
+                    <div class="col-sm-6">
+                        <label class="radio-inline">
+                            <input type="radio" name="isReferRoom" value="1" v-model="detail.isReferRoom" :checked="detail.isReferRoom == 1" /> 关联配电房
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="isReferRoom" value="0" v-model="detail.isReferRoom" :checked="detail.isReferRoom == 0" /> 不关联配电房
+                        </label>
+                    </div>
+
+				</div>
+				
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"></div>
+                    <input type="button" class="btn btn-primary" @click="save" value="确定" :disabled="saveLock" /> &nbsp;&nbsp;
+                    <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                </div>
+            </form>
+        </div>
+
+
+
+
+        <div v-show="showUpdate" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal" style="width: 100%;" data-vv-scope="form-2">
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">线路名称
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" v-model="detail.name" placeholder="请输入线路名称" data-vv-name="线路名称" v-validate="'required|max:50'"
+                            :class="{'is-danger': errors.has('form-2.线路名称')}" />
+                        <span v-show="errors.has('form-2.线路名称')" class="help is-danger">线路名称不能为空哦!</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">所属客户
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <select class="form-control" v-model="detail.companyId" disabled>
+                            <option :value="item.id" v-for="item in companyNameOptions">{{ item.name }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">所属线路
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" v-model="detail.parentName" readonly @click="lineTree" style="background-color: #fff;"
+                        />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">所属采集点
+                    </div>
+                    <div class="col-sm-5" v-if="detail.meterName">
+                        <input type="text" class="form-control" v-model="detail.meterName" readonly />
+                    </div>
+                    <div class="col-sm-5" v-else>
+                        <select class="form-control" v-model="detail.meterId">
+                            <option :value="item.id" v-for="item in meterOptions" :selected="item.id == detail.meterId">{{ item.name }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">绑定类型
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" v-model="detail.bindTypeName" readonly />
+                    </div>
+
+                </div>
+
+                <div class="form-group" v-if="!bindTypeReadonly">
+                    <div class="col-sm-2 control-label">所属楼宇/设备
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control" v-model="detail.bindName" readonly />
+                    </div>
+                </div>
+                
+                <div class="form-group" v-if="bindTypeReadonly">
+					<div class="col-sm-2 control-label">属性
+						<span class="red">*</span>
+					</div>
+                    <div class="col-sm-6">
+                        <label class="radio-inline">
+                            <input type="radio" name="status" value="1" v-model="detail.isReferRoom" :cheked="detail.isReferRoom == 1" /> 关联配电房
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="status" value="0" v-model="detail.isReferRoom" :cheked="detail.isReferRoom == 0" /> 不关联配电房
+                        </label>
+                    </div>
+				</div>
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"></div>
+                    <input type="button" class="btn btn-primary" @click="update" value="确定" :disabled="saveLock" /> &nbsp;&nbsp;
+                    <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                </div>
+            </form>
+        </div>
+        <!-- 选择菜单 -->
+        <div id="lineLayer" style="display: none;padding:10px;">
+            <ul id="lineTree" class="ztree"></ul>
+        </div>
+    </div>
+
+    <script src="${rc.contextPath}/js/company/line.js?_${date.systemTime}"></script>
+</body>
+
+</html>

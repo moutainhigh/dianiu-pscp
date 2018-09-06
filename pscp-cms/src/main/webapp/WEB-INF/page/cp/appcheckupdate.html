@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>${comments}</title>
+    #parse("sys/header.html")
+    <style>
+    .form-horizontal {
+        width: 100%;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <div class="grid-btn">
+                <div class="col-sm-2" style="padding-left: 0">
+                    <select class="form-control" v-model="q.clientTypeId">
+                        <option selected value="">
+                            选择客户端类型
+                        </option>
+                        <option v-for="item in clientType" :value="item.id">
+                            {{ item.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control" v-model="q.updateTypeId">
+                        <option selected value="">
+                            选择更新类型
+                        </option>
+                        <option v-for="item in updateType" :value="item.id">
+                            {{ item.name}}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control" v-model="q.statusTypeId">
+                        <option selected value="">
+                            选择状态
+                        </option>
+                        <option v-for="item in statusType" :value="item.id">
+                            {{ item.name}}
+                        </option>
+                    </select>
+                </div>
+                <div id="date-start" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="更新时间-开始">
+                    <span id="date-start-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <div id="date-end" style="width: 20%;" class="input-group date form_datetime col-sm-3" data-date-format="yyyy-mm-dd">
+                    <input class="form-control" size="16" type="text" readonly placeholder="更新时间-结束">
+                    <span id="date-end-remove" class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn">
+                #if($shiro.hasPermission("appcheckupdate:save"))
+                <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a> #end #if($shiro.hasPermission("appcheckupdate:update"))
+                <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a> #end #if($shiro.hasPermission("appcheckupdate:update"))
+                <a class="btn btn-primary" @click="changeStatus"><i class="fa fa-filter"></i>&nbsp;上/下线</a> #end #if($shiro.hasPermission("appcheckupdate:delete"))
+                <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a> #end
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal" data-vv-scope="form-1">
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>客户端类型:</div>
+                    <div class="col-sm-2">
+                        <select class="form-control" v-model="appCheckUpdate.appType" :disabled="ifUpdate">
+                            <option v-for="item in clientType" :value="item.id" :selected="item.id == appCheckUpdate.appType">
+                                {{ item.name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>更新类型:</div>
+                    <div class="col-sm-2">
+                        <select class="form-control" v-model="appCheckUpdate.updateType">
+                            <option v-for="item in updateType" :value="item.id" :selected="item.id == appCheckUpdate.appType">
+                                {{ item.name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>内部版本号:</div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" placeholder="请输入内部版本号" v-model="appCheckUpdate.appLatestVer" data-vv-name="内部版本号" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.内部版本号')}" />
+                        <span v-show="errors.has('form-1.内部版本号')" class="help is-danger">{{ errors.first('form-1.内部版本号') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>显示版本号:</div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" placeholder="请输入显示版本号" v-model="appCheckUpdate.appLatestShowVer" data-vv-name="显示版本号" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.显示版本号')}" />
+                        <span v-show="errors.has('form-1.显示版本号')" class="help is-danger">{{ errors.first('form-1.显示版本号') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>包名:</div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" placeholder="请输入包名" v-model="appCheckUpdate.appPkg" data-vv-name="包名" v-validate="'required|max:32'" :class="{'is-danger': errors.has('form-1.包名')}" />
+                        <span v-show="errors.has('form-1.包名')" class="help is-danger">{{ errors.first('form-1.包名') }}</span>
+                    </div>
+                </div>
+                <div class="form-group" v-if="appCheckUpdate.appType == 2">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>更新形式:</div>
+                    <div class="col-sm-2">
+                        <select class="form-control" v-model="appCheckUpdate.appDownloadType" :disabled="ifUpdate">
+                            <option v-for="item in uploadType" :value="item.id" :selected="item.id == 1">
+                                {{ item.name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" v-if="appCheckUpdate.appType==2&&appCheckUpdate.appDownloadType == 1">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>上传apk包:</div>
+                    <div class="col-sm-10" style="padding-top: 5px;padding-left: 15px;">
+
+                        <input type="file" id="apkFile" @change="onFileChange" style="margin-bottom: 5px;" />
+                        <img v-show="apkUploadImg" src="${rc.contextPath}/statics/img/image-loading.gif">
+                        <div v-show="apkUploadImg">
+                            <div class="apkUploadBg">
+                                <div class="apkUploadCon" :style="'width:' + persent*2 + 'px'"></div>
+                            </div>
+                            <span>上传进度:{{ persent }}%</span>
+                        </div>
+                        <span v-show="apkUploadText" style="color: #f60;font-weight: 700;">上传成功:</span>
+                        <a :href="appCheckUpdate.appDownloadUrl">{{ appCheckUpdate.appDownloadUrl }}</a>
+                        <input type="hidden" v-model="appCheckUpdate.appDownloadUrl">
+                        <span v-show="errors.has('form-1.更新地址')&&appCheckUpdate.appDownloadType == 2" class="help is-danger">{{ errors.first('form-1.更新地址') }}</span>
+                        <span v-show="errors.has('form-1.更新地址')&&appCheckUpdate.appDownloadType == 1" class="help is-danger">请上传Apk</span>
+                    </div>
+                </div>
+                <div class="form-group" v-show="appCheckUpdate.appDownloadType == 2||appCheckUpdate.appType==1||appCheckUpdate.appType==3">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>更新地址:</div>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" placeholder="请输入更新地址" v-model="appCheckUpdate.appDownloadUrl" data-vv-name="更新地址" v-validate="'required|max:255'" :class="{'is-danger': errors.has('form-1.更新地址')}" />
+                        <span v-show="errors.has('form-1.更新地址')" class="help is-danger">{{ errors.first('form-1.更新地址') }}</span>
+                        
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">安装包大小(kb):</div>
+                    <div class="col-sm-2">
+                        <input type="text" class="form-control" placeholder="请输入安装包大小" v-model="appCheckUpdate.appLatestSize" :readonly="appCheckUpdate.appDownloadType == 1&&appCheckUpdate.appType==2" />
+                    </div>
+                </div>
+                <div class="form-group" v-show="appCheckUpdate.appType==2">
+                    <div class="col-sm-2 control-label">文件校验码(md5):</div>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" placeholder="请输入文件校验码" v-model="appCheckUpdate.appDownloadMd5" :readonly="appCheckUpdate.appDownloadType == 1" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;">*</span>更新日志:</div>
+                    <div class="col-sm-4">
+                        <textarea rows="3" class="form-control" v-model="appCheckUpdate.updateDesc" data-vv-name="更新日志" v-validate="'required|max:64'" :class="{'is-danger': errors.has('form-1.更新日志')}"></textarea>
+                        <span v-show="errors.has('form-1.更新日志')" class="help is-danger">{{ errors.first('form-1.更新日志') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"></div>
+                    <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定" /> &nbsp;&nbsp;
+                    <input type="button" class="btn btn-warning" @click="reload" value="返回" />
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/appcheckupdate.js?_${date.systemTime}"></script>
+</body>
+
+</html>

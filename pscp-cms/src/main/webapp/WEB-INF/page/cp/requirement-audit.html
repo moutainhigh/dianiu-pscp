@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>客户需求审核</title>
+    #parse("sys/header.html")
+</head>
+<style>
+.form-horizontal {
+    width: 100%;
+}
+</style>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div v-show="showList">
+            <tabs>
+                <tab status="not_audit" name="审核中" icon="fa-star-half-o" selected="true"></tab>
+                <tab status="audit_succeed" name="审核通过" icon="fa-calendar-check-o"></tab>
+                <tab status="audit_failed" name="审核失败" icon="fa-calendar-times-o"></tab>
+            </tabs>
+            <div class="grid-btn">
+                <div class="col-sm-2" style="padding-left: 0;">
+                    <input type="text" class="form-control" placeholder="需求名称" v-model="q.needsName" @keyup.enter="query" />
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="手机号" v-model="q.loginId" @keyup.enter="query" />
+                </div>
+                <div class="col-sm-2">
+                    <input type="text" class="form-control" placeholder="客户名称" v-model="q.memberName" @keyup.enter="query" />
+                </div>
+                <a class="btn btn-default" @click="query">查询</a>
+            </div>
+            <div class="grid-btn">
+                <a class="btn btn-primary" v-if="status == 'not_audit'" @click="getDetail"><i class="fa fa-check-square-o"></i>&nbsp;审核</a>
+                <a class="btn btn-primary" v-else @click="getDetail"><i class="fa fa-eye"></i>&nbsp;查看</a>
+            </div>
+            <table id="jqGrid"></table>
+            <div id="jqGridPager"></div>
+        </div>
+        <div v-show="!showList">
+            <div class="panel panel-default">
+                <div class="panel-heading">{{title}}</div>
+                <form class="form-horizontal">
+                    <div class="form-group" v-show="status != 'not_audit'">
+                        <label class="col-sm-2 control-label">客户名称</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{ detailInfo.memberName }}</p>
+                        </div>
+                    </div>
+                    <div class="form-group" v-show="status != 'not_audit'">
+                        <label class="col-sm-2 control-label">手机号</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{ detailInfo.loginId }}</p>
+                        </div>
+                    </div>
+                    <hr v-show="status != 'not_audit'">
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">需求名称</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{ detailInfo.name }}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">需求描述</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{ detailInfo.describe }}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">附件</label>
+                        <div class="col-sm-10">
+                            <ul class="upload-ul" v-if="detailInfo.attachmentList&&detailInfo.attachmentList.length>0">
+                                <li class="upload-li" v-for="(item,index) in detailInfo.attachmentList" style="position: relative;">
+                                    <img :src="item.fid" class="upload-img" @click="imgEnlarge" @error="setImgError" />
+                                    <a class="img-remove-btn shield " v-show="status == 'not_audit'" v-if="item.isOpen == 0" @click="setImgStatusN(index)"><span class="glyphicon glyphicon-remove"></span></a>
+                                    <a class="img-remove-btn shield cancel" v-show="status == 'not_audit'" v-else @click="setImgStatusY(index)"><span class="glyphicon glyphicon-ok"></span></a>
+                                    <div class="img-cover" v-if="item.isOpen == 1">
+                                        <span style="color: #fff;">已屏蔽</span>
+                                    </div>
+                                </li>
+                            </ul>
+                            <p class="form-control-static" v-else>暂无</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">发布截止时间</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{ detailInfo.publishCutoffTime }}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">工作时间</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{ detailInfo.workingStartTime}}---{{detailInfo.workingEndTime }}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">联系人</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{detailInfo.contactPerson}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">手机号码</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{detailInfo.contactNumber}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">联系地址</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{detailInfo.contactAddr}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label">关联配电房</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <span v-for="(item,index) in detailInfo.distributionRooms">{{ item.name }}<span v-show="index != detailInfo.distributionRooms.length - 1">,</span></span>
+                            </p>
+                        </div>
+                    </div>
+                    <hr v-show="detailInfo.keyword||detailInfo.failReason">
+                    <div class="form-group" v-show="status != 'not_audit'&&detailInfo.keyword">
+                        <label class="col-sm-2 control-label">屏蔽文字</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{detailInfo.keyword}}<span class="requirement-tip">(屏蔽文字以逗号隔开)</span></p>
+                        </div>
+                    </div>
+                    <div class="form-group" v-show="status == 'audit_failed'">
+                        <label class="col-sm-2 control-label">不通过原因</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">{{detailInfo.failReason}}</p>
+                        </div>
+                    </div>
+                    <div class="form-group" v-show="status == 'not_audit'">
+                        <label class="col-sm-2 control-label">屏蔽文字</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <textarea class="form-control" placeholder="请输入需要屏蔽的文字(逗号隔开)" rows="3" v-model="detailInfo.maskString">
+                                </textarea>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group" v-show="status == 'not_audit'">
+                        <label class="col-sm-2 control-label">不通过原因</label>
+                        <div class="col-sm-10">
+                            <p class="form-control-static">
+                                <textarea class="form-control" placeholder="请输入不通过原因" rows="3" v-model="detailInfo.failReason">
+                                </textarea>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-11 control-label" style="text-align: center;margin-bottom: 15px;">
+                            <input type="button" class="btn btn-success" value="审核通过" v-show="status == 'not_audit'" @click="audit(1)" /> &nbsp;&nbsp;
+                            <input type="button" class="btn btn-danger" value="审核不通过" v-show="status == 'not_audit'" @click="audit(-1)" /> &nbsp;&nbsp;
+                            <input type="button" class="btn btn-warning" value="返回" @click="reload" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/js/cp/requirement-audit.js?_${date.systemTime}"></script>
+</body>
+
+</html>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.SysRoleDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.SysRoleEntity">
+		select * from pscp_cms_role where id = #{value} and deleted=0
+	</select>
+	
+	 <select id="queryList" resultType="com.edianniu.pscp.cms.entity.SysRoleEntity">
+		select * from pscp_cms_role 
+		<where>
+		    deleted=0 
+			<if test="name != null and name.trim() != ''">
+				and name like concat('%',#{name},'%') 
+			</if>
+		</where>
+		order by create_time desc 
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_cms_role
+		<where>
+		    deleted=0 
+			<if test="name != null and name.trim() != ''">
+				and name like concat('%',#{name},'%') 
+			</if>
+		</where>
+	</select>
+	
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.SysRoleEntity" useGeneratedKeys="true" keyProperty="id">
+		insert into pscp_cms_role
+		(
+			name, 
+			remark,
+			create_user,
+			create_time,
+			deleted
+		)
+		values
+		(
+			#{name}, 
+			#{remark},
+			#{createUser},
+			#{createTime},
+			#{deleted}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.SysRoleEntity">
+		update pscp_cms_role 
+		<set> 
+			<if test="name != null">name = #{name}, </if>
+			<if test="remark != null">remark = #{remark}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="deleteBatch">
+		update pscp_cms_role set deleted=-1,modified_time=now(),modified_user=#{modifiedUser} where deleted=0 and  id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+		;
+		update pscp_cms_role_menu set deleted=-1,modified_time=now(),modified_user=#{modifiedUser}   where deleted=0 and  role_id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+		;
+		update pscp_cms_user_role set deleted=-1,modified_time=now(),modified_user=#{modifiedUser}  where deleted=0 and  role_id in 
+		<foreach item="roleId" collection="array" open="(" separator="," close=")">
+			#{roleId}
+		</foreach>
+	</delete>
+	
+
+</mapper>

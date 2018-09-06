@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.CompanyMeterDao">
+
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.CompanyMeterEntity">
+		INSERT INTO pscp_company_meter(
+			id,
+			name,
+			company_id,
+			meter_id,
+			multiple,
+			create_time,
+			create_user,
+			deleted
+		)
+		VALUES(
+			nextval('seq_pscp_company_meter'),
+			#{name},
+			#{companyId},
+			#{meterId},
+			#{multiple},
+			#{createTime},
+			#{createUser},
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_company_meter') as id;
+		</selectKey>
+	</insert>
+	
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.CompanyMeterEntity">
+		UPDATE pscp_company_meter
+		<set>
+			<if test="name != null and name.trim() != ''">name = #{name},</if>
+			<if test="meterId != null and meterId.trim() != ''">meter_id = #{meterId},</if>
+			<if test="multiple != null">multiple = #{multiple},</if>
+			<if test="companyId != null">company_id = #{companyId},</if>
+			<if test="status != null">status = #{status},</if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+			<if test="bindStatus != null">bind_status = #{bindStatus},</if>
+			<if test="deleted != null"> deleted = #{deleted}</if>
+		</set>
+		WHERE deleted = 0 AND id = #{id}
+	</update>
+	
+	<select id="queryList" parameterType="map"
+			resultType="com.edianniu.pscp.cms.entity.CompanyMeterEntity">
+		SELECT p.*, c.name AS companyName, c.contacts, c.mobile, 
+			   <!-- l.name AS lineName, b.name AS buildingName, e.name AS equipmentName -->
+			   l.name AS lineName, b.name AS buildingName, e.name || '(' || e.address || ')' AS equipmentName 
+		FROM pscp_company_meter p
+		LEFT JOIN pscp_company c ON c.id = p.company_id AND c.deleted = 0
+		LEFT JOIN pscp_company_line l ON l.meter_id = p.id AND l.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0
+		LEFT JOIN pscp_company_equipment e ON
+		CASE 
+	 	 	WHEN (l.bind_type = 2) THEN (l.bind_id)
+			ELSE (null)
+		END = e.id AND e.deleted = 0
+		WHERE p.deleted = 0 
+		<if test="companyName != null and companyName.trim() != ''">
+			AND c.name like concat('%',#{companyName},'%')
+		</if>
+		<if test="mobile != null and mobile.trim() != ''">
+			AND c.mobile like concat('%',#{mobile},'%')
+		</if>
+		<if test="status != null">
+			AND p.status = #{status}
+		</if>
+		<if test="companyId != null">
+			AND p.company_id = #{companyId}
+		</if>
+		<if test="bindStatus != null">
+			AND p.bind_status = #{bindStatus}
+		</if>
+		ORDER BY p.create_time desc
+		<if test="offset != null and limit != null">
+			LIMIT #{limit} OFFSET #{offset}
+		</if>
+	</select>
+	
+	<select id="queryTotal" parameterType="map" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM pscp_company_meter p
+		LEFT JOIN pscp_company c ON c.id = p.company_id AND c.deleted = 0
+		LEFT JOIN pscp_company_line l ON l.meter_id = p.id AND l.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0
+		LEFT JOIN pscp_company_equipment e ON
+		CASE 
+	 	 	WHEN (l.bind_type = 2) THEN (l.bind_id)
+			ELSE (null)
+		END = e.id AND e.deleted = 0
+		WHERE p.deleted = 0 
+		<if test="companyName != null and companyName.trim() != ''">
+			AND c.name like concat('%',#{companyName},'%')
+		</if>
+		<if test="mobile != null and mobile.trim() != ''">
+			AND c.mobile like concat('%',#{mobile},'%')
+		</if>
+		<if test="status != null">
+			AND p.status = #{status}
+		</if>
+	</select>
+	
+	<select id="queryObject" parameterType="java.lang.Long"
+			resultType="com.edianniu.pscp.cms.entity.CompanyMeterEntity">
+		SELECT p.*, c.name AS companyName, c.contacts, c.mobile, 
+			   l.name AS lineName, b.name AS buildingName, e.name AS equipmentName
+		FROM pscp_company_meter p
+		LEFT JOIN pscp_company c ON c.id = p.company_id AND c.deleted = 0
+		LEFT JOIN pscp_company_line l ON l.meter_id = p.id AND l.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0
+		LEFT JOIN pscp_company_equipment e ON
+		CASE 
+	 	 	WHEN (l.bind_type = 2) THEN (l.bind_id)
+			ELSE (null)
+		END = e.id AND e.deleted = 0
+		WHERE p.deleted = 0 AND p.id = #{id}
+	</select>
+	
+	<select id="queryObjectByName" parameterType="map"
+			resultType="com.edianniu.pscp.cms.entity.CompanyMeterEntity">
+		SELECT p.*, c.name AS companyName, c.contacts, c.mobile, 
+			   l.name AS lineName, b.name AS buildingName, e.name AS equipmentName
+		FROM pscp_company_meter p
+		LEFT JOIN pscp_company c ON c.id = p.company_id AND c.deleted = 0
+		LEFT JOIN pscp_company_line l ON l.meter_id = p.id AND l.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0
+		LEFT JOIN pscp_company_equipment e ON
+		CASE 
+	 	 	WHEN (l.bind_type = 2) THEN (l.bind_id)
+			ELSE (null)
+		END = e.id AND e.deleted = 0
+		WHERE p.deleted = 0 
+		<if test="companyId != null">AND p.company_id = #{companyId}</if>
+		<if test="name != null and name.trim() != ''">AND p.name = #{name}</if>
+		LIMIT 1
+	</select>
+	
+	<delete id="deleteBatch">
+		UPDATE pscp_company_meter SET
+		deleted = -1,
+		modified_time = #{modifiedTime},
+		modified_user = #{modifiedUser}
+		WHERE deleted = 0 AND id IN
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<select id="isExist" parameterType="string" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM pscp_company_meter
+		WHERE meter_id = #{meterId} AND deleted = 0
+	</select>
+	
+	
+</mapper>

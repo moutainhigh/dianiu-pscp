@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.CompanyCertificateImageDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.CompanyCertificateImageEntity">
+		select * from pscp_company_certificate_image where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.CompanyCertificateImageEntity">
+		select * from pscp_company_certificate_image where deleted=0 order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_company_certificate_image  where deleted=0
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.CompanyCertificateImageEntity">
+		insert into pscp_company_certificate_image
+		(
+			id, 
+			company_id, 
+			file_id, 
+			order_num, 
+			status, 
+			create_time, 
+			create_user, 
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_company_certificate_image'),
+			#{companyId}, 
+			#{fileId}, 
+			#{orderNum}, 
+			#{status}, 
+			now(), 
+			#{createUser}, 			
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+    		SELECT currval('seq_pscp_company_certificate_image') as id;
+    	</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.CompanyCertificateImageEntity">
+		update pscp_company_certificate_image 
+		<set>
+			<if test="companyId != null">company_id = #{companyId}, </if>
+			<if test="fileId != null">file_id = #{fileId}, </if>
+			<if test="orderNum != null">order_num = #{orderNum}, </if>
+			<if test="status != null">status = #{status}, </if>
+			<if test="createTime != null">create_time = #{createTime}, </if>
+			<if test="createUser != null">create_user = #{createUser}, </if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_company_certificate_image set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_company_certificate_image set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="getCertificateImagesByCompany" parameterType="java.lang.Long" resultType="com.edianniu.pscp.cms.entity.CompanyCertificateImageEntity">
+		select * from pscp_company_certificate_image where company_id=#{companyId} and deleted=0
+	</select>
+	
+	<select id="getCertificateImageByFileId" parameterType="java.lang.String" resultType="com.edianniu.pscp.cms.entity.CompanyCertificateImageEntity">
+		select * from pscp_company_certificate_image where file_id=#{fileId} and deleted=0
+	</select>
+</mapper>

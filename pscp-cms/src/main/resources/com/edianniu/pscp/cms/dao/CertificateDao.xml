@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.CertificateDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.CertificateEntity">
+		select * from pscp_certificate where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.CertificateEntity">
+		select * from pscp_certificate where deleted=0 order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+	<select id="getAllCertificate" resultType="com.edianniu.pscp.cms.entity.CertificateEntity">
+		select * from pscp_certificate where deleted=0 order by create_time desc
+	</select>
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_certificate  where deleted=0
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.CertificateEntity">
+		insert into pscp_certificate
+		(
+			id, 
+			name, 
+			type, 
+			remark, 
+			create_time, 
+			create_user, 
+			modified_time, 
+			modified_user, 
+			deleted
+		)
+		values
+		(
+			#{id}, 
+			#{name}, 
+			#{type}, 
+			#{remark}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.CertificateEntity">
+		update pscp_certificate 
+		<set>
+			<if test="name != null">name = #{name}, </if>
+			<if test="type != null">type = #{type}, </if>
+			<if test="remark != null">remark = #{remark}, </if>
+			<if test="createTime != null">create_time = #{createTime}, </if>
+			<if test="createUser != null">create_user = #{createUser}, </if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_certificate set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_certificate set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

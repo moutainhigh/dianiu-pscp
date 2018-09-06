@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.MemberWalletDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.cms.entity.MemberWallet">
+		select * from pscp_member_wallet where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.cms.entity.MemberWallet">
+       select * from 
+		(
+			select 
+			w.*,
+			m.mobile,
+			m.login_name,
+			m.is_admin,
+			m.is_customer,
+			m.is_electrician,
+			m.is_facilitator,
+			m.company_id,
+			(select user_name from pscp_electrician e where e.member_id=m.id and e.deleted=0 and e.status=2 limit 1) as user_name,
+			(select name from pscp_company c where  c.id=m.company_id and c.deleted=0 and c.status=2 limit 1) as company_name
+ 			from pscp_member_wallet w left JOIN pscp_member m on w.uid=m.id where w.deleted=0 and m.deleted=0
+ 		)t1
+ 		<where>
+ 		    t1.deleted=0
+			<if test="memberName != null and memberName.trim() != ''">
+				and (t1.user_name like concat('%',#{memberName},'%') or t1.company_name like concat('%',#{memberName},'%'))
+			</if>
+			<if test="mobile != null and mobile.trim() != ''">
+				and t1.mobile like concat('%',#{mobile},'%') 
+			</if>
+			<if test="loginName != null and loginName.trim() != ''">
+				and login_name like concat('%',#{loginName},'%') 
+			</if>
+ 		</where>
+		order by  t1.create_time desc 
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(1) from 
+		(
+			select 
+			w.*,
+			m.mobile,
+			m.login_name,
+			m.is_admin,
+			m.is_customer,
+			m.is_electrician,
+			m.is_facilitator,
+			m.company_id,
+			(select user_name from pscp_electrician e where e.member_id=m.id and e.deleted=0 and e.status=2) as user_name,
+			(select name from pscp_company c where  c.id=m.company_id and c.deleted=0 and c.status=2) as company_name
+ 			from pscp_member_wallet w left JOIN pscp_member m on w.uid=m.id where w.deleted=0 and m.deleted=0
+ 		)t1
+ 		<where>
+ 		    t1.deleted=0
+			<if test="memberName != null and memberName.trim() != ''">
+				and (t1.user_name like concat('%',#{memberName},'%') or t1.company_name like concat('%',#{memberName},'%'))
+			</if>
+			<if test="mobile != null and mobile.trim() != ''">
+				and t1.mobile like concat('%',#{mobile},'%') 
+			</if>
+			<if test="loginName != null and loginName.trim() != ''">
+				and login_name like concat('%',#{loginName},'%') 
+			</if>
+ 		</where>
+	</select>
+
+    <select id="queryEntityByUid" parameterType="long"
+            resultType="com.edianniu.pscp.cms.entity.MemberWallet">
+        SELECT * FROM pscp_member_wallet
+        WHERE deleted = 0 AND uid = #{uid}
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.cms.entity.MemberWallet">
+		insert into pscp_member_wallet
+		(
+			id, 
+			uid, 
+			amount, 
+			freezing_amount, 
+			create_time, 
+			create_user, 
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_member_wallet'),
+			#{uid}, 
+			#{amount}, 
+			#{freezingAmount}, 
+			now(), 
+			#{createUser}, 
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+    		SELECT currval('seq_pscp_member_wallet') as id;
+    	</selectKey>
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.cms.entity.MemberWallet">
+        update pscp_member_wallet
+        <set>
+            <if test="uid != null">uid = #{uid},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="freezingAmount != null">freezing_amount = #{freezingAmount},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_member_wallet
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_member_wallet set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

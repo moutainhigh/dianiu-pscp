@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>财务信息</title>
+    #parse("sys/header.html")
+    <style>
+    h4 {
+        margin: 0 0 2em 2em;
+        font-weight: bold;
+    }
+    
+    .form-horizontal {
+        width: 100%;
+    }
+    
+    @media (min-width: 768px) {
+        .ml-10 {
+            margin-left: 10px !important;
+        }
+        .col-sm-10 {
+            width: 70%;
+            padding-left: 0px;
+        }
+        .col-sm-2 {
+            width: 16.66666667%;
+        }
+    }
+    
+    .dropdown-menu {
+        max-height: 200px;
+        overflow-y: scroll;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp">
+        <ul class="nav nav-tabs">
+            <li role="presentation">
+                <a href="${rc.contextPath}/cp/company.html"><i class="fa fa-building"></i>企业信息</a>
+            </li>
+            <li role="presentation" class="active">
+                <a href="#"><i class="fa fa-credit-card-alt"></i>财务信息</a>
+            </li>
+        </ul>
+        <div class="panel panel-default">
+            <form class="form-horizontal">
+                    <h4>财务信息</h4>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>所在地区:</div>
+                        <div class="col-sm-3">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('省份')}">
+                                    {{ province.name }}<span class="caret" v-if="!readOnly"></span>
+                                </button>
+                                <input type="hidden" v-model="bankCard.provinceId" data-vv-name="省份" v-validate="'required'" />
+                                <span v-show="errors.has('省份')" class="help is-danger">{{ errors.first('省份') }}</span>
+                                <ul class="dropdown-menu" v-if="!readOnly">
+                                    <li v-for=" province in provinces">
+                                        <a @click="getProvince(province.name,province.id)">{{ province.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('城市')}">
+                                    {{ city.name }}<span class="caret" v-if="!readOnly"></span>
+                                </button>
+                                <input type="hidden" v-model="bankCard.cityId" data-vv-name="城市" v-validate="'required'" />
+                                <span v-show="errors.has('城市')" class="help is-danger">{{ errors.first('城市') }}</span>
+                                <ul class="dropdown-menu" v-if="!readOnly">
+                                    <li v-for=" city in citys">
+                                        <a @click="getCity(city.name,city.id)">{{ city.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>开户银行:</div>
+                        <div class="col-sm-2">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" :class="{'is-danger': errors.has('银行')}">
+                                    {{ bank.name }}<span class="caret" v-if="!readOnly"></span>
+                                </button>
+                                <input type="hidden" v-model="bankCard.bankId" data-vv-name="银行" v-validate="'required'" />
+                                <span v-show="errors.has('银行')" class="help is-danger">{{ errors.first('银行') }}</span>
+                                <ul class="dropdown-menu" v-if="!readOnly">
+                                    <li v-for=" bank in bankCard.banks">
+                                        <a @click="getBank(bank.name,bank.id)">{{ bank.name }}</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>银行开户地:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" placeholder="请输入银行卡开户地" v-model="bankCard.bankBranchName" data-vv-name="银行开户地" v-validate="'required|max:40'" :class="{'is-danger': errors.has('银行开户地')}" :disabled="readOnly" />
+                            <span v-show="errors.has('银行开户地')" class="help is-danger">{{ errors.first('银行开户地') }}</span>
+                        </div>
+                        <div class="col-sm-2 control-label"><span style="color: red;">*</span>银行账户:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" placeholder="请输入银行账户" v-model="bankCard.account" data-vv-name="银行账户" v-validate="'required|bankCard'" :class="{'is-danger': errors.has('银行账户')}" :disabled="readOnly" />
+                            <span v-show="errors.has('银行账户')" class="help is-danger">{{ errors.first('银行账户') }}</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-2 control-label">开户名:</div>
+                        <div class="col-sm-2">
+                            <input type="text" class="form-control" v-model="bankCard.companyName" disabled="disabled" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-11" style="text-align: center;">
+                            <input type="button" class="btn btn-primary" :value="changeInfoBtn" @click="toggleReadOnly" /> &nbsp;&nbsp;
+                            <input type="button" class="btn btn-primary" value="保存" v-if="!readOnly" @click="saveOrUpdate" />
+                        </div>
+                    </div>
+            </form>
+            </div>
+        </div>
+        <script src="${rc.contextPath}/js/cp/company_finance.js?_${date.systemTime}"></script>
+</body>
+
+</html>

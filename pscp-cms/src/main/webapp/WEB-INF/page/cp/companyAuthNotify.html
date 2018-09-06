@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<title>企业信息</title>
+		#parse("sys/header.html")
+		<style>
+			h4 {
+				margin: 0 0 2em 2em;
+				font-weight: bold;
+			}
+			
+			.form-horizontal {
+				width: 100%;
+			}
+			
+			@media (min-width: 768px) {
+				.ml-10 {
+					margin-left: 10px !important;
+				}
+				.col-sm-10 {
+					width: 70%;
+					padding-left: 0px;
+				}
+				.col-sm-2 {
+					width: 16.66666667%;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		你尚未认证，请<input type="button" class="btn btn-primary" onclick="gotoCompanyAuth()" value="立即去认证" />
+	</body>
+      
+		
+		
+</html>

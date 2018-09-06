@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>配置</title>
+    #parse("sys/header.html")
+    <link rel="stylesheet" href="${rc.contextPath}/statics/plugins/element-ui@2.0.10/css/index.css">
+    <style>
+        .config-tip {
+            font-size: 12px;
+            color: #e74c3c;
+        }
+
+        .factor-config .form-control,
+        .load-config .form-control {
+            width: 25%;
+            display: inline-block;
+        }
+
+        .fee-price-input .el-input {
+            width: 25%;
+            display: inline-block;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" v-cloak>
+        <div class="form-group">
+            <select class="form-control" v-model="companyId" style="width: 35%;" @change="getDetail">
+                <option :value="''" selected="true">请选择客户</option>
+                <option :value="item.id" v-for="item in companyNameOptions">{{ item.name }}</option>
+            </select>
+        </div>
+        <tabs>
+            <tab status="health" name="电压健康" icon="fa-signal" selected="true"></tab>
+            <tab status="factor" name="功率因数" icon="fa-thermometer-three-quarters"></tab>
+            <tab status="load" name="用电负荷" icon="fa-sliders"></tab>
+            <tab status="fee" name="电费设置" icon="fa-pencil"></tab>
+        </tabs>
+        <div v-show="tabStatus == 'health'" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal" style="width: 100%;" data-vv-scope="form-1">
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">电压上限(V)
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="health.up" data-vv-name="电压上限" v-validate="'required|max:10|numeric'" :class="{'is-danger': errors.has('form-1.电压上限')}"
+                            placeholder="例如10000" />
+                        <span v-show="errors.has('form-1.电压上限')" class="help is-danger">{{ errors.first('form-1.电压上限') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">电压下限(V)
+                        <span class="red">*</span>
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" v-model="health.down" data-vv-name="电压下限" v-validate="'required|max:10|numeric'"
+                            :class="{'is-danger': errors.has('form-1.电压下限')}" placeholder="例如2000" />
+                        <span v-show="errors.has('form-1.电压下限')" class="help is-danger">{{ errors.first('form-1.电压下限') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"></div>
+                    <div class="col-sm-9">
+                        <input type="button" class="btn btn-primary" @click="healthSave" value="更新" :disabled="saveLock" />
+                        <span class="config-tip">提示: 请设置电压上下限，用于电压数据监控警告</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div v-show="tabStatus == 'factor'" class="panel panel-default factor-config">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal" style="width: 100%;" data-vv-scope="form-2">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" value="0" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" v-model="factor.low" placeholder="严重上限值" data-vv-name="严重上限值" v-validate="'required|max:4|factor'"
+                            :class="{'is-danger': errors.has('form-2.严重上限值')}" />
+                        <span class="label label-danger" style="background-color: #ff2a6b;">严重</span>
+                        <span v-show="errors.has('form-2.严重上限值')" class="help is-danger">{{ errors.first('form-2.严重上限值') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" v-model="factor.low" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" v-model="factor.middle" placeholder="低上限值" data-vv-name="低上限值" v-validate="'required|max:4|factor'"
+                            :class="{'is-danger': errors.has('form-2.低上限值')}" />
+                        <span class="label label-warning" style="background-color: #3578ca;">低</span>
+                        <span v-show="errors.has('form-2.严重上限值')" class="help is-danger">{{ errors.first('form-2.低上限值') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" v-model="factor.middle" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" v-model="factor.high" placeholder="正常上限值" data-vv-name="正常上限值" v-validate="'required|max:4|factor'"
+                            :class="{'is-danger': errors.has('form-2.正常上限值')}" />
+                        <span class="label label-success" style="background-color: #31a9ee;">正常</span>
+                        <span v-show="errors.has('form-2.正常上限值')" class="help is-danger">{{ errors.first('form-2.正常上限值') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" v-model="factor.high" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" value="1" readonly />
+                        <span class="label label-success" style="background-color: #37e1e7;">好</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-9">
+                        <input type="button" class="btn btn-primary" @click="factorSave" value="更新" :disabled="saveLock" />
+                        <span class="config-tip">提示: 请设置功率因数对应值，用于功率因数数据监控告警</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div v-show="tabStatus == 'load'" class="panel panel-default load-config">
+            <div class="panel-heading">{{title}}</div>
+            <form class="form-horizontal" style="width: 100%;" data-vv-scope="form-3">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" value="0" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" v-model="load.low" placeholder="低上限值" data-vv-name="低上限值" v-validate="'required|max:4|numeric'"
+                            :class="{'is-danger': errors.has('form-3.低上限值')}" />(kW)
+                        <span class="label label-danger" style="background-color: #72cde7;">低</span>
+                        <span v-show="errors.has('form-3.低上限值')" class="help is-danger">{{ errors.first('form-3.低上限值') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" v-model="load.low" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" v-model="load.middle" placeholder="经济上限值" data-vv-name="经济上限值" v-validate="'required|max:4|numeric'"
+                            :class="{'is-danger': errors.has('form-3.经济上限值')}" />(kW)
+                        <span class="label label-warning" style="background-color: #4af185;">经济</span>
+                        <span v-show="errors.has('form-3.经济上限值')" class="help is-danger">{{ errors.first('form-3.经济上限值') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" v-model="load.middle" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" v-model="load.high" placeholder="警戒上限值" data-vv-name="警戒上限值" v-validate="'required|max:4|numeric'"
+                            :class="{'is-danger': errors.has('form-3.警戒上限值')}" />(kW)
+                        <span class="label label-success" style="background-color: #ffa200;">警戒</span>
+                        <span v-show="errors.has('form-3.警戒上限值')" class="help is-danger">{{ errors.first('form-3.警戒上限值') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" v-model="load.high" readonly /> &nbsp;&nbsp;~&nbsp;&nbsp;
+                        <input type="text" class="form-control" v-model="load.load" placeholder="越界上限值" data-vv-name="越界上限值" v-validate="'required|max:4|numeric'"
+                            :class="{'is-danger': errors.has('form-3.越界上限值')}" />(kW)
+                        <span class="label label-success" style="background-color: #ff4e00;">越界</span>
+                        <span v-show="errors.has('form-3.越界上限值')" class="help is-danger">{{ errors.first('form-3.越界上限值') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-9">
+                        <input type="button" class="btn btn-primary" @click="loadSave" value="更新" :disabled="saveLock" />
+                        <span class="config-tip">提示: 请设置用电负荷对应值，用于用电负荷数据监控告警</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div v-show="tabStatus == 'fee'" class="panel panel-default">
+            <div class="panel-heading">{{title}}</div>
+            <div class="form-horizontal" style="width: 100%;">
+                <div class="form-group">
+                    <form data-vv-scope="form-4">
+                        <div class="col-sm-2 control-label">计费周期为每月(号)
+                            <span class="red">*</span>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" v-model="fee.chargeTimeInterval" data-vv-name="计费周期" v-validate="'required|max:2|numeric|dayperiod'"
+                                :class="{'is-danger': errors.has('form-4.计费周期')}" placeholder="例如15" />
+                            <span v-show="errors.has('form-4.计费周期')" class="help is-danger">{{ errors.first('form-4.计费周期') }}</span>
+                        </div>
+                    </form>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        电费计费方式
+                    </div>
+                    <div class="col-sm-3">
+                        <select class="form-control" v-model="fee.chargeMode">
+                            <option :value="0" :selected="fee.chargeMode == 0">统一单价</option>
+                            <option :value="1" :selected="fee.chargeMode == 1">分时单价</option>
+                        </select>
+                    </div>
+                </div>
+                <div v-show="fee.chargeMode == 0">
+                    <div class="form-group">
+                        <form data-vv-scope="form-5">
+                            <div class="col-sm-2 control-label">
+                                电费单价(元/度)
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="fee.basePrice" placeholder="请输入电费单价" data-vv-name="统一单价" v-validate="'required|max:4|money'"
+                                    :class="{'is-danger': errors.has('form-5.统一单价')}" />
+                                <span v-show="errors.has('form-5.统一单价')" class="help is-danger">{{ errors.first('form-5.统一单价') }}</span>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+                <div v-show="fee.chargeMode == 1">
+                    <div class="form-group">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-10" style="padding-left: 15px;">
+                            <div v-for="(item,index) in priceAll" :is="'set-price'" :priceall="item"></div>
+                            <br />
+                            <span>时段设置:</span>
+                            <br />
+                            <div v-for="(item,index) in dateComponents" :key="index" :is="'time-picker'" :isedit="index == dateComponents.length -1"
+                                :index="index" :length="dateComponents.length" :comdata="item" @add-fee-type="listenAddFeeType"
+                                @remove-fee-type="listenRemoveFeeType"></div>
+                        </div>
+                    </div>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">
+                        基本电费计价方式
+                    </div>
+                    <div class="col-sm-3">
+                        <select class="form-control" v-model="fee.baseChargeMode">
+                            <option :value="1" :selected="fee.baseChargeMode == 1">变压器容量</option>
+                            <option :value="2" :selected="fee.baseChargeMode == 2">最大需量</option>
+                        </select>
+                    </div>
+                </div>
+                <div v-show="fee.baseChargeMode == 1">
+                    <form data-vv-scope="form-6">
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">
+                                变压器容量(kVa)
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="fee.transformerCapacity" placeholder="请输入变压器容量" data-vv-name="变压器容量" v-validate="'required|max:8|numeric'"
+                                    :class="{'is-danger': errors.has('form-6.变压器容量')}" />
+                                <span v-show="errors.has('form-6.变压器容量')" class="help is-danger">{{ errors.first('form-6.变压器容量') }}</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">
+                                电费单价(元/kVa)
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="fee.transformerCapacityPrice" placeholder="请输入电费单价" data-vv-name="容量电费单价"
+                                    v-validate="'required|max:4|money'" :class="{'is-danger': errors.has('form-6.容量电费单价')}" />
+                                <span v-show="errors.has('form-6.容量电费单价')" class="help is-danger">{{ errors.first('form-6.容量电费单价') }}</span>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+                <div v-show="fee.baseChargeMode == 2">
+                    <form data-vv-scope="form-7">
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">
+                                变压器容量(kVa)
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="fee.transformerCapacity" placeholder="请输入变压器容量" data-vv-name="变压器容量" v-validate="'required|max:8|numeric'"
+                                    :class="{'is-danger': errors.has('form-7.变压器容量')}" />
+                                <span v-show="errors.has('form-7.变压器容量')" class="help is-danger">{{ errors.first('form-7.变压器容量') }}</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">
+                                核定需量(kVa)
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="fee.maxCapacity" placeholder="请输入核定需量" data-vv-name="核定需量" v-validate="'required|max:8|numeric'"
+                                    :class="{'is-danger': errors.has('form-7.核定需量')}" />
+                                <span v-show="errors.has('form-7.核定需量')" class="help is-danger">{{ errors.first('form-7.核定需量') }}</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2 control-label">
+                                电费单价(元/kV)
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control" v-model="fee.maxCapacityPrice" placeholder="请输入电费单价" data-vv-name="需量电费单价" v-validate="'required|max:4|money'"
+                                    :class="{'is-danger': errors.has('form-7.需量电费单价')}" />
+                                <span v-show="errors.has('form-7.需量电费单价')" class="help is-danger">{{ errors.first('form-7.需量电费单价') }}</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <form data-vv-scope="form-4">
+                        <div class="col-sm-2 control-label">
+                            力调标准
+                        </div>
+                        <div class="col-sm-3">
+                            <select class="form-control" v-model="fee.standardAdjustRate" :class="{'is-danger': errors.has('form-4.力调标准')}">
+                                <option :value="''">请选择力调标准</option>
+                                <option :value="0.8" :selected="fee.baseChargeMode == 0.8">0.8</option>
+                                <option :value="0.85" :selected="fee.baseChargeMode == 0.85">0.85</option>
+                                <option :value="0.9" :selected="fee.baseChargeMode == 0.9">0.9</option>
+                            </select>
+                            <input type="hidden" v-model="fee.standardAdjustRate" data-vv-name="力调标准" v-validate="'required'"
+                            />
+                            <span v-show="errors.has('form-4.力调标准')" class="help is-danger">{{ errors.first('form-4.力调标准') }}</span>
+                        </div>
+                    </form>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-9">
+                        <input type="button" class="btn btn-primary" @click="feeSave" value="更新" :disabled="saveLock" />
+                        <span class="config-tip">提示: 请合理设置电费，用于客户自身电费统计功能</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="${rc.contextPath}/statics/plugins/element-ui@2.0.10/js/index.js"></script>
+    <script src="${rc.contextPath}/js/company/smart-config.js?_${date.systemTime}"></script>
+</body>
+
+</html>

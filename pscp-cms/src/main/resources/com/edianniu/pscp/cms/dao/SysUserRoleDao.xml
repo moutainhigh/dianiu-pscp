@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.SysUserRoleDao">
+
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.SysUserRoleEntity">
+		select * from pscp_cms_user_role 
+		<where>
+		    deleted=0
+			<if test="userId != null">
+				user_id = #{userId}
+			</if>
+		</where>
+	</select>
+ 
+	<insert id="save">
+		insert into pscp_cms_user_role
+		(
+			user_id, 
+			role_id,
+			create_time,
+			create_user,
+			deleted
+		)
+		values
+		<foreach collection="roleIdList" item="item" index="index" separator="," >
+		(
+			#{userId}, 
+			#{item},
+			#{createTime},
+			#{createUser},
+			#{deleted}
+		)
+		</foreach>
+	</insert>
+	
+	<delete id="delete">
+		update pscp_cms_user_role 
+		set deleted=-1,modified_time=#{modifiedTime},modified_user=#{modifiedUser} 
+		where user_id = #{value} and deleted=0
+	</delete>
+	
+	<select id="queryRoleIdList" resultType="Long">
+		select role_id from pscp_cms_user_role where user_id = #{value} and deleted=0
+	</select>
+</mapper>

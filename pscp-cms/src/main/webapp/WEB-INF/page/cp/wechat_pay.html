@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>$orderType</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="${rc.contextPath}/statics/css/bootstrap.min.css">
+    <style>
+    .pay-container {
+        margin: 1em;
+        border: 1px solid #ccc;
+        max-width: 1200px;
+    }
+    
+    .pay-logo {
+        height: 65px;
+        line-height: 65px;
+    }
+    
+    .pay-logo,
+    .order-detail,
+    .wechat-info {
+        padding: 0 3em;
+    }
+    
+    .wechat-info {
+        padding-top: 25px;
+        padding-bottom: 25px;
+    }
+    
+    .pay-logo img {
+        max-height: 80%;
+        margin-right: 15px;
+        padding-bottom: 10px;
+    }
+    
+    .pay-logo span {
+        font-size: 24px;
+    }
+    
+    .order-detail {
+        height: 120px;
+        background-color: #eee;
+        width: 100%;
+    }
+    
+    .order-detail table {
+        width: 100%;
+        height: 100%;
+    }
+    
+    .wechat-detail {
+        height: 45px;
+        line-height: 45px;
+        margin: 25px 0;
+        border: 1px solid #ccc;
+        padding-left: 25px;
+        position: relative;
+    }
+    
+    .wechat-detail img:nth-child(1) {
+        max-height: 70%;
+    }
+    
+    .wechat-detail img:nth-child(2) {
+        max-height: 50%;
+    }
+    
+    .qrCode {
+        margin: 15px 0;
+    }
+    
+    .qrCode-tip img {
+        max-width: 80%;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp" class="pay-container">
+        <div class="pay-logo">
+            <img src="${rc.contextPath}/statics/img/logo-pay.png"><span>收银台</span>
+        </div>
+        <div class="order-detail">
+            <table>
+                <tbody>
+                    <tr>
+                        <td style="vertical-align: bottom;padding-bottom: 5px;"><span>订单编号&nbsp;:&nbsp;$orderId</span></td>
+                        <td rowspan="2" style="text-align: right;padding-right: 50px;"><span>应付金额&nbsp;:&nbsp;</span><span>￥$amount</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="vertical-align: top;padding-top: 5px;">订单类型&nbsp;:&nbsp;$orderType</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="wechat-info">
+            <div v-show="payStatus === 1">
+                <div class="wechat-detail">
+                    <img src="${rc.contextPath}/statics/img/WePayLogo.png">
+                    <img src="${rc.contextPath}/statics/img/WePay-demand.png">
+                    <span style="color:#aaa;">&nbsp;&nbsp;亿万用户的选择，更快更安全</span>
+                    <span style="position: absolute;right: 0;margin-right: 45px;">支付&nbsp;<span
+                    style="color: #f60;font-size: 14px;">$amount</span>元</span>
+                </div>
+                <div class="qrCode">
+                    <div id="code"></div>
+                </div>
+                <div class="qrCode-tip">
+                    <img src="${rc.contextPath}/statics/img/QRtip.png">
+                </div>
+            </div>
+            <div v-show="payStatus === 2" style="background-color: #f5faff">
+                <img src="${rc.contextPath}/statics/img/pay-success-icon.png" style="max-width: 50px;">
+                <span>支付成功,3秒后返回相关页面。。。</span>
+            </div>
+            <div v-show="payStatus === 3" style="background-color: #fff2f2">
+                <img src="${rc.contextPath}/statics/img/pay-fail-icon.png" style="max-width: 50px;">
+                <span>支付失败,3秒后返回重新支付</span>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.bootcss.com/vue/2.2.6/vue.js"></script>
+    <script src="${rc.contextPath}/statics/libs/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+    <script>
+    var vm = new Vue({
+        el: '#rrapp',
+        data: {
+            payStatus: 1
+        },
+        mounted: function() {
+            var self = this;
+            var myInterval = setInterval(function() {
+                var data = '$orderId';
+                $.ajax({
+                    type: 'post',
+                    url: '../payment/wxpay/polling/' + data,
+                    success: function(r) {
+                        var re = JSON.parse(r);
+                        if (re.code === 0) {
+                            if (re.result.payState === 2) {
+                                clearInterval(myInterval);
+                                self.payStatus = 2;
+                                setTimeout(function() {
+                                    window.location.href = re.result.pageUrl;
+                                }, 3000)
+                            } else if (re.result.payState === 3 || re.result.payState === 4) {
+                                clearInterval(myInterval);
+                                self.payStatus = 3;
+                                setTimeout(function() {
+                                    window.location.href = re.result.pageUrl;
+                                }, 3000)
+                            }
+                        } else {
+                            alert(re.msg);
+                        }
+                    }
+                });
+            }, 1000)
+        }
+    });
+    $("#code").qrcode({
+        width: 230,
+        height: 230,
+        text: '$thirdPartyPaymentInfo'
+    });
+    </script>
+</body>
+
+</html>

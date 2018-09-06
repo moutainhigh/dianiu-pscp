@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.AppCheckUpdateDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.AppCheckUpdateEntity">
+		select * from pscp_app_check_update where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.AppCheckUpdateEntity">
+		select * from pscp_app_check_update where deleted=0 
+		<if test="status !=null">
+			and status 			=#{status}
+		</if>
+		<if test="appType !=null">
+			and app_type 			=#{appType}
+		</if>
+		<if test="updateType !=null">
+			and update_type 			=#{updateType}
+		</if>
+		<if test="startTime !=null">
+			and create_time			&gt;=#{startTime}
+		</if>
+		<if test="endTime !=null">
+			and create_time			&lt;=#{endTime}
+		</if>
+		order by create_time desc
+		
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_app_check_update  where deleted=0
+		<if test="bean !=null and bean.status !=null">
+			and status 			=#{bean.status}
+		</if>
+		<if test="bean !=null and bean.appType !=null">
+			and app_type 			=#{bean.appType}
+		</if>
+		<if test="bean !=null and bean.updateType !=null">
+			and update_type 			=#{bean.updateType}
+		</if>
+		<if test="bean !=null and bean.startTime !=null">
+			and create_time			&gt; #{bean.startTime}
+		</if>
+		<if test="bean !=null and bean.endTime !=null">
+			and create_time			&lt; #{bean.endTime}
+		</if>
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.AppCheckUpdateEntity">
+		insert into pscp_app_check_update
+		(
+			id, 
+			app_start_ver, 
+			app_end_ver, 
+			app_type, 
+			app_pkg, 
+			app_latest_ver, 
+			app_latest_show_ver, 
+			app_latest_size, 
+			update_type, 
+			update_desc, 
+			app_download_url, 
+			app_download_type, 
+			create_time, 
+			create_user, 
+			deleted, 
+			status, 
+			app_download_md5
+		)
+		values
+		(
+			nextval('seq_pscp_app_check_update'), 
+			#{appStartVer}, 
+			#{appEndVer}, 
+			#{appType}, 
+			#{appPkg}, 
+			#{appLatestVer}, 
+			#{appLatestShowVer}, 
+			#{appLatestSize}, 
+			#{updateType}, 
+			#{updateDesc}, 
+			#{appDownloadUrl}, 
+			#{appDownloadType}, 
+			now(), 
+			#{createUser},  
+			0, 
+			#{status}, 
+			#{appDownloadMd5}
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			select currval('seq_pscp_app_check_update') as id ;
+		</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.AppCheckUpdateEntity">
+		update pscp_app_check_update 
+		<set>
+			<if test="appStartVer != null">app_start_ver = #{appStartVer}, </if>
+			<if test="appEndVer != null">app_end_ver = #{appEndVer}, </if>
+			<if test="appType != null">app_type = #{appType}, </if>
+			<if test="appPkg != null">app_pkg = #{appPkg}, </if>
+			<if test="appLatestVer != null">app_latest_ver = #{appLatestVer}, </if>
+			<if test="appLatestShowVer != null">app_latest_show_ver = #{appLatestShowVer}, </if>
+			<if test="appLatestSize != null">app_latest_size = #{appLatestSize}, </if>
+			<if test="updateType != null">update_type = #{updateType}, </if>
+			<if test="updateDesc != null">update_desc = #{updateDesc}, </if>
+			<if test="appDownloadUrl != null">app_download_url = #{appDownloadUrl}, </if>
+			<if test="appDownloadType != null">app_download_type = #{appDownloadType}, </if>
+			<if test="modifiedTime != null">modified_time = now(), </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}, </if>
+			<if test="status != null">status = #{status}, </if>
+			<if test="appDownloadMd5 != null">app_download_md5 = #{appDownloadMd5}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_app_check_update set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_app_check_update set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+	<select id="getMaxAppLatestVer" resultType="int">
+		SELECT MAX(app_latest_ver) FROM pscp_app_check_update  WHERE app_pkg=#{appPkg} and deleted = 0
+	</select>
+</mapper>

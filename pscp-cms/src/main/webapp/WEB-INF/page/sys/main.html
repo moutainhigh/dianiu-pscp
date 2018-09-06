@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>控制台</title>
+    #parse("sys/header.html")
+    <style>
+    .form-control-static {
+        margin-left: 10%;
+        padding: 10px 25px;
+        color: #333;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="rrapp">
+        <div class="form-group">
+            <div>
+                <div class="col-sm-4">
+                    <p class="form-control-static">欢迎登录电力服务云平台</p>
+                    <p class="form-control-static"><span>欢迎回来&nbsp;:&nbsp;</span><span>{{ user.loginName }}</span></p>
+                    <p class="form-control-static"><span>您的用户ID&nbsp;:&nbsp;</span><span>{{ user.mobile }}</span></p>
+                </div>
+                <hr>
+            </div>
+        </div>
+    </div>
+    <script>
+    var vm = new Vue({
+        el: '#rrapp',
+        data: {
+            title: '首页',
+            user: {
+                loginName: '',
+                mobile: ''
+            },
+            companyInfo: {
+                name: '',
+                address: '',
+                contacts: '',
+                mobile: '',
+                phone: ''
+            }
+        },
+        methods: {
+            getUser: function() {
+                $.getJSON("user/info?_" + $.now(), function(r) {
+                    vm.user = r.user;
+                });
+            }
+        },
+        created: function() {
+            var self = this;
+            this.getUser();
+        }
+    });
+    </script>
+</body>
+
+</html>

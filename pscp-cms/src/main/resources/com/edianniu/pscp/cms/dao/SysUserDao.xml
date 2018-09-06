@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.SysUserDao">
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.SysUserEntity">
+		select <include refid="pscp_user_columns"/> from pscp_cms_user where id = #{value}
+	</select>
+	
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.SysUserEntity">
+		select <include refid="pscp_user_columns"/> from pscp_cms_user 
+		<where>
+		    deleted=0
+			<if test="username != null and username.trim() != ''">
+				and username like concat('%',#{username},'%') 
+			</if>
+			<if test="loginName != null and loginName.trim() != ''">
+				and login_name like concat('%',#{loginName},'%') 
+			</if>
+			<if test="mobile != null and mobile.trim() != ''">
+				and mobile like concat('%',#{mobile},'%') 
+			</if>
+		</where>
+		order by create_time desc
+		<if test="offset != null and limit != null">
+			<!-- limit #{offset}, #{limit} -->
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_cms_user
+		<where>
+		    deleted=0
+			<if test="username != null and username.trim() != ''">
+				and username like concat('%',#{username},'%') 
+			</if>
+			<if test="loginName != null and loginName.trim() != ''">
+				and login_name like concat('%',#{loginName},'%') 
+			</if>
+			<if test="mobile != null and mobile.trim() != ''">
+				and mobile like concat('%',#{mobile},'%') 
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查询用户的所有权限 -->
+	<select id="queryAllPerms" resultType="String">
+		select m.perms from pscp_cms_user_role ur 
+			LEFT JOIN pscp_cms_role_menu rm on ur.role_id = rm.role_id  and rm.deleted=0 
+			LEFT JOIN pscp_cms_menu m on rm.menu_id = m.id and m.deleted=0
+		where ur.user_id = #{userId} and ur.deleted=0
+	</select>
+	
+	<!-- 查询用户的所有菜单ID --> 
+	<select id="queryAllMenuId" resultType="Long">
+		select m.id from pscp_cms_user_role ur 
+			LEFT JOIN pscp_cms_role_menu rm on ur.role_id = rm.role_id and rm.deleted=0
+			LEFT JOIN pscp_cms_menu m on rm.menu_id = m.id and m.deleted=0
+		where ur.user_id = #{userId}  and ur.deleted=0
+	</select>
+	
+	<select id="queryByUserName" resultType="com.edianniu.pscp.cms.entity.SysUserEntity">
+		select * from pscp_cms_user where username = #{username} and deleted=0
+	</select>
+	<select id="queryByLoginName" resultType="com.edianniu.pscp.cms.entity.SysUserEntity">
+		select 
+		  <include refid="pscp_user_columns"/> 
+		from pscp_cms_user where login_name = #{loginName} and deleted=0
+	</select>
+	<select id="queryByMobile" resultType="com.edianniu.pscp.cms.entity.SysUserEntity">
+		select 
+		 <include refid="pscp_user_columns"/> 
+		from pscp_cms_user where mobile = #{mobile} and deleted=0
+	</select>
+	<select id="getCountByMobile" resultType="int">
+		select 
+		 count(*)
+		from pscp_cms_user where mobile = #{mobile} and deleted=0
+	</select>
+	<select id="getCountByLoginName" resultType="int">
+		select 
+		 count(*)
+		from pscp_cms_user where login_name = #{loginName} and deleted=0
+	</select>
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.SysUserEntity" useGeneratedKeys="true" keyProperty="userId">
+		insert into pscp_cms_user
+		(
+		    id,
+		    username,
+			login_name, 
+			mobile, 
+			passwd, 
+			tx_img,
+			nick_name,
+			sex,
+			age,
+			remark,
+			status,
+			create_time,
+			create_user,
+			deleted,
+			needs_audit_notice,
+			member_audit_notice,
+			off_line_notice
+		)
+		values
+		(
+		    nextval('seq_pscp_cms_user'),
+		    #{username}, 
+			#{loginName}, 
+			#{mobile}, 
+			#{passwd}, 
+			#{txImg},
+			#{nickName},
+			#{sex},
+			#{age},
+			#{remark},
+			#{status}, 
+			#{createTime},
+			#{createUser},
+			#{deleted},
+			#{needsAuditNotice},
+			#{memberAuditNotice},
+			#{offLineNotice}
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="userId">
+    		SELECT currval('seq_pscp_cms_user') as userId;
+    	</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.SysUserEntity">
+		update pscp_cms_user 
+		<set> 
+			<if test="username != null">username = #{username}, </if>
+			<if test="passwd != null">passwd = #{passwd}, </if>
+			<if test="mobile != null">mobile = #{mobile}, </if>
+			<if test="status != null">status = #{status},</if>
+			<if test="needsAuditNotice != null">needs_audit_notice = #{needsAuditNotice},</if>
+			<if test="memberAuditNotice != null">member_audit_notice = #{memberAuditNotice},</if>
+			<if test="offLineNotice != null">off_line_notice = #{offLineNotice}</if>
+		</set>
+		where id = #{userId} and deleted=0
+	</update>
+	
+	<update id="updatePasswd" parameterType="map">
+		update pscp_cms_user set passwd = #{newPasswd},modified_time=now(),modified_user=#{modifiedUser} 
+			where id = #{userId} and passwd = #{passwd} and deleted=0
+	</update>
+	
+	<delete id="deleteBatch">
+		update pscp_cms_user set deleted=-1, modified_time=now(),modified_user=#{modifiedUser} where id in 
+		<foreach item="userId" collection="array" open="(" separator="," close=")">
+			#{userId}
+		</foreach>
+		;
+		update pscp_cms_user_role set   deleted=-1, modified_time=now(),modified_user=#{modifiedUser}  where user_id in 
+		<foreach item="userId" collection="array" open="(" separator="," close=")">
+			#{userId}
+		</foreach>
+	</delete>
+	<sql id="pscp_user_columns">
+	        id as userId,
+	        username,
+		    login_name,	 
+			mobile,	 
+			passwd,	 
+			tx_img,	 
+			nick_name,	 
+			sex,
+			age,
+			remark,
+			status,
+			create_time as createTime,
+			create_user as createUser,	 
+			modified_time as modifiedTime, 
+			modified_user as modifiedUser,
+			deleted,
+			needs_audit_notice,
+			member_audit_notice,
+			off_line_notice
+	</sql>
+
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.CompanyLineDao">
+	
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.CompanyLineEntity">
+		INSERT INTO pscp_company_line(
+			id,
+			name,
+			parent_id,
+			bind_type,
+			bind_id,
+			building_id,
+			company_id,
+			meter_id,
+			create_time,
+			create_user,
+			is_refer_room
+		)
+		VALUES(
+			nextval('seq_pscp_company_line'),
+			#{name},
+			#{parentId},
+			#{bindType},
+			#{bindId},
+			#{buildingId},
+			#{companyId},
+			#{meterId},
+			#{createTime},
+			#{createUser},
+			#{isReferRoom}
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_company_line') as id;
+		</selectKey>
+	</insert>
+	
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.CompanyLineEntity">
+		UPDATE pscp_company_line
+		<set>
+			<if test="name != null and name.trim() != ''">name = #{name},</if>
+			<if test="parentId != null">parent_id = #{parentId},</if>
+			<if test="bindType != null">bind_type = #{bindType},</if>
+			<if test="bindId != null">bind_id = #{bindId},</if>
+			<if test="buildingId != null">building_id = #{buildingId},</if>
+			<if test="companyId != null">company_id = #{companyId},</if>
+			<if test="meterId != null">meter_id = #{meterId},</if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+			<if test="isReferRoom != null">is_refer_room = #{isReferRoom},</if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		WHERE id = #{id} AND deleted = 0
+	</update>
+	
+	<select id="queryObject" parameterType="java.lang.Long"
+			resultType="com.edianniu.pscp.cms.entity.CompanyLineEntity">
+		SELECT l.*, c.name AS companyName, c.contacts, c.mobile, b.name AS buildingName
+		FROM pscp_company_line l
+		LEFT JOIN pscp_company c ON l.company_id = c.id AND c.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0
+		WHERE l.deleted = 0 AND l.id = #{id}
+	</select>
+	
+	<select id="queryList" parameterType="map"
+			resultType="com.edianniu.pscp.cms.entity.CompanyLineEntity">
+		SELECT l.*, c.name AS companyName, c.contacts, c.mobile, b.name AS buildingName
+		FROM pscp_company_line l
+		LEFT JOIN pscp_company c ON l.company_id = c.id AND c.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0
+		WHERE l.deleted = 0
+		<if test="companyName != null and companyName.trim() != ''">
+			AND c.name LIKE CONCAT('%',#{companyName},'%')
+		</if>
+		<if test="mobile != null and mobile.trim() != ''">
+			AND c.mobile LIKE CONCAT('%',#{mobile},'%')
+		</if>
+		ORDER BY l.create_time DESC
+		<if test="limit != null and offset != null">
+			LIMIT #{limit} OFFSET #{offset}
+		</if>
+	</select> 
+	
+	<select id="queryTotal" parameterType="map" resultType="java.lang.Integer">
+		SELECT COUNT(1)
+		FROM pscp_company_line l
+		LEFT JOIN pscp_company c ON l.company_id = c.id AND c.deleted = 0
+		LEFT JOIN pscp_company_building b ON l.building_id = b.id AND b.deleted = 0
+		WHERE l.deleted = 0
+		<if test="companyName != null and companyName.trim() != ''">
+			AND c.name LIKE CONCAT('%',#{companyName},'%')
+		</if>
+		<if test="mobile != null and mobile.trim() != ''">
+			AND c.mobile LIKE CONCAT('%',#{mobile},'%')
+		</if>
+	</select>
+	
+    <select id="getCountChildLines" parameterType="Long" resultType="java.lang.Integer">
+    	SELECT COUNT(1) FROM pscp_company_line
+    	<where>
+    		deleted = 0 AND parent_id = #{id}
+    	</where>
+    </select>
+	
+	<delete id="deleteBatch">
+		UPDATE pscp_company_line SET
+		deleted = -1,
+		modified_time = #{modifiedTime},
+		modified_user = #{modifiedUser}
+		WHERE deleted = 0 AND id IN
+		<foreach collection="array" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	
+	
+</mapper>

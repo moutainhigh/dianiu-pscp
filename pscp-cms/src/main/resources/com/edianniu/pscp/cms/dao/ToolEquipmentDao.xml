@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.cms.dao.ToolEquipmentDao">
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.ToolEquipmentEntity">
+		INSERT INTO pscp_tool_equipment(
+			id,
+			name,
+			model,
+			company_id,
+			create_time,
+			create_user,
+			deleted
+		)values(
+			nextval('seq_pscp_tool_equipment'),
+			#{name},
+			#{model},
+			#{companyId},
+			now(),
+			#{createUser},
+			0
+		);
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_tool_equipment') as id;
+		</selectKey>
+	</insert>
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.ToolEquipmentEntity">
+	
+		select * from pscp_tool_equipment where deleted=0 and company_id in 
+		<foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+		 order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_tool_equipment where deleted=0 and company_id in
+		<foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+		
+	</select>
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.ToolEquipmentEntity">
+		select * from pscp_tool_equipment where deleted=0 and id=#{value}
+	</select>
+	<update id="update"  parameterType="com.edianniu.pscp.cms.entity.ToolEquipmentEntity">
+		update pscp_tool_equipment set
+			<if test="name!=null">name=#{name},</if>
+			<if test="model!=null">model = #{model} ,</if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+	</update>
+	<delete id="delete">
+		update pscp_tool_equipment set deleted=-1 ,modified_time=now(),modified_user=${modifiedUser} where id =#{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_tool_equipment set deleted=-1 ,modified_time=now(),modified_user=${modifiedUser} where id in
+			<foreach collection="array" item="id" open="(" separator="," close=")">#{id}</foreach>
+	</delete>
+</mapper>

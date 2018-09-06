@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.cms.dao.SmsTemplateDao">
+
+	<select id="queryObject" resultType="com.edianniu.pscp.cms.entity.SmsTemplateEntity">
+		select * from pscp_sms_template where id = #{value} and deleted=0
+	</select>
+
+	<select id="queryList" resultType="com.edianniu.pscp.cms.entity.SmsTemplateEntity">
+		select * from pscp_sms_template where deleted=0 order by create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from pscp_sms_template  where deleted=0
+	</select>
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.cms.entity.SmsTemplateEntity">
+		insert into pscp_sms_template
+		(
+			id, 
+			msg_id, 
+			context, 
+			create_user, 
+			create_time, 		 
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_sms_template'),
+			#{msgId}, 
+			#{context}, 
+			#{createUser}, 
+			now(), 			 
+			0
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.cms.entity.SmsTemplateEntity">
+		update pscp_sms_template 
+		<set>
+			<if test="msgId != null">msg_id = #{msgId}, </if>
+			<if test="context != null">context = #{context}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="modifiedTime != null">modified_time = now(), </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete">
+	    update pscp_sms_template set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id = #{value}
+	</delete>
+	<delete id="deleteBatch">
+		update pscp_sms_template set deleted=-1,modified_time=now(),modified_user=${modifiedUser}  where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>
