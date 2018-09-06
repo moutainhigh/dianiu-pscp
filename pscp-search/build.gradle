@@ -1,0 +1,137 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.7.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+	options.debug = "on"
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
+}
+repositories {
+    def dianniu="http://111.1.17.197:8080/nexus/content/groups/public"
+    def aliyun = "http://maven.aliyun.com/nexus/content/groups/public/"
+    def abroad = "http://central.maven.org/maven2/"
+    // 先从url中下载jar若没有找到，则在artifactUrls中寻找
+	maven{
+		url dianniu
+	}
+    maven {
+        url aliyun
+        artifactUrls abroad 
+    }
+}
+
+configurations {
+    compile.exclude group: "org.springframework.boot", module: "spring-boot-starter-jetty"
+    compile.exclude group: "org.codehaus.woodstox", module: "wstx-asl"
+    compile.exclude group: "commons-fileupload"
+}
+
+task makeJar(type: Jar) {
+    println jarVersion
+    baseName 'pscp-search-client'
+    version = jarVersion
+
+    into('com/edianniu/pscp/search/dubbo') {
+        from("build/classes/main/com/edianniu/pscp/search/dubbo") {
+            exclude('impl')
+        }
+    }
+
+    into('com/edianniu/pscp/search/support') {
+        from("build/classes/main/com/edianniu/pscp/search/support") {
+            exclude('query')
+        }
+    }
+	into('com/edianniu/pscp/search/util') {
+		from("build/classes/main/com/edianniu/pscp/search/util") {
+			exclude('impl')
+		}
+	}
+
+    destinationDir = rootDir
+}
+
+task makeSourcesJar(type: Jar, dependsOn: classes) {
+    println jarVersion
+    baseName 'pscp-search-client'
+    version = jarVersion
+    classifier = 'sources'
+
+    into('com/edianniu/pscp/search/dubbo') {
+        from("src/main/java/com/edianniu/pscp/search/dubbo") {
+            exclude('impl')
+        }
+    }
+
+    into('com/edianniu/pscp/search/support') {
+        from("src/main/java/com/edianniu/pscp/search/support") {
+            exclude('query')
+        }
+    }
+	into('com/edianniu/pscp/search/util') {
+		from("src/main/java/com/edianniu/pscp/search/util") {
+			exclude('query')
+		}
+	}
+
+    destinationDir = rootDir
+}
+
+artifacts {
+    archives makeJar
+    archives makeSourcesJar
+}
+
+// 项目依赖
+dependencies {
+   /**common**/
+   compile "commons-beanutils:commons-beanutils:1.9.1"
+    /** dubbo **/
+   compile("com.alibaba:dubbo:${dubbo_version}") {
+        exclude(module: 'spring')
+    }
+   /** zookeeper **/
+    compile("org.apache.zookeeper:zookeeper:${zookeeper_version}") {
+        exclude(module: 'slf4j-log4j12')
+        exclude(module: 'slf4j')
+		exclude(module: 'log4j')
+    }
+    /** zkclient **/
+    compile("com.101tec:zkclient:${zkclient_version}") {
+        exclude(module: 'spring')
+        exclude(module: 'slf4j-log4j12')
+        exclude(module: 'slf4j')
+		exclude(module: 'log4j')
+    }
+
+    compile(
+            "org.springframework.boot:spring-boot-starter:${spring_boot_version}",
+            "org.springframework.boot:spring-boot-starter-web:${spring_boot_version}",
+            "org.springframework.boot:spring-boot-autoconfigure:${spring_boot_version}",
+
+            "org.elasticsearch:elasticsearch:${elasticsearch_version}",
+            "org.elasticsearch.client:transport:${elasticsearch_version}",
+
+            "com.alibaba:fastjson:${fastjson_version}",
+            "org.apache.logging.log4j:log4j-api:${log4j_version}",
+            "org.apache.logging.log4j:log4j-core:${log4j_version}",
+            "commons-lang:commons-lang:${commons_lang_version}",
+    )
+    //compileOnly('org.projectlombok:lombok')
+    testCompile ("junit:junit")
+	
+	testCompile "org.springframework.boot:spring-boot-starter-test:${spring_boot_version}"
+    
+}

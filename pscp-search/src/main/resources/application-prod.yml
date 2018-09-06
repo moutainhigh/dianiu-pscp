@@ -1,0 +1,11 @@
+logging:
+  level: info
+
+es:
+  cluster:
+    name: pscp-search
+    nodes: 127.0.0.1:9300
+
+dubbo:
+  port: 28805
+  address: zookeeper://127.0.0.1:2181

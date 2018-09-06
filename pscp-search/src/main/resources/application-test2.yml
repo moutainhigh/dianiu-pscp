@@ -1,0 +1,11 @@
+logging:
+  level: debug
+
+es:
+  cluster:
+    name: pscp-search
+    nodes: 192.168.1.251:9300
+
+dubbo:
+  port: 28810
+  address: zookeeper://192.168.1.251:2182
