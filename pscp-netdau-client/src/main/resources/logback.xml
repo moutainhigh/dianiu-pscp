@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="1 seconds">
+    <contextName>pscp-test</contextName>
+    <jmxConfigurator/>
+    <!-- direct log messages to stdout -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %5p |-%c{35}:%L - %m %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/pscp-test.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>logs/bak/pscp-test.%d{yyyy-MM-dd}.%i.log.gz</FileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>1024MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %highlight(%5p) %green(|-%c{35}:%L) - %m %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="errorFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/pscp-test-error.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>logs/bak/pscp-test-error.%d{yyyy-MM-dd}.log.gz</FileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%t] %5p |-%c{35}:%L - %m %n</pattern>
+        </encoder>
+    </appender>
+    <!-- 数据仓库抽取日志文件格式 -->
+	<appender name="dwLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		  <File>logs/meterlog-dw.log</File>
+		  <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			   <FileNamePattern>../logs/1__meterlog-dw__%d{yyyy-MM-dd}__%d{yyyyMMdd}000000__%d{yyyyMMdd}235959__0.log</FileNamePattern>
+			   <MaxHistory>7</MaxHistory>   
+		  </rollingPolicy>
+		  <layout class="ch.qos.logback.classic.PatternLayout">
+		    <pattern>%msg%n</pattern>
+		  </layout>
+	 </appender>
+	 <logger name="com.edianniu.pscp.message.log.DWLogger" level="info">
+        <appender-ref ref="dwLogAppender"/>
+     </logger>
+    <!-- <logger name="com.edianniu.pscp.message" level="debug"/> -->
+    <logger name="org.apache.kafka.clients" level="warn"/>
+
+    <root level="info">
+        <appender-ref ref="stdout"/>
+        <appender-ref ref="file"/>
+        <appender-ref ref="errorFile"/>
+    </root>
+</configuration>
