@@ -1,0 +1,41 @@
+/classes/
+.gradle/
+*.class
+
+pscp-sps-client-*.jar
+
+#package file
+*.war
+*.ear
+
+#kdiff3 file
+*.orig
+
+#maven ignore
+target/
+
+#eclipse ignore
+.settings/
+.project
+.classpath
+
+#idea
+.idea/
+/idea/
+*.ipr
+*.iws
+*.iml
+/out/
+
+#temp file
+/logs/
+*.buildinUnits.cache
+*.diff
+*.patch
+*.tmp
+
+#system ignore
+.DS_Store
+Thumbs.db
+/build/
+/bin/

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.ElectricianWorkExperienceDao">
+    <sql id="Base_Column_List">
+        id, resume_id, start_time, end_time, company_name, work_content, order_num,
+        ext, create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.ElectricianWorkExperience">
+		select * from pscp_electrician_work_experience where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.ElectricianWorkExperience">
+        select * from pscp_electrician_work_experience where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_work_experience  where deleted=0
+	</select>
+
+    <select id="getAllListByResumeId" parameterType="long"
+            resultType="com.edianniu.pscp.sps.domain.ElectricianWorkExperience">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_electrician_work_experience
+        WHERE deleted = 0 AND resume_id = #{resumeId}
+        ORDER BY start_time DESC, create_time DESC
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.ElectricianWorkExperience">
+		insert into pscp_electrician_work_experience
+		(
+			id, 
+			resume_id, 
+			company_name, 
+			work_content, 
+			start_time, 
+			end_time, 
+			order_num, 
+			ext, 
+			create_time, 
+			create_user, 
+			modified_time, 
+			modified_user, 
+			deleted
+		)
+		values
+		(
+			#{id}, 
+			#{resumeId}, 
+			#{companyName}, 
+			#{workContent}, 
+			#{startTime}, 
+			#{endTime}, 
+			#{orderNum}, 
+			#{ext}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.ElectricianWorkExperience">
+        update pscp_electrician_work_experience
+        <set>
+            <if test="resumeId != null">resume_id = #{resumeId},</if>
+            <if test="companyName != null">company_name = #{companyName},</if>
+            <if test="workContent != null">work_content = #{workContent},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="orderNum != null">order_num = #{orderNum},</if>
+            <if test="ext != null">ext = #{ext},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_electrician_work_experience
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+
+    <delete id="deleteBatch">
+        update pscp_electrician_work_experience set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where
+        id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

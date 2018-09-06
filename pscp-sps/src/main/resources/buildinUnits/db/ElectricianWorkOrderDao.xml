@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.ElectricianWorkOrderDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.ElectricianWorkOrder">
+		select * from pscp_electrician_work_order where id = #{value} and deleted=0
+	</select>
+    <select id="getByOrderId" resultType="com.edianniu.pscp.sps.domain.ElectricianWorkOrder">
+		select * from pscp_electrician_work_order where order_id = #{value} and deleted=0
+	</select>
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.ElectricianWorkOrder">
+		insert into pscp_electrician_work_order
+		(
+			id, 
+			work_order_id, 
+			order_id, 
+			check_option, 
+			type, 
+			social_work_order_id, 
+			work_order_leader, 
+			electrician_id, 
+			status, 
+			confirm_time, 
+			begin_time, 
+			finish_time, 
+			evaluate_time, 
+			cancle_time, 
+			memo, 
+			company_id, 
+			create_time, 
+			create_user, 
+			modified_time, 
+			modified_user, 
+			deleted
+		)
+		values
+		(
+			#{id}, 
+			#{workOrderId}, 
+			#{orderId}, 
+			#{checkOption}, 
+			#{type}, 
+			#{socialWorkOrderId}, 
+			#{workOrderLeader}, 
+			#{electricianId}, 
+			#{status}, 
+			#{confirmTime}, 
+			#{beginTime}, 
+			#{finishTime}, 
+			#{evaluateTime}, 
+			#{cancleTime}, 
+			#{memo}, 
+			#{companyId}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.ElectricianWorkOrder">
+        update pscp_electrician_work_order
+        <set>
+            <if test="workOrderId != null">work_order_id = #{workOrderId},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="checkOption != null">check_option = #{checkOption},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="socialWorkOrderId != null">social_work_order_id = #{socialWorkOrderId},</if>
+            <if test="workOrderLeader != null">work_order_leader = #{workOrderLeader},</if>
+            <if test="electricianId != null">electrician_id = #{electricianId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="finishTime != null">finish_time = #{finishTime},</if>
+            <if test="evaluateTime != null">evaluate_time = #{evaluateTime},</if>
+            <if test="cancleTime != null">cancle_time = #{cancleTime},</if>
+            <if test="memo != null">memo = #{memo},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="settlementPayStatus != null">settlement_pay_status = #{settlementPayStatus},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_electrician_work_order
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_electrician_work_order set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.ElectricianWorkOrder">
+        select * from
+        pscp_electrician_work_order
+        where deleted=0
+        <if test="type != null">and type = #{type}</if>
+        <if test="status != null">and status = #{status}</if>
+        <if test="unequal != null">and status != #{unequal}</if>
+        <if test="workOrderId != null">and work_order_id = #{workOrderId}</if>
+        <if test="checkOption != null">and check_option = #{checkOption}</if>
+        <if test="socialWorkOrderId != null">and social_work_order_id = #{socialWorkOrderId}</if>
+        <if test="condition != null">#{condition}</if>
+    </select>
+
+    <select id="queryTotal" parameterType="map" resultType="int">
+        SELECT COUNT(1) FROM
+        pscp_electrician_work_order
+        WHERE deleted=0
+        <if test="type != null">and type = #{type}</if>
+        <if test="status != null">and status = #{status}</if>
+        <if test="workOrderId != null">and work_order_id = #{workOrderId}</if>
+        <if test="socialWorkOrderId != null">and social_work_order_id = #{socialWorkOrderId}</if>
+        <if test="condition != null">#{condition}</if>
+        <if test="greaterThanStatus != null">and status &gt; #{greaterThanStatus}</if>
+    </select>
+
+    <select id="getWorkOrderLeader" parameterType="long" resultType="java.util.Map">
+        SELECT
+        t.electrician_id AS id,
+        e.user_name AS name,
+        m.mobile AS "contactTel"
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        LEFT JOIN pscp_member m ON t.electrician_id = m.id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND m.deleted = 0
+        AND t.work_order_leader = 1
+        AND t.work_order_id = #{workOrderId}
+        LIMIT 1
+    </select>
+
+    <select id="getCompanyElectricianWorkOrder" parameterType="long" resultType="java.util.Map">
+        SELECT
+        t.check_option_id AS "checkOptionId",
+        t.check_option AS "checkOption",
+        t.electrician_id AS id,
+        t.status AS status,
+        e.user_name AS name
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND t.type = 1
+        AND t.work_order_id = #{workOrderId}
+        <if test="unequal != null">AND t.status != #{unequal}</if>
+    </select>
+
+    <select id="queryMapListSocialElectrician" parameterType="map" resultType="map">
+        SELECT
+        t.id AS "electricianWorkOrderId",
+        t.order_id AS "orderId",
+        to_char(t.create_time,'yyyy-mm-dd') AS "createTime",
+        t.status AS "status",
+        t.electrician_id AS "electricianId",
+        e.user_name AS "electricianName",
+        t.actual_work_time AS "actualWorkTime",
+        t.settlement_pay_status AS "settlementPayStatus",
+        e.id AS "electrician_id"
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND t.type = 2
+        AND t.work_order_id = #{workOrderId}
+        AND t.social_work_order_id = #{socialWorkOrderId}
+    </select>
+
+    <update id="updateByWorkOrderId" parameterType="map">
+        UPDATE pscp_electrician_work_order
+        SET status = #{nstatus}, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE deleted = 0
+              AND work_order_id = #{workOrderId}
+              AND status = #{bstatus}
+              AND type = #{type}
+    </update>
+
+    <update id="updateBySocialWorkOrderId" parameterType="map">
+        UPDATE pscp_electrician_work_order
+        SET status = #{nstatus},
+        <if test="modifiedUser != null and modifiedUser != ''">
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        </if>
+        WHERE deleted = 0
+        AND type = 2
+        AND social_work_order_id = #{socialWorkOrderId}
+        AND status = #{bstatus}
+    </update>
+
+    <update id="confirmBatch">
+        <foreach collection="array" item="item" index="index" open="" close="" separator=";">
+            update pscp_electrician_work_order
+            <set>
+                status = #{item.status},
+                <if test="item.memo != null and item.memo != ''">
+                    memo = #{item.memo}
+                </if>
+                <if test="modifiedUser != null and modifiedUser != ''">
+                    modified_user = #{modifiedUser},
+                    modified_time = #{modifiedTime}
+                </if>
+            </set>
+            where id = #{item.id}
+            and electrician_id = #{item.electricianId}
+            and social_work_order_id = #{item.socialWorkOrderId}
+        </foreach>
+    </update>
+
+    <update id="updateBatchLiquidateInfo">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pscp_electrician_work_order
+            <set>
+                <if test="item != null and item.status != null">
+                    status = #{item.status},
+                </if>
+                <if test="item != null and item.settlementPayStatus != null">
+                    settlement_pay_status = #{item.settlementPayStatus},
+                </if>
+                <if test="item != null and item.actualWorkTime != null">
+                    actual_work_time = #{item.actualWorkTime},
+                </if>
+                <if test="item != null and item.actualFee != null">
+                    actual_fee = #{item.actualFee},
+                </if>
+                modified_user = #{modifiedUser},
+                modified_time = #{modifiedTime}
+            </set>
+            where id = #{item.id}
+            <if test="item != null and item.electricianId != null">
+                and electrician_id = #{item.electricianId}
+            </if>
+            <if test="item != null and item.socialWorkOrderId != null">
+                and social_work_order_id = #{item.socialWorkOrderId}
+            </if>
+        </foreach>
+    </update>
+
+    <update id="updateLeader">
+        update pscp_electrician_work_order
+        <set>
+            electrician_id = #{electricianId},
+            modified_user = #{modifiedUser},
+            modified_time = #{modifiedTime}
+        </set>
+        where work_order_leader = #{workOrderLeader}
+        and work_order_id = #{workOrderId}
+        <if test="checkOptionId != null">and check_option_id = #{checkOptionId}</if>
+    </update>
+
+    <update id="updateBatch">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pscp_electrician_work_order
+            <set>
+                <if test="item != null and item.status != null">status = #{item.status},</if>
+                <if test="item != null and item.workOrderLeader != null">
+                    work_order_leader = #{item.workOrderLeader},
+                </if>
+                modified_user = #{modifiedUser},
+                modified_time = #{modifiedTime}
+            </set>
+            where electrician_id = #{item.electricianId}
+            and work_order_id = #{item.workOrderId}
+            <if test="item != null and item.checkOptionId != null">and check_option_id = #{item.checkOptionId}</if>
+
+        </foreach>
+    </update>
+
+    <update id="updateBatchCheckOption">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pscp_electrician_work_order
+            <set>
+                check_option = #{item.checkOption},
+                modified_user = #{modifiedUser},
+                modified_time = #{modifiedTime}
+            </set>
+            where check_option_id = #{item.checkOptionId}
+            and work_order_id = #{item.workOrderId}
+        </foreach>
+    </update>
+
+    <insert id="saveBatch" parameterType="list">
+        INSERT INTO pscp_electrician_work_order (
+        id,
+        work_order_id,
+        order_id,
+        check_option_id,
+        check_option,
+        type,
+        social_work_order_id,
+        work_order_leader,
+        electrician_id,
+        status,
+        confirm_time,
+        begin_time,
+        finish_time,
+        evaluate_time,
+        cancle_time,
+        memo,
+        company_id,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (nextval('seq_pscp_electrician_work_order'),
+            #{item.workOrderId},
+            #{item.orderId},
+            #{item.checkOptionId},
+            #{item.checkOption},
+            #{item.type},
+            #{item.socialWorkOrderId},
+            #{item.workOrderLeader},
+            #{item.electricianId},
+            #{item.status},
+            #{item.confirmTime},
+            #{item.beginTime},
+            #{item.finishTime},
+            #{item.evaluateTime},
+            #{item.cancleTime},
+            #{item.memo},
+            #{item.companyId},
+            #{item.createTime},
+            #{item.createUser},
+            0
+            )
+        </foreach>
+    </insert>
+    <select id="getUnLiquidatedSocialElectricianWorkOrderCount"
+            resultType="int">
+        select count(*) from pscp_electrician_work_order
+        where 
+        deleted=0 
+        and social_work_order_id = #{socialWorkOrderId}
+        and status  not in(-1,-2,5) 
+        and type=2
+    </select>
+    <select id="getConfirmedSocialElectricianWorkOrderCount"
+            resultType="int">
+        select count(*) from pscp_electrician_work_order
+        where 
+        deleted=0 
+        and social_work_order_id = #{socialWorkOrderId}
+        and status  in(1,2,3,4,5) 
+        and type=2
+    </select>
+    <select id="getUnConfirmSocialElectricianWorkOrderIds"
+            resultType="java.lang.Long">
+        select id from pscp_electrician_work_order
+        where 
+        deleted=0
+        and social_work_order_id = #{socialWorkOrderId}
+        and status=0
+        and type=2
+    </select>
+    <select id="queryMapByCondition" parameterType="map" resultType="map">
+        SELECT
+        t.id AS "electricianWorkOrderId",
+        t.order_id AS "orderId",
+        to_char(t.create_time,'yyyy-mm-dd') AS "createTime",
+        t.status AS "status",
+        t.electrician_id AS "electricianId",
+        e.user_name AS "electricianName",
+        t.actual_work_time AS "actualWorkTime"
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND t.type = 2
+        AND t.electrician_id = #{electricianId}
+        AND t.work_order_id = #{workOrderId}
+        AND t.social_work_order_id = #{socialWorkOrderId}
+        limit 1
+    </select>
+
+    <select id="selectListByCondition" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.ElectricianWorkOrder">
+        SELECT * FROM pscp_electrician_work_order t
+        WHERE t.deleted = 0 AND t.company_id = #{companyId}
+        <if test="status != null">AND t.status = #{status}</if>
+        <if test="settlementPayStatus != null">AND t.settlement_pay_status = #{settlementPayStatus}</if>
+        <if test="orderIds != null and orderIds.length!=0">
+            AND t.order_id IN
+            <foreach collection="orderIds" item="orderId" index="index" open="(" separator="," close=")">
+                #{orderId}
+            </foreach>
+        </if>
+
+
+    </select>
+
+    <select id="selectAllCheckOption" parameterType="map" resultType="map">
+        SELECT
+        t.electrician_id AS "electricianId",
+        e.user_name AS "userName",
+        t.check_option as "checkOption",
+        t.check_option_id as "checkOptionId",
+        t.work_order_leader AS "workOrderLeader"
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON e.member_id = t.electrician_id
+        <where>
+            t.deleted = 0 AND e.deleted = 0
+            <if test="type != null">AND type = #{type}</if>
+            <if test="workOrderId != null">AND work_order_id = #{workOrderId}</if>
+        </where>
+    </select>
+</mapper>

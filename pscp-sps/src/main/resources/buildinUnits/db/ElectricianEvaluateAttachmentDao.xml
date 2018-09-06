@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.ElectricianEvaluateAttachmentDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.ElectricianEvaluateAttachment">
+		select * from pscp_electrician_evaluate_attachment where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.ElectricianEvaluateAttachment">
+        select * from pscp_electrician_evaluate_attachment where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_evaluate_attachment  where deleted=0
+	</select>
+
+    <select id="queryListByEvaluateId" parameterType="long"
+            resultType="com.edianniu.pscp.sps.domain.ElectricianEvaluateAttachment">
+        SELECT * FROM pscp_electrician_evaluate_attachment
+        WHERE deleted = 0 AND electrician_evaluate_id = #{evaluateId}
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.ElectricianEvaluateAttachment">
+		insert into pscp_electrician_evaluate_attachment
+		(
+			id, 
+			electrician_evaluate_id, 
+			type, 
+			fid, 
+			create_time, 
+			create_user, 
+			modified_time, 
+			modified_user, 
+			deleted
+		)
+		values
+		(
+			#{id}, 
+			#{electricianEvaluateId}, 
+			#{type}, 
+			#{fid}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <insert id="saveBatchAttachment">
+        insert into pscp_electrician_evaluate_attachment
+        (
+        id,
+        electrician_evaluate_id,
+        type,
+        fid,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (nextval('seq_pscp_electrician_evaluate_attachment'),
+            #{item.electricianEvaluateId},
+            #{item.type},
+            #{item.fid},
+            #{createTime},
+            #{createUser},
+            0)
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.ElectricianEvaluateAttachment">
+        update pscp_electrician_evaluate_attachment
+        <set>
+            <if test="electricianEvaluateId != null">electrician_evaluate_id = #{electricianEvaluateId},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="fid != null">fid = #{fid},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_electrician_evaluate_attachment
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+
+    <delete id="deleteBatch">
+        update pscp_electrician_evaluate_attachment set deleted=-1,modified_time=now(),modified_user=${modifiedUser}
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

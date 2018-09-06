@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.SocialWorkOrderDao">
+    <select id="getAfterExpiryTimeAndUnPayOrders" resultType="java.lang.Long">
+        select id from pscp_social_work_order where expiry_time &lt;now() and status=0 and deleted=0
+    </select>
+    <select id="getBeforeExpiryTimeAndUnPayOrders" resultType="java.lang.Long">
+        select id from pscp_social_work_order where
+        (date_part('day', (expiry_time-now()) ) * 24 +date_part('hour', (expiry_time-now())))=#{hour} and
+        status=0 and deleted=0
+    </select>
+    <select id="getAfterExpiryTimeAndPaiedOrders" resultType="java.lang.Long">
+        select id from pscp_social_work_order where expiry_time &lt;now() and status=1 and deleted=0
+    </select>
+    <select id="getFinishOrders" resultType="java.lang.Long">
+        select id from pscp_social_work_order where status=3 and deleted=0
+    </select>
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        select * from pscp_social_work_order where deleted=0
+    </select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        select * from pscp_social_work_order where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+    <select id="queryTotal" resultType="int">
+        select count(*) from pscp_social_work_order where deleted=0
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        insert into pscp_social_work_order
+        (
+        id,
+        work_order_id,
+        order_id,
+        expiry_time,
+        begin_work_time,
+        end_work_time,
+        qualifications,
+        content,
+        total_fee,
+        quantity,
+        unit,
+        status,
+        pay_type,
+        pay_status,
+        pay_amount,
+        pay_time,
+        pay_sync_time,
+        pay_async_time,
+        pay_memo,
+        company_id,
+        create_time,
+        create_user,
+        modified_time,
+        modified_user,
+        deleted,
+        fee
+        )
+        values
+        (
+        #{id},
+        #{workOrderId},
+        #{orderId},
+        #{expiryTime},
+        #{beginWorkTime},
+        #{endWorkTime},
+        #{qualifications},
+        #{content},
+        #{totalFee},
+        #{quantity},
+        #{unit},
+        #{status},
+        #{payType},
+        #{payStatus},
+        #{payAmount},
+        #{payTime},
+        #{paySynctime},
+        #{payAsynctime},
+        #{payMemo},
+        #{companyId},
+        #{createTime},
+        #{createUser},
+        #{modifiedTime},
+        #{modifiedUser},
+        #{deleted},
+        #{fee}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        update pscp_social_work_order
+        <set>
+            <if test="workOrderId != null">work_order_id = #{workOrderId},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="expiryTime != null">expiry_time = #{expiryTime},</if>
+            <if test="beginWorkTime != null">begin_work_time = #{beginWorkTime},</if>
+            <if test="endWorkTime != null">end_work_time = #{endWorkTime},</if>
+            <if test="qualifications != null">qualifications = #{qualifications},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="totalFee != null">total_fee = #{totalFee},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="payType != null">pay_type = #{payType},</if>
+            <if test="payStatus != null">pay_status = #{payStatus},</if>
+            <if test="payAmount != null">pay_amount = #{payAmount},</if>
+            <if test="payTime != null">pay_time = #{payTime},</if>
+            <if test="paySynctime != null">pay_sync_time = #{paySynctime},</if>
+            <if test="payAsynctime != null">pay_async_time = #{payAsynctime},</if>
+            <if test="payMemo != null">pay_memo = #{payMemo},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+            <if test="fee != null">fee = #{fee}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <update id="batchUpdatePayment">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pscp_social_work_order
+            <set>
+                status = #{item.status},
+                <if test="item != null and item.payType != null">pay_type = #{item.payType},</if>
+                <if test="item != null and item.payStatus != null">pay_status = #{item.payStatus},</if>
+                <if test="item != null and item.payAmount != null">pay_amount = #{item.payAmount},</if>
+                <if test="item != null and item.payTime != null">pay_time = #{item.payTime},</if>
+                <if test="item != null and item.paySynctime != null">pay_sync_time = #{item.paySynctime},</if>
+                <if test="item != null and item.payAsynctime != null">pay_async_time = #{item.payAsynctime},</if>
+                <if test="item != null and item.payMemo != null">pay_memo = #{item.payMemo},</if>
+                <if test="item != null and item.status != null">status = #{item.status},</if>
+                modified_user = #{modifiedUser},
+                modified_time = #{modifiedTime}
+            </set>
+            where id = #{item.id}
+        </foreach>
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_social_work_order
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id =
+              #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_social_work_order set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getEntityByWorkOrderId" parameterType="long"
+            resultType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        SELECT * FROM pscp_social_work_order
+        WHERE work_order_id = #{workOrderId} and deleted=0
+    </select>
+
+    <select id="queryListWorkOrder" parameterType="map"
+            resultType="com.edianniu.pscp.sps.bean.socialworkorder.list.vo.SocialWorkOrderVO">
+        SELECT
+        t.id,
+        t.order_id AS orderId,
+        t.work_order_id AS workOrderId,
+        o.name AS name,
+        o.latitude AS latitude,
+        o.longitude AS longitude,
+        o.address AS address,
+        c.cp_name AS customerName,
+        p.name AS projectName,
+        t.fee AS fee,
+        t.quantity AS quantity,
+        t.status AS status,
+        to_char(t.create_time,'yyyy-mm-dd') AS publishTime,
+        t.create_time AS createTime,
+        t.expiry_time AS closingDate,
+        t.pay_async_time AS payTime,
+        t.qualifications AS qualifications,
+        t.title AS title
+        FROM pscp_social_work_order t
+        LEFT JOIN pscp_work_order o ON t.work_order_id = o.id
+        LEFT JOIN pscp_engineering_project p ON o.engineering_project_id = p.id
+        LEFT JOIN pscp_company_customer c ON p.customer_id = c.id
+        <where>
+            t.deleted=0 AND o.deleted=0
+            <if test="companyId != null">AND t.company_id = #{companyId}</if>
+            <if test="name != null and name != ''">
+                AND o.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="title != null and title != ''">
+                AND t.title like CONCAT('%',#{title},'%')
+            </if>
+            <if test="projectName != null and projectName != ''">
+                AND p.name like CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="customerName != null and customerName != ''">
+                AND c.cp_name like CONCAT('%',#{customerName},'%')
+            </if>
+            <if test="startTime != null">
+                AND t.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND t.create_time &lt;= #{endTime}
+            </if>
+            <if test="finishStartTime != null">
+                AND t.modified_time &gt;= #{finishStartTime}
+            </if>
+            <if test="finishEndTime != null">
+                AND t.modified_time &lt;= #{finishEndTime}
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryListWorkOrderCount" parameterType="map"
+            resultType="int">
+        SELECT COUNT(1) FROM pscp_social_work_order t
+        LEFT JOIN pscp_work_order o ON t.work_order_id = o.id
+        LEFT JOIN pscp_engineering_project p ON o.engineering_project_id = p.id
+        LEFT JOIN pscp_company_customer c ON p.customer_id = c.id
+        <where>
+            t.deleted=0 AND o.deleted=0
+            <if test="companyId != null">AND t.company_id = #{companyId}</if>
+            <if test="name != null and name != ''">
+                AND o.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="title != null and title != ''">
+                AND t.title like CONCAT('%',#{title},'%')
+            </if>
+            <if test="projectName != null and projectName != ''">
+                AND p.name like CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="customerName != null and customerName != ''">
+                AND c.cp_name like CONCAT('%',#{customerName},'%')
+            </if>
+            <if test="startTime != null">
+                AND t.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND t.create_time &lt;= #{endTime}
+            </if>
+            <if test="finishStartTime != null">
+                AND t.modified_time &gt;= #{finishStartTime}
+            </if>
+            <if test="finishEndTime != null">
+                AND t.modified_time &lt;= #{finishEndTime}
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+    <select id="getById" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        SELECT * FROM pscp_social_work_order
+        WHERE deleted=0
+        AND id = #{id}
+    </select>
+
+    <select id="getByIdAndCompanyId" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        SELECT * FROM pscp_social_work_order
+        WHERE deleted=0
+        <if test="id != null">AND id = #{id}</if>
+        <if test="orderId != null and orderId != ''">AND order_id = #{orderId}</if>
+        <if test="companyId != null">AND company_id = #{companyId}</if>
+    </select>
+
+    <select id="getSocialElectricianFee" parameterType="java.lang.Long" resultType="java.lang.Double">
+        select fee from view_social_work_order where id = #{id}
+    </select>
+
+    <select id="selectListByCondition" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.SocialWorkOrder">
+        SELECT * FROM pscp_social_work_order t
+        WHERE t.deleted = 0 AND t.company_id = #{companyId}
+        <if test="status != null">AND t.status = #{status}</if>
+        <if test="orderIds != null and orderIds.length!=0">
+            AND t.order_id IN
+            <foreach collection="orderIds" item="orderId" index="index" open="(" separator="," close=")">
+                #{orderId}
+            </foreach>
+        </if>
+    </select>
+
+    <insert id="batchSave" parameterType="list" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO pscp_social_work_order
+        (
+        id,
+        work_order_id,
+        order_id,
+        expiry_time,
+        begin_work_time,
+        end_work_time,
+        qualifications,
+        title,
+        content,
+        total_fee,
+        fee,
+        quantity,
+        unit,
+        status,
+        company_id,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (nextval('seq_pscp_social_work_order'),
+            #{item.workOrderId},
+            #{item.orderId},
+            #{item.expiryTime},
+            #{item.beginWorkTime},
+            #{item.endWorkTime},
+            #{item.qualifications}::jsonb,
+            #{item.title},
+            #{item.content},
+            #{item.totalFee},
+            #{item.fee},
+            #{item.quantity},
+            #{item.unit},
+            #{item.status},
+            #{item.companyId},
+            #{item.createTime},
+            #{item.createUser},
+            0)
+        </foreach>
+    </insert>
+    
+    <select id="scanNeedRefundOrders" parameterType="map" resultType="string">
+    	SELECT order_id FROM pscp_social_work_order
+    	<where>
+    		deleted=0
+    		<if test="statusList != null"> AND status in
+    			<foreach collection="statusList" item="status" open="(" separator="," close=")">
+    				#{status}
+    			</foreach>
+    		</if>
+    		<if test="payStatus != null">AND pay_status = #{payStatus}</if>
+    		<if test="refundStatus != null">AND refund_status = #{refundStatus}</if>
+    	</where>
+    	ORDER BY modified_time ASC
+    	<if test="limit != null">limit #{limit}</if>
+    </select>
+    
+</mapper>

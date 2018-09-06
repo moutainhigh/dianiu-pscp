@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.WorkOrderEvaluateDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.WorkOrderEvaluate">
+		select * from pscp_work_order_evaluate where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.WorkOrderEvaluate">
+        select * from pscp_work_order_evaluate where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_work_order_evaluate  where deleted=0
+	</select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.WorkOrderEvaluate">
+		insert into pscp_work_order_evaluate
+		(
+			`id`, 
+			`work_order_id`, 
+			`customer_id`, 
+			`content`, 
+			`service_quality`, 
+			`service_speed`, 
+			`create_time`, 
+			`create_user`, 
+			`modified_time`, 
+			`modified_user`, 
+			`deleted`
+		)
+		values
+		(
+			#{id}, 
+			#{workOrderId}, 
+			#{customerId}, 
+			#{content}, 
+			#{serviceQuality}, 
+			#{serviceSpeed}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.WorkOrderEvaluate">
+        update pscp_work_order_evaluate
+        <set>
+            <if test="workOrderId != null">`work_order_id` = #{workOrderId},</if>
+            <if test="customerId != null">`customer_id` = #{customerId},</if>
+            <if test="content != null">`content` = #{content},</if>
+            <if test="serviceQuality != null">`service_quality` = #{serviceQuality},</if>
+            <if test="serviceSpeed != null">`service_speed` = #{serviceSpeed},</if>
+            <if test="createTime != null">`create_time` = #{createTime},</if>
+            <if test="createUser != null">`create_user` = #{createUser},</if>
+            <if test="modifiedTime != null">`modified_time` = #{modifiedTime},</if>
+            <if test="modifiedUser != null">`modified_user` = #{modifiedUser},</if>
+            <if test="deleted != null">`deleted` = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_work_order_evaluate
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_work_order_evaluate set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectAllByWorkOrderId" parameterType="long"
+            resultType="com.edianniu.pscp.sps.domain.WorkOrderEvaluate">
+        SELECT * FROM pscp_work_order_evaluate
+        WHERE deleted = 0 AND work_order_id = #{workOrderId}
+    </select>
+
+    <select id="queryListEvaluate"
+            parameterType="com.edianniu.pscp.sps.bean.workorder.evaluate.ListReqData"
+            resultType="com.edianniu.pscp.sps.domain.WorkOrderEvaluate">
+        SELECT t.*
+        FROM pscp_work_order_evaluate t
+        LEFT JOIN pscp_work_order o ON t.work_order_id = o.id
+        WHERE t.deleted = 0 AND o.deleted = 0
+        <if test="workOrderId != null">
+            AND o.id = #{workOrderId}
+        </if>
+        <if test="orderId != null and orderId != ''">
+            AND o.order_id = #{orderId}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="queryListEvaluateCount" resultType="int"
+            parameterType="com.edianniu.pscp.sps.bean.workorder.evaluate.ListQuery">
+        SELECT COUNT(t.id)
+        FROM pscp_work_order_evaluate t
+        LEFT JOIN pscp_work_order o ON t.work_order_id = o.id
+        WHERE t.deleted = 0 AND o.deleted = 0
+        <if test="workOrderId != null">
+            AND o.id = #{workOrderId}
+        </if>
+        <if test="orderId != null and orderId != ''">
+            AND o.order_id = #{orderId}
+        </if>
+    </select>
+</mapper>

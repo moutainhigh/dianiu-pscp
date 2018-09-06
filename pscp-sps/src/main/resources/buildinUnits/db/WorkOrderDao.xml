@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.WorkOrderDao">
+
+    <select id="queryObject" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.WorkOrder">
+        select * from pscp_work_order
+        where deleted=0
+        and id = #{id}
+        <if test="uid != null">and member_id = #{uid}</if>
+        <if test="companyId != null">and company_id = #{companyId}</if>
+    </select>
+    <select id="getById"
+            resultType="com.edianniu.pscp.sps.domain.WorkOrder">
+        select * from pscp_work_order
+        where deleted=0
+        and id = #{value}
+    </select>
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.WorkOrder">
+        select * from pscp_work_order where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_work_order  where deleted=0
+	</select>
+    <select id="getCountByProjectId" resultType="int">
+		select count(*) from pscp_work_order  where deleted=0 and engineering_project_id=#{value}
+	</select>
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.WorkOrder">
+		insert into pscp_work_order
+		(
+			id,
+			order_id,
+			member_id,
+			engineering_project_id,
+			name,
+			content,
+			devices,
+			type,
+			address,
+			latitude,
+			longitude,
+			start_time,
+			end_time,
+			actual_start_time,
+			actual_end_time,
+			status,
+			remark,
+			company_id,
+			create_time,
+			create_user,
+			modified_time,
+			modified_user,
+			deleted,
+			hazard_factor_identifications,
+			identification_other,
+			safety_measures,
+			safety_measures_other,
+			carrying_tools,
+			defect_records
+		)
+		values
+		(
+			#{id}, 
+			#{orderId}, 
+			#{memberId}, 
+			#{engineeringProjectId}, 
+			#{name}, 
+			#{content}, 
+			#{devices}, 
+			#{type}, 
+			#{address}, 
+			#{latitude}, 
+			#{longitude}, 
+			#{startTime}, 
+			#{endTime}, 
+			#{actualStartTime}, 
+			#{actualEndTime}, 
+			#{status},
+			#{remark}, 
+			#{companyId}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}, 
+			#{hazardFactorIdentifications},
+			#{identificationOther},
+			#{safetyMeasures},
+			#{safetyMeasuresOther},
+			#{carryingTools},
+			#{defectRecords}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.WorkOrder">
+        update pscp_work_order
+        <set>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="memberId != null">member_id = #{memberId},</if>
+            <if test="engineeringProjectId != null">engineering_project_id = #{engineeringProjectId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="devices != null">devices = #{devices},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="actualStartTime != null">actual_start_time = #{actualStartTime},</if>
+            <if test="actualEndTime != null">actual_end_time = #{actualEndTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+            <if test="hazardFactorIdentifications != null">hazard_factor_identifications =
+                #{hazardFactorIdentifications},
+            </if>
+            <if test="identificationOther != null">identification_other =
+                #{identificationOther},
+            </if>
+            <if test="safetyMeasures != null">safety_measures = #{safetyMeasures},</if>
+            <if test="safetyMeasuresOther != null">safety_measures_other = #{safetyMeasuresOther},</if>
+            <if test="carryingTools != null">carrying_tools = #{carryingTools}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <update id="updateModifiedUserInfo" parameterType="com.edianniu.pscp.sps.domain.WorkOrder">
+        UPDATE pscp_work_order
+        SET modified_time = #{modifiedTime}, modified_user = #{modifiedUser}
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <select id="calculateDistance" parameterType="map" resultType="map">
+      SELECT
+        t.latitude, t.longitude,
+        earth_distance(ll_to_earth(t.latitude, t.longitude), ll_to_earth(#{latitude}, #{longitude})) as distance
+      FROM pscp_work_order t WHERE t.deleted=0 AND t.id = #{id}
+    </select>
+
+    <delete id="delete">
+        UPDATE pscp_work_order
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_work_order set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+
+
+
+
+    <select id="queryListWorkOrder" parameterType="map"
+            resultType="com.edianniu.pscp.sps.bean.workorder.chieforder.WorkOrderInfo">
+        SELECT
+        t.id AS id,
+        t.order_id AS orderId,
+        t.name AS name,
+        t.address AS address,
+        t.latitude AS latitude,
+        t.longitude AS longitude,
+        c.cp_name AS customerName,
+        p.name AS projectName,
+        t.status AS status,
+        to_char(t.create_time,'yyyy-mm-dd') AS publishTime,
+        t.create_time AS createTime,
+        t.start_time AS startTime,
+        t.end_time AS endTime,
+        t.type AS type,
+        t.create_user AS dispatchPersonnel,
+        t.modified_user AS lastAmendment,
+        to_char(t.modified_time,'yyyy-mm-dd HH:mm:ss') AS lastModifiedTime,
+        m.name AS companyName
+        FROM pscp_work_order t
+        LEFT JOIN pscp_engineering_project p ON t.engineering_project_id = p.id
+        LEFT JOIN pscp_company_customer c ON p.customer_id = c.id
+        LEFT JOIN pscp_company m ON m.id = p.company_id
+        <where>
+            t.deleted = 0
+            <if test="customerUid != null and customerUid != ''">AND c.member_id = #{customerUid}</if>
+            <if test="memberId != null and memberId != ''">AND t.member_id = #{memberId}</if>
+            <if test="companyId != null and companyId != ''">AND t.company_id = #{companyId}</if>
+            <if test="companyName != null and companyName.trim() != ''">
+            	AND m.name like concat ('%', #{companyName}, '%')
+            </if>
+            <if test="name != null and name.trim() != ''">
+                AND t.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="projectName != null and projectName.trim() != ''">
+                AND p.name like CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="customerName != null and customerName.trim() != ''">
+                AND c.cp_name like CONCAT('%',#{customerName},'%')
+            </if>
+            <if test="startTime != null">
+                AND t.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND t.create_time &lt;= #{endTime}
+            </if>
+            <if test="subStatus != null">
+            	AND t.status = #{subStatus}
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+    <select id="queryListWorkOrderCount" parameterType="map" resultType="int">
+        SELECT COUNT(1) FROM pscp_work_order t
+         LEFT JOIN pscp_engineering_project p ON t.engineering_project_id = p.id
+        LEFT JOIN pscp_company_customer c ON p.customer_id = c.id
+        LEFT JOIN pscp_company m ON m.id = p.company_id
+        <where>
+            t.deleted = 0
+            <if test="customerUid != null and customerUid != ''">AND c.member_id = #{customerUid}</if>
+            <if test="memberId != null and memberId != ''">AND t.member_id = #{memberId}</if>
+            <if test="companyId != null and companyId != ''">AND t.company_id = #{companyId}</if>
+            <if test="companyName != null and companyName.trim() != ''">
+            	AND m.name like concat ('%', #{companyName}, '%')
+            </if>
+            <if test="name != null and name.trim() != ''">
+                AND t.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="projectName != null and projectName.trim() != ''">
+                AND p.name like CONCAT('%',#{projectName},'%')
+            </if>
+            <if test="customerName != null and customerName.trim() != ''">
+                AND c.cp_name like CONCAT('%',#{customerName},'%')
+            </if>
+            <if test="startTime != null">
+                AND t.create_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND t.create_time &lt;= #{endTime}
+            </if>
+            <if test="subStatus != null">
+            	AND t.status = #{subStatus}
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+
+
+    <select id="getWorkOrderSequence" resultType="long">
+        select nextval('seq_pscp_electrician_work_log')
+    </select>
+
+    <select id="queryEntity" resultType="com.edianniu.pscp.sps.domain.WorkOrder">
+        SELECT * FROM pscp_work_order t
+        <where>
+            t.deleted = 0
+            <if test="name != null and name != ''">
+                AND t.name = #{name}
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND t.order_id = #{orderId}
+            </if>
+            <if test="companyId != null">
+                AND t.company_id = #{companyId}
+            </if>
+        </where>
+        limit 1
+    </select>
+
+    <select id="getWorkOrderByCondition" resultType="com.edianniu.pscp.sps.domain.WorkOrder">
+        SELECT * FROM pscp_work_order t
+        <where>
+            t.deleted = 0
+            <if test="id != null">
+                AND t.id = #{id}
+            </if>
+            <if test="orderId != null and orderId != ''">
+                AND t.order_id = #{orderId}
+            </if>
+            <if test="companyId != null">
+                AND t.company_id = #{companyId}
+            </if>
+        </where>
+        limit 1
+    </select>
+    <select id="listSelectDataVO" parameterType="map"
+            resultType="com.edianniu.pscp.sps.bean.workorder.chieforder.vo.SelectDataVO">
+        SELECT
+        id, name
+        FROM pscp_work_order
+        WHERE deleted = 0
+        AND company_id = #{companyId}
+        AND status IN
+        <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        order by create_time desc
+    </select>
+
+    <select id="queryPageSelectData" parameterType="map"
+            resultType="com.edianniu.pscp.sps.bean.workorder.chieforder.vo.SelectDataVO">
+        SELECT
+        t.id AS id,
+        t.order_id AS orderId,
+        t.name AS name,
+        t.address AS address,
+        t.status AS status,
+        to_char(t.create_time, 'yyyy-mm-dd') AS publishTime
+        FROM pscp_work_order t
+        <where>
+            t.deleted = 0
+            <if test="companyId != null and companyId != ''">AND t.company_id = #{companyId}</if>
+            <if test="name != null and name != ''">
+                AND t.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY t.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+
+    </select>
+
+    <select id="querySelectDataCount" parameterType="map" resultType="java.lang.Integer">
+        SELECT count(1) FROM pscp_work_order t
+        <where>
+            t.deleted = 0
+            <if test="companyId != null and companyId != ''">AND t.company_id = #{companyId}</if>
+            <if test="projectId != null and projectId != ''">AND t.engineering_project_id = #{projectId}</if>
+            <if test="name != null and name != ''">
+                AND t.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="status != null and status.length != 0">
+                AND t.status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getWorkOrderVOs" parameterType="map"
+            resultType="com.edianniu.pscp.sps.bean.workorder.chieforder.vo.WorkOrderVO">
+        SELECT
+        id AS id,
+        order_id AS orderId,
+        name AS name,
+        content AS content,
+        devices AS devices,
+        address AS address,
+        to_char(start_time, 'yyyy-mm-dd') AS startTime,
+        to_char(end_time, 'yyyy-mm-dd') AS endTime,
+        (to_char(start_time,'yyyy-mm-dd') || '~' || to_char(end_time,'yyyy-mm-dd')) AS workTime,
+        need_social_electrician AS needSocialElectrician,
+        to_char(create_time, 'yyyy-mm-dd') AS publishTime,
+        status AS status
+        FROM pscp_work_order
+        <where>
+            deleted = 0
+            <if test="projectId != null and projectId != ''">AND engineering_project_id = #{projectId}</if>
+            <if test="companyId != null and companyId != ''">AND company_id = #{companyId}</if>
+            <if test="status != null and status.length != 0">
+                AND status IN
+                <foreach collection="status" item="item" index="index" open="(" close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="name != null and name != ''">
+                AND name = #{name}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+
+</mapper>

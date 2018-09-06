@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.ElectricianResumeDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.ElectricianResume">
+		select * from pscp_electrician_resume where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.ElectricianResume">
+        select * from pscp_electrician_resume where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_resume  where deleted=0
+	</select>
+
+    <select id="queryEntityByElectricianId" parameterType="long"
+            resultType="com.edianniu.pscp.sps.domain.ElectricianResume">
+        SELECT * FROM pscp_electrician_resume
+        WHERE deleted = 0
+        AND electrician_id = #{electricianId}
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.ElectricianResume">
+		insert into pscp_electrician_resume
+		(
+			id, 
+			electrician_id, 
+			diploma, 
+			working_years, 
+			city, 
+			expected_fee, 
+			synopsis, 
+			ext, 
+			create_time, 
+			create_user, 
+			modified_time, 
+			modified_user, 
+			deleted
+		)
+		values
+		(
+			#{id}, 
+			#{electricianId}, 
+			#{diploma}, 
+			#{workingYears}, 
+			#{city}, 
+			#{expectedFee}, 
+			#{synopsis}, 
+			#{ext}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.ElectricianResume">
+        update pscp_electrician_resume
+        <set>
+            <if test="electricianId != null">electrician_id = #{electricianId},</if>
+            <if test="diploma != null">diploma = #{diploma},</if>
+            <if test="workingYears != null">working_years = #{workingYears},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="expectedFee != null">expected_fee = #{expectedFee},</if>
+            <if test="synopsis != null">synopsis = #{synopsis},</if>
+            <if test="ext != null">ext = #{ext},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_electrician_resume
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+
+    <delete id="deleteBatch">
+        update pscp_electrician_resume set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

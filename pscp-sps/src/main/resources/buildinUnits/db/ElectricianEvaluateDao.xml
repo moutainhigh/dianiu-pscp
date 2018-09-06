@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.ElectricianEvaluateDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.ElectricianEvaluate">
+		select * from pscp_electrician_evaluate where id = #{value} and deleted=0
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.ElectricianEvaluate">
+        select * from pscp_electrician_evaluate where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from pscp_electrician_evaluate  where deleted=0
+	</select>
+
+    <select id="queryEntityByElectricianWorkOrderId" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.ElectricianEvaluate">
+      SELECT * FROM pscp_electrician_evaluate
+      WHERE deleted = 0
+      AND electrician_id = #{electricianId}
+      AND electrician_work_order_id = #{electricianWorkOrderId}
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.ElectricianEvaluate">
+		insert into pscp_electrician_evaluate
+		(
+			id, 
+			electrician_work_order_id, 
+			electrician_id, 
+			content, 
+			service_quality, 
+			service_speed, 
+			company_id, 
+			create_time, 
+			create_user, 
+			modified_time, 
+			modified_user, 
+			deleted
+		)
+		values
+		(
+			#{id}, 
+			#{electricianWorkOrderId}, 
+			#{electricianId}, 
+			#{content}, 
+			#{serviceQuality}, 
+			#{serviceSpeed}, 
+			#{companyId}, 
+			#{createTime}, 
+			#{createUser}, 
+			#{modifiedTime}, 
+			#{modifiedUser}, 
+			#{deleted}
+		)
+	</insert>
+
+    <insert id="saveBatchEvaluate">
+        insert into pscp_electrician_evaluate
+        (
+        id,
+        electrician_work_order_id,
+        electrician_id,
+        content,
+        service_quality,
+        service_speed,
+        company_id,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},
+            #{item.electricianWorkOrderId},
+            #{item.electricianId},
+            #{item.content},
+            #{item.serviceQuality},
+            #{item.serviceSpeed},
+            #{item.companyId},
+            #{createTime},
+            #{createUser},
+            0)
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.ElectricianEvaluate">
+        update pscp_electrician_evaluate
+        <set>
+            <if test="electricianWorkOrderId != null">electrician_work_order_id = #{electricianWorkOrderId},</if>
+            <if test="electricianId != null">electrician_id = #{electricianId},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="serviceQuality != null">service_quality = #{serviceQuality},</if>
+            <if test="serviceSpeed != null">service_speed = #{serviceSpeed},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+    <update id="updateBatchEvaluate">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pscp_electrician_evaluate
+            <set>
+                <if test="item != null and item.content != ''">
+                    content = #{item.content},
+                </if>
+                <if test="item != null and item.serviceQuality != null">
+                    service_quality = #{item.serviceQuality},
+                </if>
+                <if test="item != null and item.serviceSpeed != null">
+                    service_speed = #{item.serviceSpeed},
+                </if>
+                modified_user = #{modifiedUser},
+                modified_time = #{modifiedTime}
+            </set>
+            where id = #{item.id}
+            and electrician_id = #{item.electricianId}
+        </foreach>
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_electrician_evaluate
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+
+    <delete id="deleteBatch">
+        update pscp_electrician_evaluate set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getId" resultType="long">
+        SELECT nextval('seq_pscp_social_work_order')
+    </select>
+</mapper>

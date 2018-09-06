@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.sps.dao.MemberWalletDetailDao">
+
+    <select id="queryList" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.MemberWalletDetail">
+
+        SELECT
+        <include refid="wallet_detail_default_columns"/>
+        FROM pscp_member_wallet_detail t
+        <where>
+            t.deleted=0
+            <if test="type != null">and t.type = #{type}</if>
+            <if test="orderId != null and orderId != ''">and t.order_id = #{orderId}</if>
+        </where>
+    </select>
+
+    <sql id="wallet_detail_default_columns">
+        t.id,
+        t.uid,
+        t.amount,
+        t.type,
+        t.deal_type AS dealType,
+        t.order_id AS orderId,
+        t.pay_order_id AS payOrderId,
+        t.fund_target AS fundTarget,
+        t.fund_source AS fundSource,
+        t.remark,
+        t.check_status AS checkStatus,
+        t.check_user AS checkUser,
+        t.check_time AS checkTime,
+        t.check_memo AS checkMemo,
+        t.pay_status AS payStatus,
+        t.pay_user AS payUser,
+        t.pay_memo AS payMemo,
+        t.pay_time AS payTime,
+        t.create_time AS dealTime,
+        t.create_user AS createUser,
+        t.modified_time AS modifiedTime,
+        t.modified_user AS modifiedUser,
+        t.deleted,
+        t.transaction_id AS transactionId,
+        t.available_amount AS availableAmount,
+        t.available_freezing_amount AS availableFreezingAmount,
+        t.deal_account AS dealAccount
+    </sql>
+</mapper>

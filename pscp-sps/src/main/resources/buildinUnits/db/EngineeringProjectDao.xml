@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.EngineeringProjectDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.bean.project.ProjectInfo">
+		select * from view_company_project where id = #{value} 
+	</select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.sps.bean.project.ProjectInfo">
+        select * from view_company_project where 1=1
+        <if test="bean != null and bean.companyId != null ">
+            and company_id =#{bean.companyId}
+        </if>
+        <if test="bean != null and bean.goStatus=='notStart'">
+            and status = 0
+        </if>
+        <if test="bean != null and bean.goStatus=='ongoing'">
+            and (status = 1 or status = 2 )
+        </if>
+        <if test="bean != null and bean.goStatus=='end' ">
+            and (status = 3 or status = -1)
+        </if>
+        <if test="bean != null and bean.cpContact != null and bean.cpContact !=''">
+            and cp_contact like CONCAT('%',#{bean.cpContact},'%')
+        </if>
+        <if test="bean != null and bean.name != null and bean.name !=''">
+            and name like CONCAT('%',#{bean.name},'%')
+        </if>
+        <if test="bean != null and bean.cpName !=null and bean.cpName !=''">
+            and cp_name like CONCAT('%',#{bean.cpName},'%')
+        </if>
+        <if test="bean != null and bean.startTime != null">
+            and start_time &gt;= #{bean.startTime}
+        </if>
+        <if test="bean != null and bean.endTime != null">
+            and end_time &lt;= #{bean.endTime}
+        </if>
+        <if test="bean != null and bean.cpContactMobile != null and bean.cpContactMobile !=''">
+            and cp_contact_mobile like CONCAT('%',#{bean.cpContactMobile},'%')
+        </if>
+        <if test="bean != null and bean.orderIds != null and bean.orderIds.length != 0">
+        	AND project_no IN
+        	<foreach collection="bean.orderIds" item="orderId" open="(" separator="," close=")">
+        		#{orderId}
+        	</foreach>
+        </if>
+        <if test="bean != null and bean.payStatuss != null and bean.payStatuss.length != 0">
+        	AND pay_status IN
+        	<foreach collection="bean.payStatuss" item="payStatus" open="(" separator="," close=")">
+        		#{payStatus}
+        	</foreach>
+        </if>
+        <if test="bean != null and bean.status != null">
+        	AND status = #{bean.status}
+        </if>
+        order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select count(*) from view_company_project where 1=1
+        <if test="bean != null and bean.companyId != null ">
+            and company_id =#{bean.companyId}
+        </if>
+        <if test="bean != null and bean.goStatus=='notStart'">
+            and status = 0
+        </if>
+        <if test="bean != null and bean.goStatus=='ongoing'">
+            and (status = 1 or status = 2)
+        </if>
+        <if test="bean != null and bean.goStatus=='end' ">
+            and (status = 3 or status = -1)
+        </if>
+        <if test="bean != null and bean.cpContact != null and bean.cpContact !=''">
+            and cp_contact like CONCAT('%',#{bean.cpContact},'%')
+        </if>
+        <if test="bean != null and bean.name != null and bean.name !=''">
+            and name like CONCAT('%',#{bean.name},'%')
+        </if>
+        <if test="bean != null and bean.cpName !=null and bean.cpName !=''">
+            and cp_name like CONCAT('%',#{bean.cpName},'%')
+        </if>
+        <if test="bean != null and bean.startTime != null">
+            and start_time &gt;= #{bean.startTime}
+        </if>
+        <if test="bean != null and bean.endTime != null">
+            and end_time &lt;= #{bean.endTime}
+        </if>
+        <if test="bean != null and bean.cpContactMobile != null and bean.cpContactMobile !=''">
+            and cp_contact_mobile like CONCAT('%',#{bean.cpContactMobile},'%')
+        </if>
+    </select>
+
+    <select id="getListByCompanyIdAndCustomerId" resultType="com.edianniu.pscp.sps.domain.EngineeringProject">
+        select * from pscp_engineering_project
+        where
+        company_id = #{companyId}
+        and customer_id=#{customerId}
+        <if test="includeExpire==false">
+            and to_char(end_time, 'yyyy-MM-dd')&gt;=to_char(now(), 'yyyy-MM-dd')
+        </if>
+        <if test="status != null">
+            -- 项目状态：进行中
+            and status = #{status}
+        </if>
+        and deleted=0
+    </select>
+
+    <select id="getCountByCustomerId" resultType="int">
+		select count(*) from pscp_engineering_project  where  deleted=0 and customer_id=#{value}
+	</select>
+    <select id="getCountByCompanyIdAndName" resultType="int">
+		select count(*) from pscp_engineering_project  where  deleted=0 and company_id=#{companyId} and name=#{name}
+	</select>
+    <select id="getCountByCompanyIdAndIdAndName" resultType="int">
+		select count(*) from pscp_engineering_project  where  deleted=0 and company_id=#{companyId} and name=#{name} and id not in(#{id})
+	</select>
+    <select id="getProjectInfoByNeedsId" resultType="com.edianniu.pscp.sps.bean.project.ProjectInfo">
+        select * from pscp_engineering_project
+        WHERE deleted = 0
+        AND needs_id = #{needsId}
+        <if test="status != null">AND status = #{status}</if>
+        limit 1
+    </select>
+    <insert id="save" parameterType="com.edianniu.pscp.sps.bean.project.ProjectInfo">
+        insert into pscp_engineering_project
+        (
+        id,
+        project_no,
+        customer_id,
+        name,
+        description,
+        start_time,
+        end_time,
+        scene_investigation,
+        company_id,
+        create_time,
+        create_user,
+        status,
+        room_ids,
+        deleted
+        )
+        values
+        (
+        nextval('seq_pscp_engineering_project'),
+        #{projectNo},
+        #{customerId},
+        #{name},
+        #{description},
+        #{startTime},
+        #{endTime},
+        #{sceneInvestigation},
+        #{companyId},
+        now(),
+        #{createUser},
+        #{status},
+        #{roomIds},
+        0
+        )
+        <selectKey keyProperty="id" resultType="java.lang.Long">
+            select currval('seq_pscp_engineering_project') as id;
+        </selectKey>
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.bean.project.ProjectInfo">
+        update pscp_engineering_project
+        <set>
+            <if test="customerId != null">customer_id = #{customerId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="sceneInvestigation != null">scene_investigation = #{sceneInvestigation},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="roomIds != null">room_ids = #{roomIds},</if>
+            <if test="actualSettlementAmount != null">actual_settlement_amount = #{actualSettlementAmount},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_engineering_project
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_engineering_project set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+	
+	<update id="batchUpdatePayment">
+		<foreach collection="list" item="item" index="index" open="" separator=";" close="">
+			update pscp_engineering_project
+			<set>
+				<if test="item != null and item.status != null">status = #{item.status},</if>
+                <if test="item != null and item.payStatus != null">pay_status = #{item.payStatus},</if>
+                <if test="item != null and item.payType != null">pay_type = #{item.payType},</if>
+                <if test="item != null and item.payTime != null">pay_time = #{item.payTime},</if>
+                <if test="item != null and item.paySynctime != null">pay_sync_time = #{item.paySynctime},</if>
+                <if test="item != null and item.payAsynctime != null">pay_async_time = #{item.payAsynctime},</if>
+                <if test="item != null and item.payMemo != null">pay_memo = #{item.payMemo},</if>
+                modified_time = now()
+			</set>
+			where id = #{item.id}
+		</foreach>
+	</update>
+
+</mapper>

@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.SpsCompanyCustomerDao">
+
+    <select id="queryObject" resultType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+		select * from pscp_company_customer where id = #{value} and deleted=0
+	</select>
+    <select id="getListByCompanyId" resultType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+		select * from pscp_company_customer 
+		where company_id = #{companyId} and deleted=0 
+		<if test="statusList !=null">and status in
+	        <foreach item="status" collection="statusList" open="(" separator="," close=")">
+	            #{status}
+	        </foreach>
+		</if>
+	</select>
+	
+    <!-- <select id="queryList" resultType="com.edianniu.pscp.sps.domain.CompanyCustomer" parameterType="map">
+        select * from pscp_company_customer where 1=1
+        <if test="bean !=null and bean.mobile != null and bean.mobile !=''">
+            and mobile like CONCAT('%',#{bean.mobile},'%')
+        </if>
+        <if test="bean !=null and bean.cpContact != null and bean.cpContact !=''">
+            and cp_contact like CONCAT('%',#{bean.cpContact},'%')
+        </if>
+        <if test="bean !=null and bean.cpName != null and bean.cpName !=''">
+            and cp_name like CONCAT('%',#{bean.cpName},'%')
+        </if>
+        <if test="bean !=null and bean.createTimeStart !=null">
+            and create_time &gt; #{bean.createTimeStart}
+        </if>
+        <if test="bean !=null and bean.createTimeEnd !=null">
+            and create_time &lt; #{bean.createTimeEnd}
+        </if>
+        and deleted=0 order by create_time desc
+        <if test="offset != null and limit !=  null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select count(*) from pscp_company_customer where 1=1
+        <if test="bean !=null and bean.mobile != null and bean.mobile !=''">
+            and mobile like CONCAT('%',#{bean.mobile},'%')
+        </if>
+        <if test="bean !=null and bean.cpContact != null and bean.cpContact !=''">
+            and cp_contact like CONCAT('%',#{bean.cpContact},'%')
+        </if>
+        <if test="bean !=null and bean.cpName != null and bean.cpName !=''">
+            and cp_name like CONCAT('%',#{bean.cpName},'%')
+        </if>
+        <if test="bean !=null and bean.createTimeStart !=null">
+            and create_time &gt; #{bean.createTimeStart}
+        </if>
+        <if test="bean !=null and bean.createTimeEnd !=null">
+            and create_time &lt; #{bean.createTimeEnd}
+        </if>
+        and deleted=0
+    </select> -->
+
+    <select id="getCompanyCustomerByMap" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+        SELECT * FROM pscp_company_customer
+        <where>
+            deleted = 0
+            <if test="id != null">and id =#{id}</if>
+            <if test="memberId != null">and member_id =#{memberId}</if>
+            <if test="companyId != null">and company_id =#{companyId}</if>
+        </where>
+        LIMIT 1
+    </select>
+
+    <select id="queryCount" parameterType="com.edianniu.pscp.sps.bean.customer.ListPageQuery"
+            resultType="int">
+        select count(1) from pscp_company_customer
+        <where>
+            deleted=0
+            <if test="companyId != null">and company_id = #{companyId}</if>
+            <if test="mobile != null and mobile !=''">
+                and mobile like CONCAT('%',#{mobile},'%')
+            </if>
+            <if test="cpContact != null and cpContact !=''">
+                and cp_contact like CONCAT('%',#{cpContact},'%')
+            </if>
+            <if test="cpName != null and cpName !=''">
+                and cp_name like CONCAT('%',#{cpName},'%')
+            </if>
+            <if test="createTimeStart !=null">
+                and create_time &gt;= #{createTimeStart}
+            </if>
+            <if test="createTimeEnd !=null">
+                and create_time &lt;= #{createTimeEnd}
+            </if>
+        </where>
+    </select>
+     <select id="queryList" parameterType="com.edianniu.pscp.sps.bean.customer.ListPageQuery"
+            resultType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+        select * from pscp_company_customer
+        <where>
+            deleted=0
+            <if test="companyId != null">and company_id = #{companyId}</if>
+            <if test="mobile != null and mobile !=''">
+                and mobile like CONCAT('%',#{mobile},'%')
+            </if>
+            <if test="cpContact != null and cpContact !=''">
+                and cp_contact like CONCAT('%',#{cpContact},'%')
+            </if>
+            <if test="cpName != null and cpName !=''">
+                and cp_name like CONCAT('%',#{cpName},'%')
+            </if>
+            <if test="createTimeStart !=null">
+                and create_time &gt;= #{createTimeStart}
+            </if>
+            <if test="createTimeEnd !=null">
+                and create_time &lt;= #{createTimeEnd}
+            </if>
+        </where>
+        ORDER by create_time DESC
+        <if test="offset != null and pageSize !=  null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+    
+    <select id="getByCustomerId" parameterType="long"
+            resultType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+        SELECT * FROM pscp_company_customer WHERE deleted = 0 AND id = #{customerId} limit 1;
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+        INSERT INTO pscp_company_customer(
+        id,
+        member_id,
+        company_id,
+        mobile,
+        cp_name,
+        cp_contact,
+        cp_address,
+        cp_phone,
+        cp_contact_mobile,
+        status,
+        create_time,
+        create_user,
+        deleted
+
+        )VALUES(
+        nextval('seq_pscp_company_customer'),
+        #{memberId},
+        #{companyId},
+        #{mobile},
+        #{cpName},
+        #{cpContact},
+        #{cpAddress},
+        #{cpPhone},
+        #{cpContactMobile},
+        #{status},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_company_customer') as id;
+        </selectKey>
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+        update pscp_company_customer
+        <set>
+            <if test="memberId != null">member_id = #{memberId},</if>
+            <if test="mobile != null">mobile = #{mobile},</if>
+            <if test="cpName != null">cp_name = #{cpName},</if>
+            <if test="cpContact != null">cp_contact = #{cpContact},</if>
+            <if test="cpContactMobile != null">cp_contact_mobile = #{cpContactMobile},</if>
+            <if test="cpPhone != null">cp_phone = #{cpPhone},</if>
+            <if test="cpAddress != null">cp_address = #{cpAddress},</if>
+            <if test="companyId != null">company_id = #{companyId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_company_customer
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+    <delete id="deletes">
+        update pscp_company_customer set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="deleteBatch">
+        update pscp_company_customer set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    
+    <select id="getAllCompanyCustomerList" 
+    		resultType="com.edianniu.pscp.sps.domain.CompanyCustomer">
+    	SELECT * FROM pscp_company_customer
+    	WHERE deleted = 0 AND status = 1 AND company_id != 0
+    </select>
+
+</mapper>

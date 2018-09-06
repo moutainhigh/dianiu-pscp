@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.sps.dao.ElectricianWorkOrderViewDao">
+    <select id="queryList" resultType="com.edianniu.pscp.sps.domain.ElectricianWorkOrderView" 
+            parameterType="com.edianniu.pscp.sps.bean.workorder.electrician.ListQuery">
+        select * from view_electrician_work_order
+        where
+        company_id=#{companyId}
+        <if test="mobile != null and mobile.trim() != ''">
+        and mobile like concat('%',#{mobile},'%') 
+        </if>
+        <if test="userName != null and userName.trim() != ''">
+        and user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="customerId != null">and customer_id = #{customerId}</if>
+        <if test="name != null and name.trim() != ''">and name like concat('%',#{name},'%')</if>
+		<if test="finishStartTime != null and finishStartTime.trim() != ''">and finish_time &gt;=#{finishStartTime}</if>
+		<if test="finishEndTime != null and finishEndTime.trim() != ''">and finish_time &lt;=#{finishEndTime}</if>
+		<if test="publishStartTime != null and publishStartTime.trim() != ''">and create_time &gt;=#{finishStartTime}</if>
+		<if test="publishEndTime != null and publishEndTime.trim() != ''">and create_time &lt;=#{publishEndTime}</if>
+		and ( 1 = 1
+			  and ( 1 = 1 
+				   <if test="electricianType != null">and electriciantype = #{electricianType}</if>
+				   <if test="statuss != null and statuss.length>0">
+		               and status in
+		               <foreach item="status" index="index" collection="statuss" open="(" separator="," close=")">
+		                   #{status}
+		               </foreach>
+		           </if> )
+	        
+	         <if test="electricianType2 != null"> or ( electriciantype = #{electricianType2}</if>
+			 <if test="statuss2 != null and statuss2.length>0">
+	             and status in
+	             <foreach item="status2" index="index" collection="statuss2" open="(" separator="," close=")">
+	                 #{status2}
+	             </foreach> )
+	         </if> 
+        )
+        order by create_time desc
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+    
+    
+    <select id="queryCount" resultType="int" parameterType="com.edianniu.pscp.sps.bean.workorder.electrician.ListQuery">
+		select count(*) from view_electrician_work_order where 
+		company_id=#{companyId}
+        <if test="mobile != null and mobile.trim() != ''">
+        and mobile like concat('%',#{mobile},'%') 
+        </if>
+        <if test="userName != null and userName.trim() != ''">
+        and user_name like concat('%',#{userName},'%')
+        </if>
+        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="customerId != null">and customer_id = #{customerId}</if>
+        <if test="name != null and name.trim() != ''">and name like concat('%',#{name},'%')</if>
+		<if test="finishStartTime != null and finishStartTime.trim() != ''">and finish_time &gt;=#{finishStartTime}</if>
+		<if test="finishEndTime != null and finishEndTime.trim() != ''">and finish_time &lt;=#{finishEndTime}</if>
+		<if test="publishStartTime != null and publishStartTime.trim() != ''">and create_time &gt;=#{finishStartTime}</if>
+		<if test="publishEndTime != null and publishEndTime.trim() != ''">and create_time &lt;=#{publishEndTime}</if>
+		and ( 1 = 1
+			  and ( 1 = 1 
+				   <if test="electricianType != null">and electriciantype = #{electricianType}</if>
+				   <if test="statuss != null and statuss.length>0">
+		               and status in
+		               <foreach item="status" index="index" collection="statuss" open="(" separator="," close=")">
+		                   #{status}
+		               </foreach>
+		           </if> )
+	        
+	         <if test="electricianType2 != null"> or ( electriciantype = #{electricianType2}</if>
+			 <if test="statuss2 != null and statuss2.length>0">
+	             and status in
+	             <foreach item="status2" index="index" collection="statuss2" open="(" separator="," close=")">
+	                 #{status2}
+	             </foreach> )
+	         </if> 
+        )
+	</select>
+</mapper>

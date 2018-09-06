@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.sps.dao.NewsDao">
+    <insert id="save" parameterType="com.edianniu.pscp.sps.domain.News">
+        INSERT INTO pscp_news(
+        id,
+        title,
+        content,
+        description,
+        cover_pic,
+        type,
+        status,
+        order_num,
+        create_time,
+        create_user,
+        deleted
+        )VALUES(
+        nextval('seq_pscp_news'),
+        #{title},
+        #{content},
+        #{description},
+        #{coverPic},
+        #{type},
+        #{status},
+        #{orderNum},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_news') as id;
+        </selectKey>
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.sps.domain.News">
+        UPDATE pscp_news
+        <set>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="coverPic != null and coverPic != ''">cover_pic = #{coverPic},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="orderNum != null">order_num = #{orderNum},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE pscp_news
+        SET status = #{status}, modified_user = #{modifiedUser}, modified_time = #{modifiedTime}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectNewsListInfoVOTopNum" parameterType="map"
+            resultType="com.edianniu.pscp.sps.bean.news.VO.NewsListInfoVO">
+        SELECT
+        id,
+        title,
+        description,
+        cover_pic AS "coverPic",
+        order_num AS "orderNum",
+        to_char(create_time,'yyyy.mm.dd') AS "publishTime"
+        FROM pscp_news WHERE deleted = 0 AND status = 1
+        <if test="type != null">
+            AND type = #{type}
+        </if>
+        ORDER BY create_time desc
+        limit #{topn}
+    </select>
+
+    <select id="getNewsDetailsVOById" parameterType="long"
+            resultType="com.edianniu.pscp.sps.bean.news.VO.NewsDetailsInfoVO">
+        SELECT
+        title,
+        content,
+        description,
+        cover_pic AS "coverPic",
+        create_user AS "executiveEditor",
+        to_char(create_time,'yyyy.mm.dd') AS "publishTime"
+        FROM pscp_news
+        WHERE id = #{id} limit 1
+    </select>
+
+    <select id="queryCount" parameterType="map" resultType="int">
+        SELECT count(1) FROM pscp_news WHERE deleted = 0 AND type = #{type}
+    </select>
+
+    <select id="queryList" parameterType="map"
+            resultType="com.edianniu.pscp.sps.domain.News">
+        SELECT * FROM pscp_news WHERE deleted = 0 AND type = #{type}
+        ORDER BY create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="getNewsDetailsById" parameterType="long"
+            resultType="com.edianniu.pscp.sps.domain.News">
+        SELECT * FROM pscp_news WHERE id = #{id};
+    </select>
+</mapper>
