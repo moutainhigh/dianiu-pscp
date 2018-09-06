@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.message.getuiclient.dao.GeTuiClientDao">
+
+    <insert id="save" parameterType="com.edianniu.pscp.message.getuiclient.domain.GeTuiClient">
+		INSERT INTO pscp_getui_client(
+		id,
+		uid,
+		os_type,
+		app_type,
+		app_pkg,
+		client_id,
+		device_token,
+		report_time,
+		company_id,
+		create_time,
+		create_user,
+		deleted
+		)
+		VALUES(
+		nextval('seq_pscp_getui_client'),
+		#{uid},
+		#{osType},
+		#{appType},
+		#{appPkg},
+		#{clientId},
+		#{deviceToken},
+		#{reportTime},
+		#{companyId},
+		now(),
+		#{createUser},
+		#{deleted}
+		)
+	</insert>
+    <insert id="saveDetail" parameterType="com.edianniu.pscp.message.getuiclient.domain.GeTuiClientDetail">
+		INSERT INTO pscp_getui_client_detail(
+		id,
+		uid,
+		os_type,
+		app_type,
+		app_pkg,
+		client_id,
+		device_token,
+		report_time,
+		company_id,
+		create_time,
+		create_user,
+		deleted
+		)
+		VALUES(
+		nextval('seq_pscp_getui_client_detail'),
+		#{uid},
+		#{osType},
+		#{appType},
+		#{appPkg},
+		#{clientId},
+		#{deviceToken},
+		#{reportTime},
+		#{companyId},
+		now(),
+		#{createUser},
+		#{deleted}
+		)
+	 </insert>
+    <update id="update"
+            parameterType="com.edianniu.pscp.message.getuiclient.domain.GeTuiClient">
+        UPDATE pscp_getui_client
+        SET
+            report_time   = #{reportTime},
+            os_type       = #{osType},
+            app_type      = #{appType},
+			app_pkg       = #{appPkg},
+            client_id     = #{clientId},
+            device_token  = #{deviceToken},
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        WHERE id = #{id}
+    </update>
+    <select id="getById"
+            resultType="com.edianniu.pscp.message.getuiclient.domain.GeTuiClient">
+        SELECT
+        id,
+		uid,
+		os_type as osType,
+		app_type as appType,
+		app_pkg as appPkg,
+		client_id as clientId,
+		device_token as deviceToken,
+		report_time as reportTime,              
+        FROM pscp_getui_client T
+        WHERE T.id =#{id} AND deleted=0
+    </select>
+    <select id="getByUid"
+            resultType="com.edianniu.pscp.message.getuiclient.domain.GeTuiClient">
+        SELECT
+        T.id,
+		T.uid,
+		T.os_type as osType,
+		app_type as appType,
+		app_pkg as appPkg,
+		T.client_id as clientId,
+		T.device_token as deviceToken,
+		T.report_time as reportTime           
+        FROM pscp_getui_client T
+        WHERE T.uid =#{uid} AND T.deleted=0 limit 1
+    </select>
+    <select id="getClientIdByUid"
+            resultType="com.edianniu.pscp.message.getuiclient.domain.GeTuiClient">
+        SELECT
+		T.app_type as appType,
+		T.app_pkg as appPkg,
+		T.client_id as clientId        
+        FROM pscp_getui_client T
+        WHERE T.uid =#{uid} AND deleted=0 limit 1
+    </select>
+    <select id="getClientIdByUidAndCompanyId"
+            resultType="com.edianniu.pscp.message.getuiclient.domain.GeTuiClient">
+        SELECT
+		T.client_id,
+		T.app_type,
+		T.app_pkg           
+        FROM pscp_getui_client T
+        WHERE T.uid =#{uid} AND T.company_id =#{companyId} AND deleted=0 limit 1
+    </select>
+</mapper>

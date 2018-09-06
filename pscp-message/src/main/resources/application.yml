@@ -1,0 +1,6 @@
+server:
+  port: 8064
+
+spring:
+  profiles:
+    active: dev

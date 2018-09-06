@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.message.meter.dao.WarningDao">
+	
+	<insert id="save" parameterType="com.edianniu.pscp.message.meter.domain.Warning">
+		INSERT INTO pscp_company_equipment_warnings(
+			id,
+			company_id,
+			warning_type,
+			warning_object,
+			occur_time,
+			description,
+			deal_status,
+			read_status,
+			create_time,
+			create_user,
+			deleted
+		)
+		VALUES(
+			nextval('seq_pscp_company_equipment_warnings'),
+			#{companyId},
+			#{warningType},
+			#{warningObject},
+			#{occurTime},
+			#{description},
+			#{dealStatus},
+			#{readStatus},
+			now(),
+			#{createUser},
+			#{deleted}
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_company_equipment_warnings') as id;
+		</selectKey>
+	</insert>
+	
+	<update id="updateDealStatus" parameterType="com.edianniu.pscp.message.meter.domain.Warning">
+		UPDATE pscp_company_equipment_warnings
+		<set>
+			<if test="revertTime != null">revert_time = #{revertTime},</if>
+			<if test="dealStatus != null">deal_status = #{dealStatus},</if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime}</if>
+		</set>
+		<where>
+			warning_type = #{warningType} and
+			warning_object = #{warningObject} and 
+			deal_status = 0 and
+			deleted = 0
+		</where>
+	</update>
+	
+	
+</mapper>

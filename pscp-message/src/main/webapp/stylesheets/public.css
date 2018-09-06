@@ -1,0 +1,257 @@
+body {
+	width: 100%;
+	font-size: 14px;
+	font-family: "微软雅黑";
+	margin: 0;
+	padding: 0;
+	background-color: #F3F3F3;
+	padding-bottom: 20px;
+}
+input{
+	font-family: "微软雅黑";
+}
+a{
+	text-decoration:none;
+}
+img{ 
+	border:none
+}
+.head-box {
+	width: 100%;
+	background-color: white;
+}
+.head {
+	width: 1000px;
+	margin: 0 auto;
+	height: 80px;
+}
+.logo {
+	float: left;
+	width: 214px;
+	height: 70px;
+	margin-top: 5px;
+	background-size: cover;
+	margin-right: 226px;
+}
+.search-box {
+	float: left;
+	width: 560px;
+	height: 50px;
+}
+.search {
+	float: left;
+	width: 420px;
+	margin-top: 20px;
+	line-height: 22px;
+	padding: 8px 10px;
+	font-size: 17px;
+	height: 22px;
+	color: #999999;
+	border: 0;
+	border: 1px solid #BCBCBC;
+}
+.search-btn {
+	float: left;
+	width: 100px;
+	margin-top: 20px;
+	line-height: 40px;
+	text-align: center;
+	margin-left: 10px;
+	background-color: #FF6700;
+	color: white;
+	border-radius: 3px;
+	font-size: 19px;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+}
+.nav {
+	width: 100%;
+	border-top: 1px solid rgb(216, 216, 216);
+	background-color: #E1E1E1;
+}
+.nav ul {
+	width: 1000px;
+	margin: 0 auto;
+	padding: 0;
+	font-size: 0;
+}
+.nav-content {
+	list-style: none;
+	font-size: 19px;
+	width: 130px;
+	display: inline-block;
+	line-height: 55px;
+	text-align: center;
+	color: #666666;
+	cursor: pointer;
+}
+.nav-checked {
+	background-color: white;
+	color: #FF6600;
+}
+.footer-box ul {
+	padding-left: 0;
+	margin-top: 40px;
+	list-style: none;
+	text-align: center;
+}
+.footer-box ul li {
+	display: inline-block;
+	font-size: 15px;
+	color: #666666;
+}
+.footer-link {
+	text-decoration: none;
+	color: #666666;
+}
+.footer-img {
+	display: block;
+	width: 220px;
+	height: 42px;
+	margin: 0 auto;
+}
+.footer-text {
+	text-align: center;
+	font-size: 13px;
+	color: #666666;
+}
+.content-title {
+	width: 1000px;
+	margin: 0 auto;
+	margin-top: 10px;
+}
+.content-title-box {
+	line-height: 45px;
+	font-size: 17px;
+	padding-left: 20px;
+	border-bottom: 1px solid rgb(216, 216, 216);
+}
+.getmore {
+	width: 120px;
+	height: 70px;
+	margin: 0 auto;
+	cursor: pointer;
+	background: url(../img/getmore.png) no-repeat;
+	background-size: cover;
+}
+.nomore {
+	display:none;
+	width: 120px;
+	height: 70px;
+	margin: 0 auto;
+	cursor: pointer;
+	background: url(../img/nomore.png) no-repeat;
+	background-size: cover;
+}
+.content-box {
+	width: 1000px;
+	margin: 20px auto;
+}
+
+
+.game-class {
+	border: 1px solid rgb(216, 216, 216);
+	font-size: 0;
+	padding-bottom: 20px;
+	background-color: white;
+}
+.game-class-box {
+	position: relative;
+	display: inline-block;
+	width: 220px;
+	height: 72px;
+	margin: 20px 0 0 24px;
+	cursor: pointer;
+	background-color:#f7f7f7;
+}
+.game-class-img {
+	width: 50px;
+	height: 50px;
+	margin: 11px 0 11px 38px;
+}
+.game-class-name {
+	position: absolute;
+	top: 0;
+	left: 90px;
+	font-size: 17px;
+	margin: 0;
+	color: #333333;
+	margin-left: 15px;
+	line-height: 72px;
+}
+.game-selected-content {
+	padding: 20px 0 0 20px;
+	font-size: 0;
+}
+.game-selected {
+	margin-top: 10px;
+	font-size: 0;
+	border: 1px solid rgb(216, 216, 216);
+	background-color: white;
+}
+.game-selected-box {
+	display: inline-block;
+	width: 326px;
+	height: 110px;
+	margin-bottom: 45px;
+	position:relative;
+}
+.game-content-img {
+	display: block;
+	float: left;
+	width: 110px;
+	height: 110px;
+}
+.game-content-text {
+	float: left;
+	margin-left: 10px;
+	height: 110px;
+	width: 170px;
+}
+.game-content-title {
+	width:150px;
+	font-size: 15px;
+	margin: 15px 0 5px 18px;
+	color: #333333;
+	white-space: nowrap;  
+    overflow: hidden;  
+    text-overflow: ellipsis;  
+}
+.game-content-information {
+	font-size: 13px;
+	margin: 5px 0 0 18px;
+	color: #FF6600;
+}
+.game-content-btn {
+	display:block;
+	width: 100px;
+	font-size: 14px;
+	line-height: 25px;
+	text-align: center;
+	margin: 15px 18px;
+	border: 1px solid rgb(216, 216, 216);
+	background-color: #f0f0f0;
+	color: #333333;
+	border-radius: 3px;
+	cursor: pointer;
+}
+.game-content-btn:hover{
+	color: white;
+	background-color: #ff6700;
+}
+.game-content-btn-hover {
+	background-color: orangered;
+	color: white;
+}
+.load{
+	width: 200px;
+	margin: 100px auto 100px;
+	font-size: 14px;
+}
+.load img{
+	display:inline-block;
+	position:relative;
+	top: 10px;
+	margin-right: 20px;
+}

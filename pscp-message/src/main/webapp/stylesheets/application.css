@@ -1,0 +1,142 @@
+body {
+  position: relative;
+  padding-top: 60px;
+  font-size: 14px !important;
+}
+
+span.error {
+    background-color: #000000;
+}
+
+span.sick {
+    background-color: #F0D000;
+}
+
+/* Footer
+-------------------------------------------------- */
+.footer {
+  text-align: center;
+  margin-top: 70px;
+  border-top: 1px solid #e5e5e5;
+  background-color: #f5f5f5;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.footer p {
+  margin-bottom: 0;
+  color: #777;
+}
+.footer-links {
+  margin: 10px 0;
+}
+.footer-links li {
+  display: inline;
+  padding: 0 2px;
+}
+.footer-links li:first-child {
+  padding-left: 0;
+}
+
+/***** Ajax indicator ******/
+#ajax-indicator {
+    position: absolute; /* fixed not supported by IE */
+    background-color: #eee;
+    border: 1px solid #bbb;
+    top: 35%;
+    left: 40%;
+    width: 20%;
+    font-weight: bold;
+    text-align: center;
+    padding: 0.6em;
+    z-index: 100;
+    opacity: 0.5;
+}
+
+html>body #ajax-indicator {
+    position: fixed;
+}
+
+#ajax-indicator span {
+    background: url(../images/loading.gif) no-repeat 0 40%;
+    padding-left: 26px;
+    vertical-align: bottom;
+}
+
+.highcharts-contextmenu hr {
+    margin: 2px;
+    border-top: 1px solid rgb(155, 155, 155);
+}
+
+.table thead {
+    background-color: #f5f5f5;
+}
+
+.pagination {
+    text-align: center;
+    padding: .3em;
+}
+
+.pagination a, .pagination span {
+    padding: .2em .5em;
+}
+
+.pagination span.disabled {
+    color: #AAA;
+}
+
+.pagination span.current {
+    font-weight: bold;
+    color: #FF0084;
+}
+
+.pagination a {
+    border: 1px solid #DDDDDD;
+    color: #0063DC;
+    text-decoration: none;
+}
+
+.pagination a:hover, .pagination a:focus {
+    border-color: #003366;
+    background: #0063DC;
+    color: white;
+}
+
+.pagination .page_info {
+    color: #aaa;
+    padding-top: .8em;
+}
+
+.pagination .prev_page, .pagination .next_page {
+    border-width: 2px;
+}
+
+.pagination .prev_page {
+    margin-right: 1em;
+}
+
+.pagination .next_page {
+    margin-left: 1em;
+}
+
+#ui-datepicker-div, .ui-datepicker{ font-size: 85%; }
+
+
+.icon-add {
+    background-image: url(../images/add.png);
+}
+
+.icon-edit {
+    background-image: url(../images/edit.png);
+}
+
+.icon-del {
+    background-image: url(../images/delete.png);
+}
+
+.icon-save {
+    background-image: url(../images/save.png);
+}
+
+.icon-reload {
+    background-image: url(../images/reload.png);
+}

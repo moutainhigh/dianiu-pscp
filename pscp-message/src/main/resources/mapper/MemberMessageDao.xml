@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.message.msg.dao.MemberMessageDao">
+    <sql id="Base_Column_List">
+        id, uid, type, category, title, content, push_time, ext, is_read, is_deleted,
+        company_id, create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <insert id="saveEntity"
+            parameterType="com.edianniu.pscp.message.msg.domain.MemberMessage">
+        INSERT INTO pscp_member_message(
+        id,
+        uid,
+        type,
+        category,
+        title,
+        content,
+        push_time,
+        ext,
+        is_read,
+        is_deleted,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES (
+        nextval('seq_pscp_member_message'),
+        #{uid},
+        #{type},
+        #{category},
+        #{title},
+        #{content},
+        #{pushTime},
+        #{ext}::json,
+        #{isRead},
+        0,
+        now(),
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_member_message') as id;
+        </selectKey>
+    </insert>
+
+    <update id="updateEntity"
+            parameterType="com.edianniu.pscp.message.msg.domain.MemberMessage">
+        UPDATE pscp_member_message
+        SET category      = #{category},
+            ext      = #{ext}::json,
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        WHERE id = #{id}
+              AND is_deleted = 0
+    </update>
+    <select id="getUserMsgsByUidAndCategoryAndExt" parameterType="map"
+            resultType="com.edianniu.pscp.message.msg.domain.MemberMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_message
+        WHERE deleted = 0
+        AND is_deleted = 0
+        AND uid = #{uid}
+        AND category = #{category}
+        AND ext = #{ext}::json
+    </select>
+    <select id="getUserMsgsByUidAndCategoryAndInvitationId" parameterType="map"
+            resultType="com.edianniu.pscp.message.msg.domain.MemberMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_message
+        WHERE deleted = 0
+        AND is_deleted = 0
+        AND uid = #{uid}
+        AND category = #{category}
+        AND (ext->>'actionType')::text='none'
+        AND (ext->>'invitationId')::text=#{invitationId}
+    </select>
+    <select id="getUserMsgsByUidAndCategory" parameterType="map"
+            resultType="com.edianniu.pscp.message.msg.domain.MemberMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_message
+        WHERE deleted = 0
+        AND is_deleted = 0
+        AND uid = #{uid}
+        AND category = #{category}
+    </select>
+
+
+</mapper>

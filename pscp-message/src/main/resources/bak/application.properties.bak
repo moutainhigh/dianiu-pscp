@@ -1,0 +1,61 @@
+#jdbc settings
+jdbc.driver=org.postgresql.Driver
+jdbc.url=jdbc:postgresql://192.168.1.251:1921/pscpdev
+jdbc.username=pscpdev
+jdbc.password=pscpdev2017
+pool.idleConnectionTestPeriodInSeconds=60
+pool.idleMaxAgeInSeconds=120
+pool.minConnectionsPerPartition=1
+pool.maxConnectionsPerPartition=10
+pool.partitionCount=5
+pool.statementsCacheSize=100
+pool.acquireIncrement=5
+pool.defaultAutoCommit=true
+pool.logStatementsEnabled=true
+pool.connectionTimeoutInMs=5000
+pool.logExecuteTimeGTInMs=500
+pool.statisticsEnabled=true
+pool.connectionHookClassName=stc.skymobi.app.commons.db.ConnectionHookImpl
+# redis cache
+redis.cache.host=192.168.1.251
+redis.cache.port=6379
+redis.cache.cfg.maxActive=120
+redis.cache.cfg.maxIdle=30000
+redis.cache.cfg.maxWait=10000
+redis.cache.cfg.testOnBorrow=true
+redis.cache.cfg.timeout=5000
+#jmx
+jmxmp.ip=localhost
+jmxmp.port=5695
+
+#dubbo consumer
+zk.address=192.168.1.251:2183
+dubbo.address=zookeeper\://192.168.1.251\:2183
+dubbo.port=28806
+#ge tui config 
+getui.appids=facilitator:da2KHOnCGJ8VgSgLEi0nO8,electrician:THFfw4ldLl5by8jEJ5xVk1,customer:dVYpyFTnZ67W5BcbZVrbv7
+getui.appkeys=facilitator:HrWjgOIx7J8Pc2usHbgYB7,electrician:A2GGIjLOIC6wnKQ3ttYZN1,customer:g4bMf2f1LV5n9gIneIHNbA
+getui.masters=facilitator:iZXJPJHELa5Bp4qPUVgPF2,electrician:ni6VBj8eLu6IrjLW2YpzE,customer:j7j9ZuTvNn7sS26z7QXrt6
+getui.host=https://api.getui.com/apiex.htm
+
+###sms
+sms.bw.uri=http://cloud.baiwutong.com:8080
+sms.bw.uid=wj5360
+sms.bw.passwd=7809tj
+sms.bw.md5TdCode=6ece5a51e1ace644615cbcface9da4e0
+#open|close
+sms.bw.smsSwitch=close
+# disable mobiles send sms 
+sms.send.filter.mobiles=13666640001,13666640002,13666640003,13666640004,13666640005,13666640006,13666640007,13666640008,13666640009,13666640010,13666640011,13666640012,13666640013,13666640014,13666640015,13666640016,13666640017,13666640018,13666640019,13666640020
+##kafka message topic config
+getuiclient.kafka.topic.name=pscp_getuiclient
+sms.kafka.topic.name=pscp_sms
+msg.kafka.topic.name=pscp_msg
+#meter log topics
+meter.log.kafka.topic.names=dev_meter_log_0
+meter.info.kafka.topic.name=dev_meter_info
+#meter warning topic
+meter.warning.kafka.topic.name=dev_meter_warning
+
+
+

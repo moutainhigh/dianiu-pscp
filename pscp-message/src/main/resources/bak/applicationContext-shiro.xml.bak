@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+       default-lazy-init="true">
+
+    <description>Shiro安全配置</description>
+
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="casRealm"/>
+        <property name="subjectFactory" ref="casSubjectFactory"/>
+    </bean>
+
+    <bean id="casRealm" class="stc.skymobi.web.shiro.cas.ShiroCasRealm">
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="casServerUrlPrefix" value="${casServerUrlPrefix}"/>
+    </bean>
+
+    <bean id="casFilter" class="stc.skymobi.web.shiro.cas.ShiroCasFilter">
+        <property name="casServerUrlPrefix" value="${casServerUrlPrefix}"/>
+    </bean>
+
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="https://omsserver:8443/cas/login"/>
+        <property name="successUrl" value="/"/>
+        <property name="unauthorizedUrl" value="/"/>
+        <property name="filters">
+            <util:map>
+                <!-- 添加casFilter到shiroFilter -->
+                <entry key="casFilter" value-ref="casFilter"/>
+            </util:map>
+        </property>
+        <property name="filterChainDefinitions">
+            <value>
+                /admin/** = casFilter, roles[beacon管理员]
+                / = anon
+                <!--/app/** = authc-->
+            </value>
+        </property>
+    </bean>
+
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+
+    <!-- 如果要实现cas的remember me的功能，需要用到下面这个bean，并设置到securityManager的subjectFactory中 -->
+    <bean id="casSubjectFactory" class="org.apache.shiro.cas.CasSubjectFactory"/>
+
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+</beans>

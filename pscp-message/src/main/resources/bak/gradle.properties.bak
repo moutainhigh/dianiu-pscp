@@ -1,0 +1,7 @@
+group = com.edianniu.pscp.message
+version = 1.0.5
+
+springVersion = 4.2.9.RELEASE
+springDataJpaVersion = 1.5.2.RELEASE
+jarVersion=3.17
+

@@ -1,0 +1,38 @@
+.theme-detail-box{
+	border: 1px solid rgb(216,216,216);
+	background-color: white;
+}
+.theme-detail-introduce{
+	padding: 27px 22px;
+	border-bottom: 1px solid rgb(216,216,216);
+	height: 115px;
+}
+.theme-detail-img{
+	float: left;
+	width: 295px;
+	height: 115px;
+}
+.theme-detail-text{
+	float: left;
+	width: 630px;
+}
+.theme-detail-title{
+	font-size: 20px;
+	margin: 8px;
+	margin-top: 4px;
+}
+.theme-introduce{
+	font-size: 13px;
+	margin: 8px;
+	line-height: 25px;
+	color: #666666;
+}
+.theme-detail-time{
+	font-size: 13px;
+	margin: 8px;
+	color: #666666;
+}
+.theme-detail-content{
+	padding: 28px 0 0 20px;
+	font-size: 0;
+}

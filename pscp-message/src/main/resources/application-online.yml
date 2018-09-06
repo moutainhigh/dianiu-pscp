@@ -1,0 +1,82 @@
+logging:
+  level: debug
+##datasource
+spring: 
+  datasource:
+    url: jdbc:postgresql://111.1.17.197:1921/pscpdev
+    username: pscpdev
+    password: pscpdev2017
+    driver-class-name: org.postgresql.Driver
+    max-idle: 10
+    max-wait: 10000
+    min-idle: 1
+    initial-size: 1
+    validation-query: SELECT 1
+    test-on-borrow: false
+    test-while-idle: true
+    time-between-eviction-runs-millis: 18800
+mybatis:
+  mapper-locations: classpath:mapper/*Dao.xml
+  config-location: classpath:mybatis/mybatis-config.xml 
+##redis cache
+redis:
+  cache:
+    host: 127.0.0.1
+    port: 6380
+    cfg:
+      maxActive: 300
+      maxIdle: 30000
+      maxWait: 10000
+      testOnBorrow: true
+      timeout: 5000    
+##zk
+zk.address: 127.0.0.1:2184
+dubbo:
+  port: 28808
+  address: zookeeper://127.0.0.1:2184
+##kafka 
+kafka:
+  bootstrap.servers: 127.0.0.1:9091,127.0.0.1:9092,127.0.0.1:9093,127.0.0.1:9094
+  consumer:
+    group.id: group_dev
+    enable.auto.commit: false
+    auto.commit.interval.ms: 3000
+    max:
+      poll:
+        interval.ms: 3000
+        records: 20
+    session.timeout.ms: 30000
+  producer:
+    acks: all
+    retries: 0
+    batch.size: 16384
+    linger.ms: 1
+    buffer.memory: 33554432
+##kafka message topic config
+getuiclient.kafka.topic.name: pscp_getuiclient
+sms.kafka.topic.name: pscp_sms
+msg.kafka.topic.name: pscp_msg
+##meter topics
+meter:
+  log.kafka.topic.names: meter_log_0
+  info.kafka.topic.name: test_meter_info
+  warning.kafka.topic.name: test_meter_warning
+##ge tui config 
+getui:
+  appids: facilitator:da2KHOnCGJ8VgSgLEi0nO8,electrician:THFfw4ldLl5by8jEJ5xVk1,customer:dVYpyFTnZ67W5BcbZVrbv7
+  appkeys: facilitator:HrWjgOIx7J8Pc2usHbgYB7,electrician:A2GGIjLOIC6wnKQ3ttYZN1,customer:g4bMf2f1LV5n9gIneIHNbA
+  masters: facilitator:iZXJPJHELa5Bp4qPUVgPF2,electrician:ni6VBj8eLu6IrjLW2YpzE,customer:j7j9ZuTvNn7sS26z7QXrt6
+  host: https://api.getui.com/apiex.htm
+##sms
+sms:
+  bw:
+    uri: http://cloud.baiwutong.com:8080
+    uid: wj5360
+    passwd: 7809tj
+    md5TdCode: 6ece5a51e1ace644615cbcface9da4e0
+    #open|close
+    smsSwitch: open  
+  #disable mobiles send sms 
+  send.filter.mobiles: 13968662288,13757247699,13906728288,13336114849,13666640001,13666640002,13666640003,13666640004,13666640005,13666640006,13666640007,13666640008,13666640009,13666640010,13666640011,13666640012,13666640013,13666640014,13666640015,13666640016,13666640017,13666640018,13666640019,13666640020,13111111111,13122222222,13133333333,13144444444,13155555555,13166666666,13666630001,13666630002,13666630003,13666630004,13666630005,13666630006,13666630007,13666630008,13666630009,13666630010,13666630011,13666630012,13666630013,13666630014,13666630015,13666630016,13666630017,13666630018,13666630019,13666630020,13666630021,13666630022,13666630023,13666630024,13666630025
+ 
+

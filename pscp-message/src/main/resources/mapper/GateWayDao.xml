@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.message.meter.dao.GateWayDao">
+	<select id="get" resultType="com.edianniu.pscp.message.meter.domain.GateWay">
+		select * from pscp_netdau_gateway_info  
+		WHERE 
+		building_id = #{buildingId} and 
+		gateway_id=#{gatewayId} and 
+		deleted=0
+	</select>
+	<select id="getById" resultType="com.edianniu.pscp.message.meter.domain.GateWay">
+		select * from pscp_netdau_gateway_info  
+		WHERE 
+		id=#{id} and deleted=0
+	</select>
+	<insert id="save"
+            parameterType="com.edianniu.pscp.message.meter.domain.GateWay">
+        INSERT INTO pscp_netdau_gateway_info(
+        id,
+        building_id,
+		gateway_id,
+		building_name,
+		build_no,
+		dev_no,
+		factory,
+		hardware,
+		software,
+		mac,
+		ip,
+		mask,
+		gate,
+		server,
+		port,
+		host,
+		com,
+		dev_num,
+		period,
+		begin_time,
+		address,
+		status,
+        report_time,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES (
+        nextval('seq_pscp_netdau_gateway_info'),
+        #{buildingId},
+		#{gatewayId},
+		#{buildingName},
+		#{buildNo},
+		#{devNo},
+		#{factory},
+		#{hardware},
+		#{software},
+		#{mac},
+		#{ip},
+		#{mask},
+		#{gate},
+		#{server},
+		#{port},
+		#{host},
+		#{com},
+		#{devNum},
+		#{period},
+		#{beginTime},
+		#{address},
+		#{status},
+        #{reportTime},
+        now(),
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_netdau_gateway_info') as id;
+        </selectKey>
+    </insert>
+	<update id="updateStatus"
+            parameterType="com.edianniu.pscp.message.meter.domain.GateWay">
+        UPDATE pscp_netdau_gateway_info
+        set 
+           status=#{status},
+           modified_user = #{modifiedUser},
+           modified_time = #{modifiedTime}
+        WHERE 
+        building_id = #{buildingId} and 
+        gateway_id=#{gatewayId} and 
+        deleted=0
+    </update>
+    <update id="update"
+            parameterType="com.edianniu.pscp.message.meter.domain.GateWay">
+        UPDATE pscp_netdau_gateway_info
+        set 
+          building_name=#{buildingName},
+		  build_no=#{buildNo},
+		  dev_no=#{devNo},
+		  factory=#{factory},
+		  hardware=#{hardware},
+		  software=#{software},
+		  mac=#{mac},
+		  ip=#{ip},
+		  mask=#{mask},
+		  gate=#{gate},
+		  server=#{server},
+		  port=#{port},
+		  host=#{host},
+		  com=#{com},
+		  dev_num=#{devNum},
+		  period=#{period},
+		  begin_time=#{beginTime},
+		  address=#{address},
+          status=#{status},
+		  report_time=#{reportTime},
+          modified_user = #{modifiedUser},
+          modified_time = #{modifiedTime}
+        WHERE 
+        building_id = #{buildingId} and 
+        gateway_id=#{gatewayId} and 
+        deleted=0
+    </update>
+</mapper>

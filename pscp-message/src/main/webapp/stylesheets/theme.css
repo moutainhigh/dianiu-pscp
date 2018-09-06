@@ -1,0 +1,12 @@
+.theme-box{
+	font-size: 0;
+	width: 960px;
+	padding: 0 19px;
+	border: 1px solid rgb(216,216,216);
+	background-color: white;
+	padding-bottom: 30px;
+}
+.small-app-btn:hover{
+	background-color: orangered;
+	color: white;
+}

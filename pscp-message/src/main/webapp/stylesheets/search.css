@@ -1,0 +1,120 @@
+.search-content-box {
+	font-size: 0;
+	padding: 20px 0 20px 20px;
+	background-color: white;
+	border: 1px solid rgb(216, 216, 216);
+}
+
+.search-title {
+	font-size: 14px;
+	margin: 0;
+	margin-bottom:;
+}
+.search-span{
+	display:inline-block;
+}
+.search-word {
+	word-wrap:break-word; 
+	overflow:hidden;
+	color: orangered;
+}
+
+.search-app-box {
+	display: inline-block;
+	width: 440px;
+	height: 100px;
+	margin: 33px 0;
+}
+
+.search-app-box-right {
+	margin-left: 85px;
+}
+
+.search-app-img {
+	display: block;
+	float: left;
+	width: 100px;
+	height: 100px;
+}
+
+.search-app-introduce-box {
+	position: relative;
+	float: left;
+}
+
+.search-app-name {
+	font-size: 14px;
+	margin: 6px;
+	margin-left: 18px;
+	color: black;
+}
+
+.search-app-num {
+	font-size: 14px;
+	margin: 6px;
+	margin-left: 18px;
+}
+
+.search-app-text {
+	width: 340px;
+	height: 40px;
+	overflow: hidden;
+	font-size: 12px;
+	line-height: 20px;
+}
+
+.search-app-text p {
+	margin: 0;
+	margin-left: 18px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+.search-app-btn {
+	position: absolute;
+	right: 10px;
+	top: 8px;
+	width: 100px;
+	height: 26px;
+	background-color: rgb(243, 243, 243);
+	font-size: 12px;
+	border: 1px solid rgb(216, 216, 216);
+	text-align: center;
+	line-height: 26px;
+	cursor: pointer;
+	color: black;
+}
+
+.search-app-btn:hover {
+	color: white;
+	background-color: #ff6700;
+}
+
+.nosearch-content {
+	width: 450px;
+	height: 150px;
+	margin: 200px auto;
+}
+
+.nosearch-img {
+	display: block;
+	width: 128px;
+	float: left;
+}
+
+.nosearch-text-content {
+	padding-top: 10px;
+	float: left;
+}
+
+.nosearch-text {
+	font-size: 14px;
+	margin: 4px;
+}
+
+.nosearch-text-top {
+	margin-top: 22px;
+}

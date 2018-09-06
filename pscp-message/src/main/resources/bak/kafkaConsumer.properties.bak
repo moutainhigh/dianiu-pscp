@@ -1,0 +1,7 @@
+bootstrap.servers=192.168.1.251:9092,192.168.1.251:9093,192.168.1.251:9094,192.168.1.251:9095
+group.id=group_dev
+enable.auto.commit=false
+auto.commit.interval.ms=3000
+max.poll.interval.ms=3000
+max.poll.records=5
+session.timeout.ms=30000

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.message.msg.dao.MessageSendLogDao">
+    <sql id="Base_Column_List">
+        id, uid, type, category, title, content, result, content_id, task_id,
+        status, response, push_time, ext, company_id,
+        create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <insert id="saveEntity"
+            parameterType="com.edianniu.pscp.message.msg.domain.MessageSendLog">
+        INSERT INTO pscp_message_send_log(
+        id,
+        uid,
+        type,
+        category,
+        title,
+        content,
+        result,
+        content_id,
+        task_id,
+        status,
+        response,
+        push_time,
+        ext,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES (
+        nextval('seq_pscp_message_send_log'),
+        #{uid},
+        #{type},
+        #{category},
+        #{title},
+        #{content},
+        #{result},
+        #{contentId},
+        #{taskId},
+        #{status},
+        #{response},
+        #{pushTime},
+        #{ext},
+        now(),
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_message_send_log') as id;
+        </selectKey>
+    </insert>
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.message.sms.dao.SmsTemplateDao">
+    <sql id="Base_Column_List">
+        id, msg_id, context, create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <insert id="saveEntity"
+            parameterType="com.edianniu.pscp.message.sms.domain.SmsTemplate">
+        INSERT INTO pscp_sms_template(
+        id,
+        msg_id,
+        context,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES (
+        nextval('seq_pscp_sms_template'),
+        #{msgId},
+        #{context},
+        now(),
+        #{createUser},
+        #{deleted}
+        )
+
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_sms_template') as id;
+        </selectKey>
+    </insert>
+
+    <select id="queryCount" parameterType="string" resultType="int">
+        SELECT count(1)
+        FROM pscp_sms_template
+        WHERE msg_id = #{msgId}
+    </select>
+
+    <select id="queryContext" parameterType="string" resultType="string">
+        SELECT context
+        FROM pscp_sms_template
+        WHERE msg_id = #{msgId}
+        LIMIT 1
+    </select>
+</mapper>

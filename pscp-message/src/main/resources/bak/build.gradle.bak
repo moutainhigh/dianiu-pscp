@@ -1,0 +1,269 @@
+apply plugin: 'war'
+apply plugin: 'eclipse'
+apply plugin: 'jetty'  
+ 
+
+/*eclipse {
+    module {
+        excludeDirs = [file(".gradle")]
+        [".eclipse", "target", "build"].each {
+            excludeDirs << file("$it")
+        }
+    }
+}
+jettyRun {
+    contextPath = '/'
+    reload = 'manual'
+    webDefaultXml = file('webdefault.xml')
+}*/
+httpPort = 8080
+stopPort = 8089
+stopKey  = 'ss'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        flatDir dirs: "${gradle.gradleHomeDir}/customPlugins" 
+    }
+
+    dependencies {
+        classpath 'com.github.ben-manes:gradle-versions-plugin:0.3'
+        classpath 'com.bmuschko:gradle-tomcat-plugin:2.0'
+    }
+}
+//apply plugin: 'tomcat'
+apply plugin: 'com.bmuschko.tomcat'
+tomcat {
+    httpPort = 8091
+    httpsPort = 8092
+    enableSSL = true
+}
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+    sourceCompatibility = 1.7
+    targetCompatibility = 1.7
+}
+task makeJar(type:Jar, dependsOn: classes) {
+	//指定生成的jar名
+	println jarVersion
+	baseName 'pscp-message-client'
+	version=jarVersion
+	//从哪里打包class文件
+	//from('build/intermediates/classes/debug/org/cmdmac/cloud/pluginsdk/')
+	//打包到jar后的目录结构
+	//into('org/cmdmac/cloud/pluginsdk/')
+	//去掉不需要打包的目录和文件
+	//exclude('test/', 'BuildConfig.class', 'R.class')
+	//去掉R$开头的文件
+	//exclude{ it.name.startsWith('R$');}
+
+
+	into('com/edianniu/pscp/message/commons') {
+		from ("build/classes/main/com/edianniu/pscp/message/commons"){
+			exclude('BaseDo.class')
+		}
+	}
+	into('com/edianniu/pscp/message/service/dubbo') {
+		from ("build/classes/main/com/edianniu/pscp/message/service/dubbo"){
+			exclude('impl')
+		}
+	}
+	into('com/edianniu/pscp/message/bean') {
+		from ("build/classes/main/com/edianniu/pscp/message/bean"){
+			//exclude('impl')
+		}
+	}
+	into('com/edianniu/pscp/message/result') {
+		from ("build/classes/main/com/edianniu/pscp/message/result"){
+
+		}
+	}
+	//include
+
+	destinationDir = rootDir
+}
+
+//makeJar.dependsOn(clearJar)
+//jar {
+//	from sourceSets.main.allSource
+//}
+task makeSourcesJar(type: Jar, dependsOn: classes) {
+	println jarVersion
+	baseName 'pscp-message-client'
+	version=jarVersion
+	classifier = 'sources'
+	into('com/edianniu/pscp/message/commons') {
+		from ("src/main/java/com/edianniu/pscp/message/commons"){
+			exclude('BaseDo.java')
+		}
+	}
+	into('com/edianniu/pscp/message/service/dubbo') {
+		from ("src/main/java/com/edianniu/pscp/message/service/dubbo"){
+			exclude('impl')
+		}
+	}
+	into('com/edianniu/pscp/message/bean') {
+		from ("src/main/java/com/edianniu/pscp/message/bean"){
+			//exclude('impl')
+		}
+	}
+	into('com/edianniu/pscp/message/result') {
+		from ("src/main/java/com/edianniu/pscp/message/result"){
+
+		}
+	}
+	//include
+
+	destinationDir = rootDir
+}
+
+task makeJavadocJar(type: Jar, dependsOn: javadoc) {
+	println jarVersion
+	baseName 'pscp-message-client'
+	version=jarVersion
+	classifier = 'javadoc'
+	into('com/edianniu/pscp/message/commons') {
+		from ("src/com/edianniu/pscp/message/commons"){
+			exclude('BaseDo')
+		}
+	}
+	into('com/edianniu/pscp/message/sms/dubbo/service') {
+		from ("src/com/edianniu/pscp/message/sms/dubbo/service"){
+			exclude('impl')
+		}
+	}
+	into('com/edianniu/pscp/message/bean') {
+		from ("src/main/java/com/edianniu/pscp/message/bean"){
+			//exclude('impl')
+		}
+	}
+	into('com/edianniu/pscp/message/sms/result') {
+		from ("src/com/edianniu/pscp/message/sms/result"){
+
+		}
+	}
+	destinationDir = rootDir
+}
+
+artifacts {
+	archives makeJar
+	archives makeSourcesJar
+//    archives makeJavadocJar
+	archives file: file("pscp-mis-client-${jarVersion}.jar"), name: "pscp-mis-client-${jarVersion}", type: 'jar'
+	archives file: file("pscp-mis-client-${jarVersion}-sources.jar"), name: "pscp-mis-client-${jarVersion}-sources", type: 'jar'
+}
+repositories {
+    maven {
+        url "http://111.1.17.197:8080/nexus/content/groups/public"
+    }
+    mavenCentral()
+    ivy {
+        url "http://111.1.17.197:8080/nexus/content/groups/public"
+        layout "pattern", {
+            artifact "[organisation]/[module]/[revision]/[artifact]-[revision].xml"
+            artifact "[organisation]/[module]/[revision]/[artifact]-[revision](-[type]).[ext]"
+            m2compatible = true
+        }
+    }
+}
+
+dependencies {
+    components {
+        eachComponent { details ->
+            details.statusScheme = ["snapshot", "integration", "milestone", "release"]
+        }
+    }
+    def tomcatVersion = '7.0.11'
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+    	           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
+    exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+    }
+    /* spring */
+    compile("org.springframework:spring-context-support:${springVersion}")
+    compile("org.springframework:spring-orm:${springVersion}")
+    compile("org.springframework:spring-tx:${springVersion}")
+    compile("org.springframework:spring-webmvc:${springVersion}")
+    compile("org.springframework:spring-web:${springVersion}")
+    compile("org.springframework.data:spring-data-jpa:${springDataJpaVersion}")
+
+    /* stc */
+    compile('skymobi.stc:stc-cache:1.0.2') { transitive = false }
+    /* ORM */
+    compile("org.hibernate:hibernate-entitymanager:4.2.7.SP1")
+    compile("org.hibernate:hibernate-validator:5.0.1.Final")
+    compile("org.hibernate:hibernate-ehcache:4.2.7.SP1")
+    compile("net.sf.ehcache:ehcache-core:2.6.5")
+
+    /* database driver */
+    compile("postgresql:postgresql:9.1-901-1.jdbc4")
+    compile("com.jolbox:bonecp:0.8.0.RELEASE")
+    compile("redis.clients:jedis:2.5.1")
+    
+    /* kafka */
+    compile ("org.apache.kafka:kafka-clients:0.10.0.0")
+
+    /* J2EE */
+    compile("javax.servlet:jstl:1.2")
+    runtime("org.glassfish.main.external:jmxremote_optional-repackaged:4.0") { transitive = false }
+    runtime("org.hibernate:hibernate-validator:5.0.1.Final")
+    providedCompile("javax.servlet:javax.servlet-api:3.0.1")
+    providedCompile("javax.servlet.jsp:jsp-api:2.0")
+    /* zookeeper */
+    compile ('com.github.sgroschupf:zkclient:0.1') { transitive = true }
+    compile ('org.apache.zookeeper:zookeeper:3.3.6') { transitive = false }
+    /**commons-net*/
+    compile ('commons-net:commons-net:3.3') { transitive = false }
+    /* Logger */
+    compile("ch.qos.logback:logback-classic:1.0.13")
+    compile("org.slf4j:slf4j-api:1.7.1")
+    compile("org.slf4j:jcl-over-slf4j:1.7.1")
+    /* commons */
+    compile("org.apache.commons:commons-lang3:3.1")
+    compile("commons-fileupload:commons-fileupload:1.3")
+    compile "commons-collections:commons-collections:3.2.1"
+    compile("commons-io:commons-io:2.4")
+    compile "com.fasterxml.jackson.core:jackson-databind:2.2.2"
+	
+	
+	/*compile 'com.alibaba:fastjson:1.1.41'*/
+    compile("org.aspectj:aspectjrt:1.7.0")
+    compile("org.aspectj:aspectjweaver:1.7.0")
+	compile 'org.apache.commons:commons-lang3:3.3.2'
+	compile 'commons-lang:commons-lang:2.6'
+	compile "org.apache.commons:commons-pool2:2.2"
+	/*http*/
+	compile 'org.apache.httpcomponents:httpcore:4.4.3'
+	compile 'org.apache.httpcomponents:httpclient:4.5.1'
+	testCompile 'org.apache.httpcomponents:httpmime:4.5.1'
+    /* Other */
+    compile("org.tuckey:urlrewritefilter:4.0.4")
+    compile("org.freemarker:freemarker:2.3.20")
+    compile("org.apache.shiro:shiro-cas:1.2.3")
+    compile("org.apache.shiro:shiro-spring:1.2.3")
+    compile("org.sitemesh:sitemesh:3.0-alpha-2")
+    /*compile 'javax.jmdns:jmdns:3.4.1'*/
+	compile ('org.mybatis:mybatis-spring:1.2.0'){transitive = false}
+	compile ('org.mybatis:mybatis:3.2.8'){transitive = false}
+    compile "io.netty:netty-all:4.0.19.Final"
+	compile 'com.alibaba:fastjson:1.1.41'
+    compile 'com.gexin.platform:gexin-rp-sdk-http:4.0.1.2'
+	compile 'com.gexin.platform:gexin-rp-sdk-base:4.0.0.7'
+	compile 'com.gexin.platform:gexin-rp-sdk-template:4.0.0.5'
+	compile 'com.google.protobuf:protobuf-java:3.0.0'
+	/*compile 'org.codehaus.jackson:jackson-all:1.8.5'*/
+	compile "org.codehaus.jackson:jackson-core-asl:1.9.13"
+	compile "org.codehaus.jackson:jackson-mapper-asl:1.9.13"
+	compile 'javax.jms:jms:1.2'
+	compile 'com.sun.jdmk:jmxtools:1.2.2'
+	compile 'com.sun.jmx:jmxri:1.2.2'
+	/**pscp-search-client**/
+	compile 'com.edianniu.pscp.search:pscp-search-client:1.0.24'
+	/**mis client**/
+    compile 'com.edianniu.pscp.mis:pscp-mis-client:3.8.12'
+	
+	testCompile "junit:junit:4.11"
+	runtime 'com.edianniu.3rd:dubbo:2.5.3_netty4.0.18'
+	
+}

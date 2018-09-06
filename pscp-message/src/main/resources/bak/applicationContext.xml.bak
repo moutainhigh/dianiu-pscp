@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+       "
+       default-lazy-init="true">
+
+    <description>Spring公共配置</description>
+
+    <context:property-placeholder location="classpath*:application.properties"
+                                  ignore-resource-not-found="true" ignore-unresolvable="true"/>
+    <import resource="classpath*:consumer.xml"/>
+    <import resource="classpath*:provider.xml"/>
+
+    <context:component-scan base-package="com.edianniu.pscp.message.web">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <aop:aspectj-autoproxy/>
+    <bean id="cacheJedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxTotal" value="${redis.cache.cfg.maxActive}"/>
+        <property name="maxIdle" value="${redis.cache.cfg.maxIdle}"/>
+        <property name="maxWaitMillis" value="${redis.cache.cfg.maxWait}"/>
+        <property name="testOnBorrow" value="${redis.cache.cfg.testOnBorrow}"/>
+    </bean>
+
+    <bean id="cacheJedisPool" class="stc.skymobi.cache.redis.MasterSlavePool">
+        <constructor-arg index="0" ref="cacheJedisPoolConfig"/>
+        <constructor-arg value="${redis.cache.host}"/>
+        <constructor-arg value="${redis.cache.port}"/>
+        <constructor-arg value="${redis.cache.cfg.timeout}"/>
+        <property name="redisName" value="cache"/>
+    </bean>
+    <bean id="jedisUtil" class="stc.skymobi.cache.redis.JedisUtil">
+        <property name="jedisPool" ref="cacheJedisPool"/>
+    </bean>
+    <bean id="taskScheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler">
+        <property name="poolSize" value="5"/>
+    </bean>
+
+    <task:annotation-driven scheduler="taskScheduler"/>
+
+    <bean id="jmxConnector" class="com.edianniu.pscp.message.web.support.JmxConnector"/>
+
+    <bean id="annotationMBeanExporter"
+          class="org.springframework.jmx.export.annotation.AnnotationMBeanExporter" lazy-init="false">
+    </bean>
+</beans>

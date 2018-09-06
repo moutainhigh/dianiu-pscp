@@ -1,0 +1,83 @@
+logging:
+  level: info
+##datasource
+spring: 
+  datasource:
+    url: jdbc:postgresql://192.168.1.251:1921/pscpdev
+    username: pscpdev
+    password: pscpdev2017
+    driver-class-name: org.postgresql.Driver
+    max-idle: 10
+    max-wait: 10000
+    min-idle: 1
+    initial-size: 1
+    validation-query: SELECT 1
+    test-on-borrow: false
+    test-while-idle: true
+    time-between-eviction-runs-millis: 18800
+mybatis:
+  mapper-locations: classpath:mapper/*Dao.xml
+  config-location: classpath:mybatis/mybatis-config.xml 
+##redis cache
+redis:
+  cache:
+    host: 192.168.1.251
+    port: 6379
+    cfg:
+      maxActive: 120
+      maxIdle: 30000
+      maxWait: 10000
+      testOnBorrow: true
+      timeout: 5000     
+##zk
+zk.address: 192.168.1.251:2183
+##dubbo
+dubbo:
+  port: 28806
+  address: zookeeper://192.168.1.251:2183
+##kafka 
+kafka:
+  bootstrap.servers: 192.168.1.251:9092,192.168.1.251:9093,192.168.1.251:9094,192.168.1.251:9095
+  consumer:
+    group.id: group_dev
+    enable.auto.commit: false
+    auto.commit.interval.ms: 3000
+    max:
+      poll:
+        interval.ms: 3000
+        records: 5
+    session.timeout.ms: 30000
+  producer:
+    acks: all
+    retries: 0
+    batch.size: 16384
+    linger.ms: 1
+    buffer.memory: 33554432
+##kafka message topic config
+getuiclient.kafka.topic.name: pscp_getuiclient
+sms.kafka.topic.name: pscp_sms
+msg.kafka.topic.name: pscp_msg
+##meter topics
+meter:
+  log.kafka.topic.names: dev_meter_log_0
+  info.kafka.topic.name: dev_meter_info
+  warning.kafka.topic.name: dev_meter_warning
+##ge tui config 
+getui:
+  appids: facilitator:da2KHOnCGJ8VgSgLEi0nO8,electrician:THFfw4ldLl5by8jEJ5xVk1,customer:dVYpyFTnZ67W5BcbZVrbv7
+  appkeys: facilitator:HrWjgOIx7J8Pc2usHbgYB7,electrician:A2GGIjLOIC6wnKQ3ttYZN1,customer:g4bMf2f1LV5n9gIneIHNbA
+  masters: facilitator:iZXJPJHELa5Bp4qPUVgPF2,electrician:ni6VBj8eLu6IrjLW2YpzE,customer:j7j9ZuTvNn7sS26z7QXrt6
+  host: https://api.getui.com/apiex.htm
+##sms
+sms:
+  bw:
+    uri: http://cloud.baiwutong.com:8080
+    uid: wj5360
+    passwd: 7809tj
+    md5TdCode: 6ece5a51e1ace644615cbcface9da4e0
+    #open|close
+    smsSwitch: close  
+  #disable mobiles send sms 
+  send.filter.mobiles: 13666640001,13666640002,13666640003,13666640004,13666640005,13666640006,13666640007,13666640008,13666640009,13666640010,13666640011,13666640012,13666640013,13666640014,13666640015,13666640016,13666640017,13666640018,13666640019,13666640020
+ 
+

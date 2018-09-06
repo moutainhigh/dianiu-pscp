@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.message.meter.dao.MeterDao">
+	<select id="get" resultType="com.edianniu.pscp.message.meter.domain.Meter">
+		select * from pscp_meter_info 
+		WHERE 
+		building_id = #{buildingId} and 
+		gateway_id=#{gatewayId} and 
+		meter_id=#{meterId} and 
+		type=#{type} and deleted=0
+	</select>
+	<select id="getList" resultType="com.edianniu.pscp.message.meter.domain.Meter">
+		select * from pscp_meter_info 
+		WHERE 
+		building_id = #{buildingId} and 
+		gateway_id=#{gatewayId} and  
+		type=#{type} and deleted=0
+	</select>
+	<select id="getById" resultType="com.edianniu.pscp.message.meter.domain.Meter">
+		select * from pscp_meter_info  
+		WHERE 
+		id=#{id} and deleted=0
+	</select>
+	<insert id="save"
+            parameterType="com.edianniu.pscp.message.meter.domain.Meter">
+        INSERT INTO pscp_meter_info(
+        id,
+        building_id,
+		gateway_id,
+		meter_id,
+		type,
+		sub_term_code,
+		name,
+		address,
+		status,
+		functions,
+        report_time,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES (
+        nextval('seq_pscp_meter_info'),
+        #{buildingId},
+		#{gatewayId},
+		#{meterId},
+		#{type},
+		#{subTermCode},
+		#{name},
+		#{address},
+		#{status},
+		#{functions},
+        #{reportTime},
+        now(),
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_meter_info') as id;
+        </selectKey>
+    </insert>
+	<update id="updateStatus"
+            parameterType="com.edianniu.pscp.message.meter.domain.Meter">
+        UPDATE pscp_meter_info
+        set 
+           status=#{status},
+           modified_user = #{modifiedUser},
+           modified_time = #{modifiedTime}
+        WHERE 
+        building_id = #{buildingId} and 
+        gateway_id=#{gatewayId} and 
+        type=#{type} and 
+        deleted=0
+    </update>
+    <update id="update"
+            parameterType="com.edianniu.pscp.message.meter.domain.Meter">
+        UPDATE pscp_meter_info
+        set 
+           status=#{status},
+           name=#{name},
+           sub_term_code=#{subTermCode},
+		   address=#{address},
+		   functions=#{functions},
+		   report_time=#{reportTime},
+           modified_user = #{modifiedUser},
+           modified_time = #{modifiedTime}
+        WHERE 
+        building_id = #{buildingId} and 
+        gateway_id=#{gatewayId} and 
+        type=#{type} and 
+        meter_id=#{meterId} and 
+        deleted=0
+    </update>
+</mapper>
