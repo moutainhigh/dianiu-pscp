@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.AppCheckUpdateDao">
+
+    <select id="getAppCheckUpdates"
+            resultType="com.edianniu.pscp.mis.domain.AppCheckUpdate">
+        SELECT
+           <include refid="detail_app_check_update_columns"/>
+        FROM pscp_app_check_update t
+        WHERE 
+         t.app_type=#{appType} and 
+         t.app_pkg=#{appPkg} and 
+         #{appVer}&lt;t.app_latest_ver and 
+         t.deleted = 0 and status = 1 
+         order by t.create_time desc ,t.modified_time desc 
+    </select>
+	<sql id="detail_app_check_update_columns">
+	        t.id,
+			t.app_start_ver as appStartVer,
+			t.app_end_ver as appEndVer,
+			t.app_type as appType,
+			t.app_pkg as appPkg,
+			t.app_latest_ver as appLatestVer,
+			t.app_latest_show_ver as appLatestShowVer,
+			t.app_latest_size as appLatestSize,
+			t.update_type as updateType,
+			t.update_desc as updateDesc,
+			t.app_download_url as appDownloadUrl,
+			t.app_download_md5 as appDownloadMd5,
+			t.status
+	</sql>
+</mapper>

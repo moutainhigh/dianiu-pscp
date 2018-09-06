@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.PayOrderDao">
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.PayOrder">
+        INSERT INTO pscp_member_pay_order (
+        id,
+        uid,
+        order_type,
+        order_id,
+        associated_order_ids,
+        amount,
+        title,
+        body,
+        pay_time,
+        pay_type,
+        pay_method,
+        pay_channel,
+        memo,
+        need_invoice,
+        extend_params,
+        status,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES (
+        nextval('seq_pscp_member_pay_order'),
+        #{uid},
+        #{orderType},
+        #{orderId},
+        #{associatedOrderIds},
+        #{amount},
+        #{title},
+        #{body},
+        #{payTime},
+        #{payType},
+        #{payMethod},
+        #{payChannel},
+        #{memo},
+        #{needInvoice},
+        #{extendParams},
+        #{status},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_member_pay_order') as id;
+        </selectKey>
+    </insert>
+    <update id="updateInvoiceOrderId"
+            parameterType="com.edianniu.pscp.mis.domain.PayOrder">
+        UPDATE pscp_member_pay_order SET
+        <if test="invoiceOrderId!=null and invoiceOrderId!=''">
+            invoice_order_id = #{invoiceOrderId},
+        </if>
+        <if test="needInvoice!=null">
+            need_invoice = #{needInvoice},
+        </if>
+        <if test="modifiedUser!=null and modifiedUser!=''">
+            modified_user = #{modifiedUser},
+        </if>
+        modified_time = now()
+        WHERE id = #{id} and deleted=0
+    </update>
+    <update id="updatePayStatus"
+            parameterType="com.edianniu.pscp.mis.domain.PayOrder">
+		UPDATE pscp_member_pay_order SET
+		status     = #{status},
+		amount = #{amount},
+		memo     = #{memo},
+		pay_sync_time=#{paySyncTime},
+		pay_async_time=#{payAsyncTime},
+		modified_time         = now(),
+		modified_user         = #{modifiedUser}
+		WHERE id = #{id} and deleted=0
+              and COALESCE(to_char(modified_time, 'yyyyMMddHHmmssSS'),'0')=#{modifiedTimeStr}
+	</update>
+    <update id="update"
+            parameterType="com.edianniu.pscp.mis.domain.PayOrder">
+        UPDATE pscp_member_pay_order SET
+        <if test="uid!=null">
+            uid=#{uid},
+        </if>
+        <if test="orderType!=null">
+            order_type=#{orderType},
+        </if>
+        <if test="orderId!=null and orderId!=''">
+            order_id=#{orderId},
+        </if>
+        <if test="associatedOrderIds!=null and associatedOrderIds!=''">
+            associated_order_ids=#{associatedOrderIds},
+        </if>
+        <if test="amount!=null and amount!=''">
+            amount=#{amount},
+        </if>
+        <if test="title!=null and title!=''">
+            title=#{title},
+        </if>
+
+        <if test="body!=null">
+            body=#{body},
+        </if>
+        <if test="payTime!=null">
+            pay_time=#{payTime},
+        </if>
+        <if test="payType!=null">
+            pay_type=#{payType},
+        </if>
+        <if test="payMethod!=null">
+            pay_method=#{payMethod},
+        </if>
+        <if test="payChannel!=null">
+            pay_channel=#{payChannel},
+        </if>
+        <if test="extendParams!=null">
+            extend_params=#{extendParams},
+        </if>
+        <if test="status!=null">
+            status = #{status},
+        </if>
+        <if test="memo!=null">
+            memo = #{memo},
+        </if>
+        <if test="paySyncTime!=null">
+            pay_sync_time=#{paySyncTime},
+        </if>
+        <if test="payAsyncTime!=null">
+            pay_async_time=#{payAsyncTime},
+        </if>
+        <if test="modifiedUser!=null">
+            modified_user = #{modifiedUser},
+        </if>
+        <if test="needInvoice!=null">
+            need_invoice=#{needInvoice},
+        </if>
+        <if test="invoiceOrderId!=null">
+            invoice_order_id=#{invoiceOrderId},
+        </if>
+        modified_time = now()
+        WHERE id = #{id} and deleted=0
+    </update>
+    <select id="getById"
+            resultType="com.edianniu.pscp.mis.domain.PayOrder">
+        SELECT
+        <include refid="pay_order_default_columns"/>
+        FROM pscp_member_pay_order t
+        WHERE
+        t.id=#{value} and t.deleted=0 limit 1
+    </select>
+
+
+    <select id="getByOrderId"
+            resultType="com.edianniu.pscp.mis.domain.PayOrder">
+        SELECT
+        <include refid="pay_order_default_columns"/>
+        FROM pscp_member_pay_order t
+        WHERE
+        t.order_id=#{orderId} and t.deleted=0 limit 1
+    </select>
+    
+    <select id="queryPayOrderListCount" resultType="int">
+    	SELECT COUNT(1)
+    	FROM pscp_member_pay_order t
+        WHERE t.uid=#{uid} and t.status=#{status} and t.order_type=#{type} and t.deleted=0
+    </select>
+    
+    <select id="queryPayOrderList" resultType="com.edianniu.pscp.mis.domain.PayOrder">
+    	SELECT <include refid="pay_order_default_columns"/>
+    	FROM pscp_member_pay_order t
+        WHERE t.uid=#{uid} and t.status=#{status} and t.order_type=#{type} and t.deleted=0
+        order by t.create_time
+        <if test="limit != null and offset != null">
+        	offset #{offset} limit #{limit}
+        </if>
+    </select>
+
+    <!--根据发票编号获取订单信息-->
+    <select id="getByInvoiceOrderId"
+            resultType="com.edianniu.pscp.mis.domain.PayOrder">
+        SELECT
+        <include refid="pay_order_default_columns"/>
+        FROM pscp_member_pay_order t
+        WHERE
+        t.invoice_order_id=#{invoiceOrderId} and t.deleted=0 limit 1
+    </select>
+
+
+    <select id="getUidAndOrderIds"
+            resultType="com.edianniu.pscp.mis.domain.PayOrder">
+        SELECT
+        <include refid="pay_order_default_columns"/>
+        FROM pscp_member_pay_order t
+        WHERE
+        t.uid=#{uid} and t.order_id=#{orderId} and t.status in(0,3,4) and t.deleted=0 limit 1
+    </select>
+    <select id="getCountByOrderId"
+            resultType="int">
+		SELECT 
+		count(*)
+		FROM pscp_member_pay_order t
+		WHERE
+            t.order_id=#{orderId} and t.deleted=0
+	</select>
+    <select id="getUidAndOrderId"
+            resultType="com.edianniu.pscp.mis.domain.PayOrder">
+        SELECT
+        <include refid="pay_order_default_columns"/>
+        FROM pscp_member_pay_order t
+        WHERE
+        t.uid=#{uid} and t.order_id=#{orderId} and t.deleted=0
+    </select>
+    <sql id="pay_order_default_columns">
+		t.id,
+		t.uid,
+		t.amount,
+		t.order_type,
+		t.title,
+        t.body,
+		t.order_id,
+		t.associated_order_ids,
+		t.status,
+		t.pay_type,
+		t.memo,
+		t.need_invoice,
+		t.extend_params,
+		t.status,
+	    t.pay_time,
+	    t.pay_sync_time,
+		t.pay_async_time,
+        t.pay_method,
+        t.pay_channel,
+        COALESCE(to_char(t.modified_time, 'yyyyMMddHHmmssSS'),'0') as modifiedTimeStr
+	</sql>
+
+</mapper>

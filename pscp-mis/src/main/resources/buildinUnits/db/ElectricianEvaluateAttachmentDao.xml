@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.mis.dao.ElectricianEvaluateAttachmentDao">
+    <sql id="Base_Column_List">
+        id, electrician_evaluate_id, fid, type, create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <select id="selectAllByEvaluateId" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianEvaluateAttachment">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_electrician_evaluate_attachment
+        WHERE deleted = 0
+        AND electrician_evaluate_id = #{evaluateId}
+    </select>
+</mapper>

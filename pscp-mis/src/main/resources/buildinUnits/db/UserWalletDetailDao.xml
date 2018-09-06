@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.UserWalletDetailDao">
+    <insert id="insert" parameterType="com.edianniu.pscp.mis.domain.UserWalletDetail">
+        INSERT INTO pscp_member_wallet_detail (
+            id,
+            uid,
+            amount,
+            type,
+            deal_type,
+            order_id,
+            pay_order_id,
+            fund_target,
+            fund_source,
+            remark,
+            check_status,
+            pay_status,       
+            create_time,
+            create_user,
+            deleted,
+            transaction_id,
+            available_amount,
+            available_freezing_amount,
+            deal_account
+        )
+        VALUES (
+            nextval('seq_pscp_member_wallet_detail'),
+            #{uid},
+            #{amount},
+            #{type},
+            #{dealType},
+            #{orderId},
+            #{payOrderId},
+            #{fundTarget},
+            #{fundSource},
+            #{remark},
+            #{checkStatus},
+            #{payStatus},
+            now(),
+            #{createUser},
+            0,
+            #{transactionId},
+            #{availableAmount},
+            #{availableFreezingAmount},
+            #{dealAccount}
+        )
+    </insert>
+    <update id="withdrawalscashAudit" parameterType="com.edianniu.pscp.mis.domain.UserWalletDetail">
+    	UPDATE pscp_member_wallet_detail
+    	 SET
+    	check_time           =  now(),
+    	check_user           =#{checkUser},
+    	check_status		 =#{checkStatus},
+    	<if test="checkMemo!=null">
+    	check_memo			 =#{checkMemo},
+    	</if>
+    	modified_user        =#{modifiedUser},
+    	modified_time        =now()
+    	WHERE id=#{id} AND deleted=0;    	
+    </update>
+    
+    <update id="withdrawalscashPayConfirm" parameterType="com.edianniu.pscp.mis.domain.UserWalletDetail">
+    	UPDATE pscp_member_wallet_detail
+    	  SET
+    	pay_time            =#{payTime},
+    	pay_user            =#{payUser},
+    	pay_status			=#{payStatus},
+    	<if test="payMemo!=null">
+    	pay_memo            =#{payMemo},
+    	</if>
+    	<if test="payTransactionId!=null">
+    	pay_transaction_id    =#{payTransactionId},
+    	</if>
+    	modified_user        =#{modifiedUser},
+    	modified_time        =now()
+    	WHERE id=#{id} AND deleted=0;  
+    </update>
+    <select id="getUserwalleDetail" parameterType="java.lang.Long" 
+    				resultType="com.edianniu.pscp.mis.domain.UserWalletDetail">
+    		SELECT 
+	    		<include refid="wallet_detail_default_columns"/>
+            FROM pscp_member_wallet_detail t
+            	WHERE id=#{id} AND deleted=0;
+    </select>
+    
+    <select id="getDetailsByUid" parameterType="java.lang.Long" 
+    				resultType="com.edianniu.pscp.mis.domain.UserWalletDetail">
+    		SELECT 
+	    		<include refid="wallet_detail_default_columns"/>
+            FROM pscp_member_wallet_detail t
+            	WHERE t.uid=#{uid} AND t.deleted=0 ORDER BY id DESC  LIMIT 5;
+    </select>  
+    <select id="getSumAmount"  resultType="java.lang.Double">
+    		SELECT 
+	    		COALESCE(sum(amount),0.00)
+            FROM pscp_member_wallet_detail t
+            	WHERE t.uid=#{uid} and t.order_id=#{orderId} and t.type=#{type} and  t.deleted=0;
+    </select>  
+    
+    
+    <sql id="wallet_detail_default_columns">
+    			t.id,
+	            t.uid,
+	            t.amount,
+	            t.type,
+	            t.deal_type          				as dealType,
+	            t.order_id           				as orderId,	  
+	            t.pay_order_id           				as payOrderId,	            
+	            t.fund_target		   				as fundTarget,
+	            t.fund_source		   				as fundSource, 
+	            t.remark,
+	            t.check_status					as checkStatus,
+	            t.check_user						as checkUser,
+	            t.check_time						as checkTime,
+	            t.check_memo						as checkMemo,
+	            t.pay_status						as payStatus,
+	            t.pay_user						as payUser,
+	            t.pay_memo						as payMemo,
+	            t.pay_time						as payTime,
+	            t.create_time						as dealTime,
+	            t.create_user 	   				as createUser,
+	            t.modified_time					as modifiedTime,
+	            t.modified_user					as modifiedUser,
+	            t.deleted,
+	            t.transaction_id	   				as transactionId,
+	            t.available_amount   				as availableAmount,
+	            t.available_freezing_amount		as availableFreezingAmount,
+	            t.deal_account					as dealAccount	            	                      
+    </sql>
+</mapper>

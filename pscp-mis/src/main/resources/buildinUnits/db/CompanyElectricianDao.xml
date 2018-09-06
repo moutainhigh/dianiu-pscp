@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CompanyElectricianDao">
+    <sql id="base_column_list">
+        id,
+        member_id,
+        mobile,
+        name,
+        status,
+        invitation_time,
+        invitation_agree_time,
+        invitation_reject_time,
+        apply_unbund_user,
+        apply_unbund_time,
+        apply_unbund_agree_time,
+        apply_unbund_reject_time,
+        company_id,
+        create_time,
+        create_user,
+        modified_time,
+        modified_user,
+        deleted
+    </sql>
+
+    <select id="getById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyElectrician">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_company_electrician
+        WHERE id = #{id}
+        AND deleted=0
+        limit 1
+    </select>
+    <select id="getByMobileAndCompanyId"
+            resultType="com.edianniu.pscp.mis.domain.CompanyElectrician">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_company_electrician
+        WHERE
+        mobile = #{mobile}
+        and company_id=#{companyId}
+        and deleted=0
+    </select>
+    <select id="getByMemberIdAndCompanyId"
+            resultType="com.edianniu.pscp.mis.domain.CompanyElectrician">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_company_electrician
+        WHERE
+        member_id = #{memberId}
+        and company_id=#{companyId}
+        and deleted=0
+    </select>
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.CompanyElectrician">
+        INSERT INTO pscp_company_electrician(
+        id,
+        member_id,
+        mobile,
+        name,
+        status,
+        invitation_time,
+        invitation_agree_time,
+        invitation_reject_time,
+        company_id,
+        create_time,
+        create_user,
+        deleted
+        )
+        VALUES(
+        nextval('seq_pscp_company_electrician'),
+        #{memberId},
+        #{mobile},
+        #{name},
+        #{status},
+        #{invitationTime},
+        #{invitationAgreeTime},
+        #{invitationRejectTime},
+        #{companyId},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_company_electrician') as id;
+        </selectKey>
+    </insert>
+    <update id="update"
+            parameterType="com.edianniu.pscp.mis.domain.CompanyElectrician">
+        UPDATE pscp_company_electrician SET
+        <if test="memberId !=null">
+            member_id= #{memberId},
+        </if>
+        <if test="mobile !=null and mobile !=''">
+            mobile=#{mobile},
+        </if>
+        <if test="name !=null  and name !=''">
+            name=#{name},
+        </if>
+        <if test="status !=null">
+            status=#{status},
+        </if>
+        <if test="invitationTime !=null">
+            invitation_time=#{invitationTime},
+        </if>
+        <if test="invitationAgreeTime !=null">
+            invitation_agree_time=#{invitationAgreeTime},
+        </if>
+        <if test="invitationRejectTime !=null">
+            invitation_reject_time=#{invitationRejectTime},
+        </if>
+        <if test="applyUnbundUser !=null and applyUnbundUser!=''">
+            apply_unbund_user=#{applyUnbundUser},
+        </if>
+        <if test="applyUnbundTime !=null">
+            apply_unbund_time=#{applyUnbundTime},
+        </if>
+        <if test="applyUnbundAgreeTime !=null">
+            apply_unbund_agree_time=#{applyUnbundAgreeTime},
+        </if>
+        <if test="applyUnbundRejectTime !=null">
+            apply_unbund_reject_time=#{applyUnbundRejectTime},
+        </if>
+        <if test="companyId !=null">
+            company_id= #{companyId},
+        </if>
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE id = #{id} and deleted=0
+    </update>
+    <update id="updateMemberId">
+        UPDATE pscp_company_electrician SET
+        <if test="memberId !=null">
+            member_id= #{memberId},
+        </if>
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE id = #{id} and deleted=0
+    </update>
+    <select id="queryElectricianInvitationInfoList"
+            parameterType="com.edianniu.pscp.mis.query.ElectricianInvitationQuery"
+            resultType="com.edianniu.pscp.mis.bean.user.invitation.ElectricianInvitationInfo">
+        select
+        *
+        from
+        (
+        select
+        t1.id,
+        t1.member_id,
+        t1.mobile,
+        t1.status,
+        t1.invitation_time,
+        t1.invitation_agree_time,
+        t1.invitation_reject_time,
+        t1.apply_unbund_agree_time,
+        t1.apply_unbund_reject_time,
+        t1.apply_unbund_time,
+        t1.apply_unbund_user,
+        t1.company_id,
+        t1.create_time,
+        t1.create_user,
+        t1.modified_time,
+        t1.modified_user,
+        t1.member_status,
+        e.id as electrician_id,
+        e.id_card_no,
+        e.audit_time,
+        e.status as auth_status,
+        CASE
+        WHEN t1.status=1 THEN
+        e.user_name
+        ELSE
+        t1.name
+        END
+        as user_name
+        from
+        (
+        SELECT
+        ce.id,
+        ce.member_id,
+        ce.mobile,
+        ce.name,
+        ce.status,
+        ce.invitation_time,
+        ce.invitation_agree_time,
+        ce.invitation_reject_time,
+        ce.apply_unbund_agree_time,
+        ce.apply_unbund_reject_time,
+        ce.apply_unbund_time,
+        ce.apply_unbund_user,
+        ce.company_id,
+        ce.create_time,
+        ce.create_user,
+        ce.modified_time,
+        ce.modified_user,
+        m.status as member_status
+        from pscp_company_electrician ce
+        LEFT JOIN pscp_member m
+        on ce.member_id=m.id
+        where ce.deleted=0 and (m.deleted=0 or m.deleted is null)
+        )t1 LEFT JOIN pscp_electrician e
+        on t1.member_id= e.member_id and t1.status in(0,1,2,3)
+        and t1.company_id=e.company_id
+        )t2
+        where
+        t2.company_id=#{companyId}
+        <if test="status != null">
+            and t2.status=#{status}
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and t2.mobile like concat('%',#{mobile},'%')
+        </if>
+        <if test="name != null and name != ''">
+            and t2.user_name like concat('%',#{name},'%')
+        </if>
+        order by t2.create_time desc
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryElectricianInvitationInfoCount"
+            parameterType="com.edianniu.pscp.mis.query.ElectricianInvitationQuery"
+            resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        (
+        select
+        t1.id,
+        t1.member_id,
+        t1.mobile,
+        t1.status,
+        t1.invitation_time,
+        t1.invitation_agree_time,
+        t1.invitation_reject_time,
+        t1.apply_unbund_agree_time,
+        t1.apply_unbund_reject_time,
+        t1.apply_unbund_time,
+        t1.apply_unbund_user,
+        t1.company_id,
+        t1.create_time,
+        t1.create_user,
+        t1.modified_time,
+        t1.modified_user,
+        t1.member_status,
+        e.id as electrician_id,
+        e.id_card_no,
+        e.audit_time,
+        e.status as auth_status,
+        CASE
+        WHEN t1.status=1 THEN
+        e.user_name
+        ELSE
+        t1.name
+        END
+        as user_name
+        from
+        (
+        SELECT
+        ce.id,
+        ce.member_id,
+        ce.mobile,
+        ce.name,
+        ce.status,
+        ce.invitation_time,
+        ce.invitation_agree_time,
+        ce.invitation_reject_time,
+        ce.apply_unbund_agree_time,
+        ce.apply_unbund_reject_time,
+        ce.apply_unbund_time,
+        ce.apply_unbund_user,
+        ce.company_id,
+        ce.create_time,
+        ce.create_user,
+        ce.modified_time,
+        ce.modified_user,
+        m.status as member_status
+        from pscp_company_electrician ce
+        LEFT JOIN pscp_member m
+        on ce.member_id=m.id
+        where ce.deleted=0 and (m.deleted=0 or m.deleted is null)
+        )t1 LEFT JOIN pscp_electrician e
+        on t1.member_id= e.member_id and t1.status in(0,1,2,3)
+        and t1.company_id=e.company_id
+        )t2
+        where
+        t2.company_id=#{companyId}
+        <if test="status != null">
+            and t2.status=#{status}
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and t2.mobile like concat('%',#{mobile},'%')
+        </if>
+        <if test="name != null and name != ''">
+            and t2.user_name like concat('%',#{name},'%')
+        </if>
+    </select>
+
+    <select id="queryFacilitatorHistory"
+            parameterType="com.edianniu.pscp.mis.bean.query.history.FacilitatorHistoryQuery"
+            resultType="com.edianniu.pscp.mis.bean.history.vo.FacilitatorHistoryVO">
+        SELECT DISTINCT c.id, c.name, e.create_time
+        FROM pscp_company_electrician e
+        LEFT JOIN pscp_company c ON e.company_id = c.id
+        WHERE e.status = -2 AND e.member_id = #{uid}
+        ORDER BY e.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryFacilitatorHistoryCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.mis.bean.query.history.FacilitatorHistoryQuery">
+        SELECT COUNT(company_id) FROM(
+            SELECT DISTINCT e.company_id FROM pscp_company_electrician e
+            WHERE e.status = -2 AND e.member_id = #{uid}
+        ) AS facilitator_history
+    </select>
+</mapper>

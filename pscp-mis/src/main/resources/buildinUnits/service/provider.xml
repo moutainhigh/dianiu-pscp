@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+
+    <!-- 提供方应用信息，用于计算依赖关系 -->
+    <dubbo:application name="pscp-mis"/>
+    <!-- 使用multicast广播注册中心暴露服务地址 -->
+    <dubbo:registry address="${dubbo.address}"/>
+    <!-- 用dubbo协议在20880端口暴露服务 -->
+    <dubbo:protocol name="dubbo" port="${dubbo.port}" payload="1573741824"/>
+    <!-- 连接到监控中心 -->
+    <!--
+    <dubbo:monitor address="${monitor.address}" />
+    -->
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.ElectricianWorkOrderInfoService"
+                   ref="electricianWorkOrderInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.MemberMessageInfoService"
+                   ref="memberMessageInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.FileUploadService"
+                   ref="fileUploadService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.UserInfoService"
+                   ref="userInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.UserInvitationInfoService"
+                   ref="userInvitationInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.WalletInfoService"
+                   ref="walletInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.PayInfoService"
+                   ref="payInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.AreaInfoService"
+                   ref="areaInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.CompanyInfoService"
+                   ref="companyInfoService" timeout="120000" retries="1" version="1.0"/>
+     <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.CompanyCustomerInfoService"
+                   ref="companyCustomerInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.ElectricianInfoService"
+                   ref="electricianInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.WorkOrderDefectRecordInfoService"
+                   ref="workOrderDefectRecordInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.WorkOrderReportInfoService"
+                   ref="workOrderReportInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.CommonAttachmentInfoService"
+                   ref="commonAttachmentInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.SysUserInfoService"
+                   ref="sysUserInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.MemberInvoiceInfoService"
+                   ref="memberInvoiceInfoService" timeout="120000" retries="1" version="1.0"/>
+    <dubbo:service interface="com.edianniu.pscp.mis.service.dubbo.PermissionInfoService"
+                   ref="permissionInfoService" timeout="120000" retries="1" version="1.0"/>                  
+</beans>

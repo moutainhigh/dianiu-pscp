@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.WorkOrderDao">
+    <sql id="Base_Column_List">
+        id, order_id, member_id, engineering_project_id, name, content, devices,
+        type, hazard_factor_identifications, identification_other, safety_measures,
+        safety_measures_other, carrying_tools, address, defect_records,
+        latitude, longitude, start_time, end_time, actual_start_time, actual_end_time,
+        status, remark, company_id, create_time, create_user,
+        modified_time, modified_user, deleted
+    </sql>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE pscp_work_order
+        <set>
+            status = #{nstatus},
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="modifiedUser != null">modified_time = now(),</if>
+            <if test="nstatus == ">
+
+            </if>
+        </set>
+        WHERE deleted = 0
+        AND id = #{id}
+        AND status = #{bstatus}
+    </update>
+
+    <update id="updateWorkOrderInfo" parameterType="map">
+        UPDATE pscp_work_order
+        <set>
+            status = #{workOrder.status},
+            <if test="workOrder.actualStartTime != null">actual_start_time = #{workOrder.actualStartTime},</if>
+            <if test="workOrder.actualEndTime != null">actual_end_time = #{workOrder.actualEndTime},</if>
+            <if test="workOrder.modifiedUser != null">modified_user = #{workOrder.modifiedUser},</if>
+            <if test="workOrder.modifiedUser != null">modified_time = #{workOrder.modifiedTime},</if>
+        </set>
+        WHERE deleted = 0
+        AND id = #{workOrder.id}
+        <if test="bstatus != null">AND status = #{bstatus}</if>
+    </update>
+
+    <select id="getEntityById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.WorkOrder">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_work_order
+        WHERE deleted = 0 AND id = #{id}
+    </select>
+
+    <select id="getEntityByOrderId" resultType="com.edianniu.pscp.mis.domain.WorkOrder">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_work_order
+        WHERE deleted = 0 AND order_id = #{orderId}
+    </select>
+
+</mapper>

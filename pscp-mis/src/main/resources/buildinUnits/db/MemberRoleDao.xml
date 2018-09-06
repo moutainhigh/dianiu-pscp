@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.MemberRoleDao">
+
+	<insert id="save" parameterType="com.edianniu.pscp.mis.domain.MemberRole">
+		INSERT INTO pscp_sys_member_role(
+		id ,
+		user_id ,
+		role_id ,
+		create_time ,
+		create_user ,
+		deleted
+		)
+		VALUES(
+		nextval('seq_pscp_sys_member_role'),
+		#{userId},
+		#{roleId},
+		now(),
+		#{modifiedUser},
+		0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_sys_member_role') as id;
+		</selectKey>
+	</insert>
+	<delete id="deleteByUid">
+		update pscp_sys_member_role set
+		deleted=-1,modified_time=now(),modified_user='系统' where user_id=#{uid}
+		and deleted=0
+	</delete>
+	<delete id="deleteByUidAndRoleId">
+		update pscp_sys_member_role set
+		deleted=-1,modified_time=now(),modified_user='系统'
+		where user_id=#{uid} and role_id=#{roleId} and deleted=0
+	</delete>
+	<select id="getPerms" resultType="java.lang.String">
+		select app_perms from pscp_sys_menu 
+		where 
+		 id in(
+		  select menu_id from pscp_sys_role_menu 
+		  where 
+		  role_id in(
+		    select role_id from pscp_sys_member_role where user_id=#{uid} and deleted=0
+		  ) and deleted=0
+		 ) and deleted=0
+	</select>
+</mapper>

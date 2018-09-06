@@ -1,0 +1,2 @@
+Main-Class: com.edianniu.pscp.mis.AppServer
+Class-Path: ./

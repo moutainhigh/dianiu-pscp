@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.mis.dao.WorkOrderReportDao">
+
+    <select id="queryList" parameterType="com.edianniu.pscp.mis.bean.query.WorkOrderReportQuery"
+            resultType="com.edianniu.pscp.mis.bean.worksheetreport.vo.ReportListVO">
+        SELECT
+        t.id,
+        t.device_name AS deviceName,
+        t.work_content AS workContent,
+        to_char(t.work_date, 'yyyy-MM-dd') AS workDate,
+        t.work_order_name AS workOrderName,
+        t.project_name AS projectName,
+        r.name AS roomName
+        FROM pscp_work_order_report t
+        LEFT JOIN pscp_customer_distribution_room r ON t.room_id = r.id
+        WHERE t.deleted=0
+        <if test="workOrderId != null">
+            and t.work_order_id = #{workOrderId}
+        </if>
+        <if test="roomId != null">
+            and t.room_id = #{roomId}
+        </if>
+        <if test="type != null">
+            and t.type = #{type}
+        </if>
+        <if test="roomIds != null and roomIds.size() &gt; 0">
+            and t.room_id in
+            <foreach item="roomId" index="index" collection="roomIds" open="(" separator="," close=")">
+                #{roomId}
+            </foreach>
+        </if>
+        ORDER BY t.create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.mis.bean.query.WorkOrderReportQuery">
+        SELECT count(1) FROM pscp_work_order_report
+        WHERE deleted=0
+        <if test="workOrderId != null">
+            and work_order_id = #{workOrderId}
+        </if>
+        <if test="roomId != null">
+            and room_id = #{roomId}
+        </if>
+        <if test="type != null">
+            and type = #{type}
+        </if>
+        <if test="roomIds != null and roomIds.size() &gt; 0">
+            and room_id in
+            <foreach item="roomId" index="index" collection="roomIds" open="(" separator="," close=")">
+                #{roomId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getEntityById" resultType="com.edianniu.pscp.mis.domain.WorkOrderReport">
+        SELECT * FROM pscp_work_order_report
+        WHERE deleted=0 AND id = #{id}
+        <if test="type != null">
+            AND type = #{type}
+        </if>
+        limit 1
+    </select>
+
+    <select id="getReportDetailsVOById" parameterType="map"
+            resultType="com.edianniu.pscp.mis.bean.worksheetreport.vo.ReportDetailsVO">
+        SELECT
+        t.id,
+        t.device_name AS deviceName,
+        r.name AS roomName,
+        t.work_content AS workContent,
+        to_char(t.work_date, 'yyyy-MM-dd') AS workDate,
+        t.leading_official AS leadingOfficial,
+        t.company_name AS companyName,
+        t.contact_number AS contactNumber,
+        t.receiver,
+        t.remark
+        FROM pscp_work_order_report t
+        LEFT JOIN pscp_customer_distribution_room r ON t.room_id = r.id
+        WHERE t.deleted=0 AND t.id = #{id}
+        <if test="type != null">
+            AND t.type = #{type}
+        </if>
+        limit 1
+    </select>
+
+    <select id="queryListReport" resultType="com.edianniu.pscp.mis.bean.worksheetreport.vo.ReportListVO">
+        SELECT
+        t.id,
+        t.device_name AS deviceName,
+        t.work_content AS workContent,
+        to_char(t.work_date, 'yyyy-MM-dd') AS workDate,
+        t.work_order_name AS workOrderName,
+        t.project_name AS projectName,
+        r.name AS roomName
+        FROM pscp_work_order_report t
+        LEFT JOIN pscp_customer_distribution_room r ON t.room_id = r.id
+        WHERE t.deleted=0
+        <if test="workOrderId != null">
+            and t.work_order_id = #{workOrderId}
+        </if>
+        <if test="roomId != null">
+            and t.room_id = #{roomId}
+        </if>
+        <if test="type != null">
+            and t.type = #{type}
+        </if>
+        ORDER BY t.create_time DESC
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.WorkOrderReport">
+        insert into pscp_work_order_report
+        (
+        id,
+        work_order_id,
+        room_id,
+        type,
+        work_order_name,
+        project_name,
+        device_name,
+        work_content,
+        work_date,
+        leading_official,
+        company_name,
+        contact_number,
+        receiver,
+        remark,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        (
+        nextval('seq_pscp_work_order_report'),
+        #{workOrderId},
+        #{roomId},
+        #{type},
+        #{workOrderName},
+        #{projectName},
+        #{deviceName},
+        #{workContent},
+        #{workDate},
+        #{leadingOfficial},
+        #{companyName},
+        #{contactNumber},
+        #{receiver},
+        #{remark},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_work_order_report') as id;
+        </selectKey>
+    </insert>
+
+    <update id="update" parameterType="com.edianniu.pscp.mis.domain.WorkOrderReport">
+        update pscp_work_order_report
+        <set>
+            <if test="workOrderId != null">work_order_id = #{workOrderId},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="workOrderName != null">work_order_name = #{workOrderName},</if>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="workContent != null">work_content = #{workContent},</if>
+            <if test="workDate != null">work_date = #{workDate},</if>
+            <if test="leadingOfficial != null">leading_official = #{leadingOfficial},</if>
+            <if test="companyName != null">company_name = #{companyName},</if>
+            <if test="contactNumber != null">contact_number = #{contactNumber},</if>
+            <if test="receiver != null">receiver = #{receiver},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createUser != null">create_user = #{createUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
+        where id = #{id} and deleted=0
+    </update>
+    <update id="updateMapCondition">
+        UPDATE pscp_work_order_report
+        <set>
+            <if test="deleted != null">deleted = #{deleted},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="modifiedUser != ''">
+                modified_user = #{modifiedUser},
+                modified_time = now(),
+            </if>
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_work_order_report
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+
+    <delete id="deleteBatch">
+        update pscp_work_order_report set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

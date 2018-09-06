@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.mis.dao.CompanyCertificateImageDao">
+
+	 
+	<insert id="save" parameterType="com.edianniu.pscp.mis.domain.CompanyCertificateImage">
+		insert into pscp_company_certificate_image
+		(
+			id, 
+			company_id, 
+			file_id, 
+			order_num, 
+			status, 
+			create_time, 
+			create_user, 
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_company_certificate_image'),
+			#{companyId}, 
+			#{fileId}, 
+			#{orderNum}, 
+			#{status}, 
+			now(), 
+			#{createUser}, 			
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+    		SELECT currval('seq_pscp_company_certificate_image') as id;
+    	</selectKey>
+	</insert>
+	 
+	<update id="update" parameterType="com.edianniu.pscp.mis.domain.CompanyCertificateImage">
+		update pscp_company_certificate_image 
+		<set>
+			<if test="companyId != null">company_id = #{companyId}, </if>
+			<if test="fileId != null">file_id = #{fileId}, </if>
+			<if test="orderNum != null">order_num = #{orderNum}, </if>
+			<if test="status != null">status = #{status}, </if>
+			<if test="createTime != null">create_time = #{createTime}, </if>
+			<if test="createUser != null">create_user = #{createUser}, </if>
+			<if test="modifiedTime != null">modified_time = #{modifiedTime}, </if>
+			<if test="modifiedUser != null">modified_user = #{modifiedUser}, </if>
+			<if test="deleted != null">deleted = #{deleted}</if>
+		</set>
+		where id = #{id} and deleted=0
+	</update>
+	
+	<delete id="delete" >
+	    update pscp_company_certificate_image set deleted=-1,modified_time=now() where id = #{id}
+	</delete>
+	
+	<select id="getCertificateImagesByCompanyId" parameterType="java.lang.Long" resultType="com.edianniu.pscp.mis.domain.CompanyCertificateImage">
+		select * from pscp_company_certificate_image where company_id=#{companyId} and deleted=0
+	</select>
+	
+	<select id="getCertificateImageByFileId" parameterType="java.lang.String" resultType="com.edianniu.pscp.mis.domain.CompanyCertificateImage">
+		select * from pscp_company_certificate_image where file_id=#{fileId} and deleted=0
+	</select>
+</mapper>

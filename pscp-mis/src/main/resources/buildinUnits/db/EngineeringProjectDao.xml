@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.EngineeringProjectDao">
+
+    <sql id="Base_Column_List">
+        id, 
+        customer_id, 
+        project_no,
+        needs_id,
+        status,
+        actual_settlement_amount,
+        pay_type,
+        pay_status,
+        pay_amount,
+        pay_time,
+        pay_sync_time,
+        pay_async_time,
+        pay_memo,
+        name, 
+        description, 
+        start_time, 
+        end_time, 
+        scene_investigation,
+        contract_file_id, 
+        company_id, 
+        create_time, 
+        create_user, 
+        modified_time, 
+        modified_user, 
+        deleted,
+        COALESCE(to_char(modified_time, 'yyyyMMddHHmmssSS'),'0') as modifiedTimeStr
+    </sql>
+
+    <select id="getById" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.EngineeringProject">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_engineering_project
+        WHERE deleted = 0
+        AND id = #{id}
+    </select>
+    <select id="getByProjectNo" parameterType="java.lang.String"
+            resultType="com.edianniu.pscp.mis.domain.EngineeringProject">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_engineering_project
+        WHERE deleted = 0
+        AND project_no = #{projectNo}
+    </select>
+
+    <select id="getRoomIdsById" parameterType="java.lang.Long"
+            resultType="java.lang.String">
+        SELECT room_ids AS "distributionRoomIds"
+		FROM pscp_engineering_project
+		WHERE deleted = 0 AND id = #{id}
+    </select>
+    
+    <update id="update"
+		parameterType="com.edianniu.pscp.mis.domain.EngineeringProject">
+		UPDATE pscp_engineering_project SET
+		status     = #{status},
+		pay_status     = #{payStatus},
+		pay_memo     = #{payMemo},
+		pay_amount     = #{payAmount},
+		pay_sync_time=#{paySyncTime},
+		pay_async_time=#{payAsyncTime},
+		pay_type=#{payType},
+		pay_time=#{payTime},
+		modified_time         = now(),
+		modified_user         = #{modifiedUser}
+		WHERE id = #{id} and deleted=0
+              and COALESCE(to_char(modified_time, 'yyyyMMddHHmmssSS'),'0')=#{modifiedTimeStr}
+	</update>
+</mapper>

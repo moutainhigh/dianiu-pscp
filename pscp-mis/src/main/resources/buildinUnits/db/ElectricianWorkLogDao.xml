@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.ElectricianWorkLogDao">
+    <sql id="sql_column">
+        id,
+        electrician_work_order_id,
+        work_order_id,
+        electrician_id,
+        content,
+        company_id,
+        create_time,
+        create_user,
+        deleted
+    </sql>
+
+    <sql id="insert_value">
+        nextval('seq_pscp_electrician_work_log'),
+        #{electricianWorkOrderId},
+        #{workOrderId},
+        #{electricianId},
+        #{content},
+        #{companyId},
+        now(),
+        #{createUser},
+        #{deleted}
+    </sql>
+
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkLog">
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_electrician_work_log') as id;
+        </selectKey>
+
+        INSERT INTO pscp_electrician_work_log(<include refid="sql_column"/>)
+        VALUES (<include refid="insert_value"/>)
+    </insert>
+
+    <select id="getEntityById" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianWorkLog">
+        SELECT
+        <include refid="sql_column"/>
+        FROM pscp_electrician_work_log
+        WHERE deleted = 0 AND id = #{id}
+    </select>
+
+    <select id="getAllEntity" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkLog"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianWorkLog">
+        SELECT
+        <include refid="sql_column"/>
+        FROM pscp_electrician_work_log
+        WHERE deleted = 0
+        AND electrician_id = #{electricianId}
+        <if test="workOrderId != null">AND work_order_id = #{workOrderId}</if>
+        <if test="electricianWorkOrderId != null">AND electrician_work_order_id = #{electricianWorkOrderId}</if>
+        ORDER BY id DESC, create_time DESC
+    </select>
+
+    <update id="delete" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkLog">
+        UPDATE pscp_electrician_work_log
+        SET deleted = -1, modified_time = now(), modified_user = #{modifiedUser}
+        WHERE deleted = 0 AND id = #{id}
+    </update>
+</mapper>

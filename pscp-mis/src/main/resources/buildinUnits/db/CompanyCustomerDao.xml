@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CompanyCustomerDao">
+    <sql id="base_column_list">
+        id, 
+        member_id, 
+        mobile, 
+        cp_name, 
+        cp_contact, 
+        cp_contact_mobile,
+        cp_phone, 
+        cp_address,
+        status,
+        invitation_time,
+        invitation_agree_time,
+        invitation_reject_time, 
+        company_id, 
+        create_time,
+        create_user, 
+        modified_time, 
+        modified_user, 
+        deleted
+    </sql>
+    
+    <select id="getById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyCustomer">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_company_customer
+        WHERE id = #{id}
+        AND deleted=0
+        limit 1
+    </select>
+    
+    <select id="getByMobileAndCompanyId"
+            resultType="com.edianniu.pscp.mis.domain.CompanyCustomer">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_company_customer
+        WHERE 
+        mobile = #{mobile}
+        and company_id=#{companyId}
+        and deleted=0
+    </select>
+    
+    <select id="getCustomerIdByMemberIdAndCompanyId"
+            resultType="java.lang.Long">
+        SELECT
+        id
+        FROM pscp_company_customer
+        WHERE 
+        member_id = #{memberId}
+        and company_id=#{companyId}
+        and deleted=0
+    </select>
+    
+    <select id="queryList" parameterType="map"
+    	resultType="com.edianniu.pscp.mis.domain.CompanyCustomer">
+    	SELECT 
+    	<include refid="base_column_list"/>
+    	FROM pscp_company_customer
+    	<where>
+    		deleted = 0 
+    		<if test="memberId != null">AND member_id = #{memberId}</if>
+    		<if test="companyId != null">AND company_id = #{companyId}</if>
+    		<if test="status != null">AND status = #{status}</if>
+    	</where>
+    </select>
+    
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.CompanyCustomer">
+		INSERT INTO pscp_company_customer(
+		id,
+		member_id,
+		mobile,
+		cp_name, 
+        cp_contact, 
+        cp_contact_mobile,
+        cp_phone, 
+        cp_address,
+        status,
+        invitation_time,
+        invitation_agree_time,
+        invitation_reject_time, 
+        company_id, 
+        create_time,
+        create_user, 
+        deleted
+		)
+		VALUES(
+		nextval('seq_pscp_company_customer'),
+		#{memberId},
+		#{mobile},
+		#{cpName},
+		#{cpContact}, 
+        #{cpContactMobile},
+        #{cpPhone}, 
+        #{cpAddress},
+        #{status},
+        #{invitationTime},
+        #{invitationAgreeTime},
+        #{invitationRejectTime}, 
+        #{companyId}, 
+        now(),
+        #{createUser}, 
+        0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+        SELECT currval('seq_pscp_company_customer') as id;
+        </selectKey>
+	</insert>
+   
+    <update id="update"
+		parameterType="com.edianniu.pscp.mis.domain.CompanyCustomer">
+		UPDATE pscp_company_customer SET
+		<if test="memberId !=null">
+			member_id= #{memberId},
+		</if>
+		<if test="mobile !=null and mobile !=''">
+			mobile=#{mobile},
+		</if>	
+		<if test="cpName !=null  and cpName !=''">
+			cp_name=#{cpName},
+		</if>
+		<if test="cpContact !=null  and cpContact!=''">
+			cp_contact=#{cpContact},
+		</if>
+		<if test="cpContactMobile !=null and cpContactMobile.trim() !=''">
+			cp_contact_mobile=#{cpContactMobile},
+		</if>
+		<if test="cpPhone !=null and cpPhone !=''">
+			cp_phone=#{cpPhone},
+		</if>
+		<if test="cpAddress !=null and cpAddress !=''">
+			cp_address=#{cpAddress},
+		</if>
+		<if test="status !=null">
+			status=#{status},
+		</if>
+		<if test="invitationTime !=null">
+			invitation_time=#{invitationTime},
+		</if>
+		<if test="invitationAgreeTime !=null">
+			invitation_agree_time=#{invitationAgreeTime},
+		</if>
+		<if test="invitationRejectTime !=null">
+			invitation_reject_time=#{invitationRejectTime},
+		</if>
+		<if test="companyId !=null">
+			company_id= #{companyId},
+		</if>
+		modified_time             = now(),
+		modified_user             = #{modifiedUser}
+		WHERE id                 = #{id} and deleted=0
+	</update>
+	
+	<update id="updateMemberId">
+		UPDATE pscp_company_customer SET
+		<if test="memberId !=null">
+			member_id= #{memberId},
+		</if>
+		modified_time             = now(),
+		modified_user             = #{modifiedUser}
+		WHERE id                 = #{id} and deleted=0
+	</update>
+	
+	<select id="queryCompanyInvitationInfoList" 
+	        parameterType="com.edianniu.pscp.mis.query.CompanyInvitationQuery"
+            resultType="com.edianniu.pscp.mis.bean.user.invitation.CompanyInvitationInfo">
+        select * from 
+        (
+	        select 
+			  t1.id,
+			  t1.member_id,
+			  t1.mobile,
+			  t1.cp_name,
+			  t1.company_id as affiliated_company_id,
+			  t1.status,
+			  t1.invitation_time,
+			  t1.invitation_agree_time,
+			  t1.invitation_reject_time,
+			  t1.create_time, 
+			  t1.create_user,
+	          t1.modified_time, 
+	          t1.modified_user,
+			  t1.member_status,
+			  CASE 
+				    WHEN t1.status=1  THEN 
+				     c.name
+			    	ELSE 
+		   			 t1.cp_name 
+		       	END
+		       	as company_name
+			  ,
+			  c.id as company_id,
+			  c.audit_time,
+			  c.status as auth_status,
+			  c.contacts as contact_name,
+			  c.id_card_no,
+			  c.mobile as contact_mobile,
+			  c.phone,
+			  c.user_name
+			from 
+			(select 
+			  cc.id,
+			  cc.member_id,
+			  cc.mobile,
+			  cc.cp_name,
+			  cc.cp_contact,
+			  cc.cp_contact_mobile,
+			  cc.cp_phone,
+			  cc.cp_address,
+			  cc.company_id,
+			  cc.status,
+			  cc.invitation_time,
+			  cc.invitation_agree_time,
+			  cc.invitation_reject_time,
+			  cc.create_user, 
+			  cc.create_time, 
+	          cc.modified_time, 
+	          cc.modified_user,
+			  m.status as member_status
+			from pscp_company_customer cc LEFT JOIN pscp_member m 
+			on cc.member_id=m.id and cc.deleted=0 and (m.deleted=0 or m.deleted is null))t1
+			left JOIN pscp_company c 
+			on t1.member_id=c.member_id and t1.status=1 and c.member_type=2 and c.deleted=0 
+		)t2
+		where 
+		t2.affiliated_company_id=#{companyId}
+		<if test="status != null">
+		  and t2.status=#{status}
+		</if>
+		<if test="mobile != null and mobile != ''">
+		  and t2.mobile like concat('%',#{mobile},'%') 
+		</if>
+        <if test="name != null and name != ''">
+          and t2.company_name like concat('%',#{name},'%')
+        </if>
+        order by t2.create_time desc
+        <if test="offset != null and pageSize != null">
+        limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryCompanyInvitationInfoCount" 
+       parameterType="com.edianniu.pscp.mis.query.CompanyInvitationQuery"
+            resultType="java.lang.Integer">
+       select count(*) from 
+        (
+	        select 
+			  t1.id,
+			  t1.member_id,
+			  t1.mobile,
+			  t1.cp_name,
+			  t1.company_id as affiliated_company_id,
+			  t1.status,
+			  t1.invitation_time,
+			  t1.invitation_agree_time,
+			  t1.invitation_reject_time,
+			  t1.create_time, 
+			  t1.create_user,
+	          t1.modified_time, 
+	          t1.modified_user,
+			  t1.member_status,
+			  CASE 
+				    WHEN t1.status=1  THEN 
+				     c.name
+			    	ELSE 
+		   			 t1.cp_name 
+		       	END
+		       	as company_name
+			  ,
+			  c.id as company_id,
+			  c.audit_time,
+			  c.status as auth_status,
+			  c.contacts as contact_name,
+			  c.id_card_no,
+			  c.mobile as contact_mobile,
+			  c.phone,
+			  c.user_name
+			from 
+			(select 
+			  cc.id,
+			  cc.member_id,
+			  cc.mobile,
+			  cc.cp_name,
+			  cc.cp_contact,
+			  cc.cp_contact_mobile,
+			  cc.cp_phone,
+			  cc.cp_address,
+			  cc.company_id,
+			  cc.status,
+			  cc.invitation_time,
+			  cc.invitation_agree_time,
+			  cc.invitation_reject_time,
+			  cc.create_user, 
+			  cc.create_time, 
+	          cc.modified_time, 
+	          cc.modified_user,
+			  m.status as member_status
+			from pscp_company_customer cc LEFT JOIN pscp_member m 
+			on cc.member_id=m.id and cc.deleted=0 and (m.deleted=0 or m.deleted is null))t1
+			left JOIN pscp_company c 
+			on t1.member_id=c.member_id and t1.status=1 and c.member_type=2 and c.deleted=0 
+		)t2
+		where 
+		t2.affiliated_company_id=#{companyId}
+		<if test="status != null">
+		  and t2.status=#{status}
+		</if>
+		<if test="mobile != null and mobile != ''">
+		  and t2.mobile like concat('%',#{mobile},'%') 
+		</if>
+        <if test="name != null and name != ''">
+          and t2.company_name like concat('%',#{name},'%')
+        </if>
+    </select>
+</mapper>

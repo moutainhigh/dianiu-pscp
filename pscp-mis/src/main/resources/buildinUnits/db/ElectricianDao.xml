@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.ElectricianDao">
+    <select id="queryCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.mis.bean.electrician.ElectricianQuery">
+		select count(*) from pscp_electrician t where
+		t.expiry_time >now()
+	</select>
+    <select id="queryList" resultType="com.edianniu.pscp.mis.domain.Electrician"
+            parameterType="com.edianniu.pscp.mis.bean.electrician.ElectricianQuery">
+        select
+        <include refid="electrician_columns"/>
+        from pscp_electrician t
+        where t.expiry_time>now()
+        order by
+        <if test="sorts!=null and sorts!=''">
+            ${sorts}
+        </if>
+
+        <if test="sorts==null or sorts==''">
+            distance asc
+        </if>
+        limit #{pageSize} offset #{offset}
+    </select>
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.Electrician">
+        INSERT INTO pscp_electrician (
+        id,
+        member_id,
+        user_name ,
+        id_card_no ,
+        id_card_front_img ,
+        id_card_back_img ,
+        status ,
+        remark ,
+        company_id ,
+        create_time ,
+        create_user ,
+        deleted
+        )VALUES(
+        nextval('seq_pscp_electrician'),
+        #{memberId},
+        #{userName},
+        #{idCardNo},
+        #{idCardFrontImg},
+        #{idCardBackImg},
+        #{status},
+        #{remark} ,
+        #{companyId},
+        now(),
+        #{userName},
+        0
+        );
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_electrician') as id;
+        </selectKey>
+    </insert>
+    <select id="getByUid" resultType="com.edianniu.pscp.mis.domain.Electrician">
+        select
+        <include refid="electrician_columns"/>
+        from pscp_electrician t where t.member_id=#{uid} and t.deleted=0
+    </select>
+    <select id="get" resultType="com.edianniu.pscp.mis.domain.Electrician">
+        select
+        <include refid="electrician_columns"/>
+        from pscp_electrician t where t.id=#{id} and t.deleted=0
+    </select>
+
+    <update id="update" parameterType="com.edianniu.pscp.mis.domain.Electrician">
+        update pscp_electrician SET
+        <if test="userName!=null and userName!=''">
+            user_name=#{userName},
+        </if>
+        <if test="idCardNo!=null and idCardNo!=''">
+            id_card_no =#{idCardNo},
+        </if>
+        <if test="idCardFrontImg!=null and idCardFrontImg!=''">
+            id_card_front_img=#{idCardFrontImg},
+        </if>
+        <if test="idCardBackImg!=null and idCardBackImg!=''">
+            id_card_back_img=#{idCardBackImg},
+        </if>
+        <if test="status!=null">
+            status=#{status},
+        </if>
+        <if test="auditTime!=null">
+            audit_time=#{auditTime},
+        </if>
+        <if test="auditUser!=null and auditUser!=''">
+            audit_user=#{auditUser},
+        </if>
+        <if test="remark!=null and remark!=''">
+            remark=#{remark},
+        </if>
+        <if test="companyId!=null">
+            company_id=#{companyId},
+        </if>
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE member_id= #{memberId} and deleted=0
+    </update>
+    <update id="updateWorkTimeAndStatus"
+            parameterType="map">
+        update pscp_electrician SET
+        <if test="workStatus!=null">
+            work_status=#{workStatus},
+        </if>
+        <if test="workTime!=null">
+            work_time=#{workTime},
+        </if>
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE member_id= #{uid}
+    </update>
+    <sql id="electrician_columns">
+        t.id,
+        t.identifier,
+        t.member_id as memberId,
+        t.user_name as userName,
+        t.id_card_no as idCardNo,
+        t.id_card_front_img as idCardFrontImg,
+        t.id_card_back_img as idCardBackImg,
+        t.status,
+        t.remark,
+        t.work_status as workStatus,
+        t.work_time as workTime,
+        t.audit_time as auditTime,
+        t.audit_user as auditUser,
+        t.company_id as companyId
+    </sql>
+</mapper>

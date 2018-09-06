@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CustomerInfoDao">	
+
+ 
+
+	
+	<select id="getById"
+		resultType="com.edianniu.pscp.mis.domain.Customer"
+		parameterType="java.lang.Long">
+		SELECT 
+		<include refid="customer_info_default_columns"/>
+		FROM pscp_company_customer t 
+		WHERE T.id=#{id} and deleted=0
+	</select>
+	<select id="getByUid"
+		resultType="com.edianniu.pscp.mis.domain.Customer"
+		parameterType="java.lang.Long">
+		select 
+		   <include refid="customer_info_default_columns"/>
+		from    
+		   pscp_company_customer t
+
+         where t1.memeber_id=#{memeberId} and t.deleted=0  
+	</select>
+	<sql id="customer_info_default_columns">
+		t.id,
+		t.member_id 		as memberId,
+		t.mobile 		,
+		t.cp_name 		as cpName,
+		t.cp_contact		as cpContact,
+		t.cp_contact_mobile		as cpContactMobile,
+		t.cp_phone			as cpPhone,
+		t.cp_address			as cpAddress,
+		t.company_id			as companyId,
+		t.deleted
+	</sql>
+</mapper>

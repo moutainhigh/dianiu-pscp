@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.SysUserDao">
+
+	<select id="queryList" parameterType="map"
+			resultType="com.edianniu.pscp.mis.bean.user.SysUserInfo">
+		select <include refid="pscp_user_columns"/> from pscp_cms_user 
+		<where>
+		    deleted=0
+			<if test="needsAuditNotice != null">and needs_audit_notice = #{needsAuditNotice}</if>
+			<if test="memberAuditNotice != null">and member_audit_notice = #{memberAuditNotice}</if>
+			<if test="offLineNotice != null">and off_line_notice = #{offLineNotice}</if>
+			<if test="status != null">and status = #{status}</if>
+		</where>
+		order by create_time desc
+	</select>
+	
+	<sql id="pscp_user_columns">
+        id as userId,
+        username,
+	    login_name,	 
+		mobile,	 
+		passwd,	 
+		tx_img,	 
+		nick_name,	 
+		sex,
+		age,
+		remark,
+		status,
+		create_time as createTime,
+		create_user as createUser,	 
+		modified_time as modifiedTime, 
+		modified_user as modifiedUser,
+		deleted,
+		needs_audit_notice,
+		member_audit_notice,
+		off_line_notice
+	</sql>
+    
+    
+    
+    
+</mapper>

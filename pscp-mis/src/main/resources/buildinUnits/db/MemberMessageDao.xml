@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.MemberMessageDao">
+
+    <sql id="Base_Column_List">
+        id, uid, type, category, ext, title, content, is_read, is_deleted,
+        push_time, create_time, modified_time, create_user, modified_user, deleted
+    </sql>
+
+    <select id="getEntityById" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.MemberMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_message
+        WHERE deleted = 0
+        AND is_deleted = 0
+        AND id = #{id}
+        limit 1
+    </select>
+
+    <select id="queryList" parameterType="com.edianniu.pscp.mis.bean.query.message.MemberMessageQuery"
+            resultType="com.edianniu.pscp.mis.domain.MemberMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_message
+        WHERE deleted = 0
+        AND is_deleted = 0
+        AND uid = #{uid}
+        <if test="isRead != null">AND is_read = #{isRead}</if>
+        ORDER BY push_time DESC
+        limit #{pageSize} offset #{offset}
+    </select>
+
+    <select id="queryCount" parameterType="com.edianniu.pscp.mis.bean.query.message.MemberMessageQuery"
+            resultType="java.lang.Integer">
+        SELECT COUNT(id) from pscp_member_message
+        WHERE deleted = 0 AND is_deleted = 0
+        <if test="uid != null">AND uid = #{uid}</if>
+        <if test="isRead != null">AND is_read = #{isRead}</if>
+    </select>
+
+    <update id="updateMessage" parameterType="com.edianniu.pscp.mis.domain.MemberMessage">
+        UPDATE pscp_member_message
+        <set>
+            <if test="isRead != null">is_read = #{isRead},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+        </set>
+        <where>
+            deleted = 0 AND is_deleted = 0
+            <if test="id != null">AND id = #{id}</if>
+            <if test="uid != null">AND uid = #{uid}</if>
+        </where>
+    </update>
+    <select id="getMemberNotReadMessagesCount" parameterType="java.lang.Long" resultType="java.lang.Integer">
+		SELECT count(1) from pscp_member_message
+		 	where uid=#{uid} and is_read=0 and deleted=0 and is_deleted = 0
+			
+	</select>
+
+    <select id="queryAllList" resultType="com.edianniu.pscp.mis.domain.MemberMessage">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_message
+        WHERE deleted = 0
+        AND is_deleted = 0
+        AND uid = #{uid}
+        <if test="isRead != null">AND is_read = #{isRead}</if>
+        ORDER BY push_time DESC
+    </select>
+</mapper>

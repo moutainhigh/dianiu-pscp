@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.ElectricianCertificateDao">
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.ElectricianCertificate">
+        INSERT INTO pscp_electrician_certificate (
+        id,
+        electrician_id,
+        certificate_id,
+        order_num,
+        status,
+        remark,
+        create_time,
+        create_user,
+        deleted
+        )VALUES(
+        nextval('seq_pscp_electrician_certificate'),
+        #{electricianId},
+        #{certificateId},
+        #{orderNum},
+        #{status},
+        #{remark},
+        now(),
+        #{createUser},
+        0
+        );
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_electrician_certificate') as id
+        </selectKey>
+    </insert>
+    <select id="getCertificatesByElectricianId" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianCertificate">
+		SELECT
+			id,
+			electrician_id			as  electricianId,
+		 	certificate_id			as	certificateId,
+		 	order_num				as  orderNum,
+			status,
+			remark
+			FROM pscp_electrician_certificate
+			WHERE electrician_id=#{electricianId} AND deleted=0;
+	</select>
+	
+    <select id="queryListMap" parameterType="long" resultType="map">
+		SELECT
+		t.certificate_id AS "certificateId", c.name AS name, c.type AS type
+		FROM pscp_electrician_certificate t
+		LEFT JOIN pscp_certificate c ON t.certificate_id = c.id
+		WHERE t.deleted = 0 AND c.deleted = 0
+		AND t.electrician_id = #{electricianId}
+		ORDER BY t.order_num
+	</select>
+
+    <update id="delete" parameterType="java.lang.Long">
+        UPDATE pscp_electrician_certificate
+        SET
+            deleted       = -1,
+            modified_time = now(),
+            modified_user = '系統'
+        WHERE id = #{id} AND deleted = 0;
+    </update>
+</mapper>

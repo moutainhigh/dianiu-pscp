@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.InvoiceDao">
+
+    <!--发票信息表字段-->
+    <sql id="base_invoice_info">
+        id, order_id, pay_order_ids, title_name, title_taxpayer_no, title_contact_number, title_bank_card_no,
+        title_bank_card_address, apply_time,
+        apply_uid,print_company_id, print_time, print_uid, status, modified_user,
+        deleted,create_time,create_user,modified_time
+    </sql>
+
+    <!--发票抬头表字段-->
+    <sql id="base_invoice_title">
+        id, uid, name, taxpayer_no, contact_number, bank_card_no, bank_card_address, modified_user,
+        deleted,create_time,create_user,modified_time
+    </sql>
+
+
+    <!--获取发票抬头数据-->
+    <select id="getInvoiceTitle" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.MemberInvoiceTitle">
+        SELECT
+        <include refid="base_invoice_title"></include>
+        FROM pscp_invoice_title
+        WHERE deleted = 0
+        AND uid=#{uid}
+
+    </select>
+
+    <!--获取发票抬头数据-->
+    <select id="getInvoiceTitleByUid" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.MemberInvoiceTitle">
+        SELECT
+        <include refid="base_invoice_title"></include>
+        FROM pscp_invoice_title
+        WHERE deleted = 0
+        AND uid=#{uid}
+
+    </select>
+
+    <!--获取发票抬头数据-->
+    <select id="getInvoiceTitleById" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.MemberInvoiceTitle">
+        SELECT
+        <include refid="base_invoice_title"></include>
+        FROM pscp_invoice_title
+        WHERE deleted = 0
+        AND id=#{id}
+
+    </select>
+
+    <!--获取发票抬头数量-->
+    <select id="getCountInvoiceTitle" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+        FROM pscp_invoice_title
+        WHERE deleted = 0
+        AND uid = #{uid}
+    </select>
+
+    <!--删除发票抬头-->
+    <update id="delete" parameterType="map">
+
+        UPDATE pscp_invoice_title
+        SET
+        deleted=1,modified_time = now(), modified_user = #{modifiedUser}
+        WHERE deleted=0
+        <if test="id !=null">AND id=#{id}</if>
+    </update>
+
+    <!--新增发票抬头-->
+    <insert id="addInvoiceTitle" parameterType="com.edianniu.pscp.mis.domain.MemberInvoiceTitle">
+        INSERT INTO pscp_invoice_title(
+        id,
+        uid,
+        name,
+        taxpayer_no,
+        contact_number,
+        bank_card_no,
+        bank_card_address,
+        create_time,
+        create_user,
+        deleted
+        )VALUES (
+        nextval('seq_pscp_invoice_title'),
+        #{uid},
+        #{name},
+        #{taxpayerNo},
+        #{contactNumber},
+        #{bankCardNo},
+        #{bankCardAddress},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_invoice_title') as id
+        </selectKey>
+
+    </insert>
+
+
+    <!--获取发票列表-->
+    <select id="queryList" parameterType="map" resultType="com.edianniu.pscp.mis.domain.MemberInvoiceInfo">
+        SELECT
+        p.id,
+        p.order_id,
+        p.pay_order_ids,
+        p.title_name,
+        p.title_taxpayer_no,
+        p.title_contact_number,
+        p.title_bank_card_no,
+        p.title_bank_card_address,
+        p.apply_time,
+        p.apply_uid,
+        p.print_company_id,
+        p.print_time,
+        p.print_uid,
+        p.status,
+        p.modified_user,
+        p.deleted,
+        p.create_time,
+        p.create_user,
+        p.modified_time
+
+        FROM pscp_invoice p
+
+        LEFT JOIN pscp_member_pay_order o ON o.invoice_order_id=p.order_id AND o.deleted=0
+        LEFT JOIN pscp_company_renter r ON r.member_id=p.apply_uid AND r.deleted=0
+
+        WHERE p.deleted = 0
+
+        <if test="status != null">AND p.status = #{status}</if>
+        <if test="companyId != null">AND p.print_company_id = #{companyId}</if>
+        <if test="payCompany != null and payCompany != ''">AND r.name = #{payCompany}</if>
+        <if test="payDate != null ">AND to_char(o.pay_time,'yyyy-MM-dd') like concat
+            ('%',#{payDate},'%')
+        </if>
+
+        ORDER BY p.create_time DESC
+        limit #{pageSize} offset #{offset}
+    </select>
+
+    <!--<if test="payContent != null and payContent != ''">AND c.name = #{payContent}</if>-->
+
+    <!--获取总数量-->
+    <select id="queryTotal" parameterType="map" resultType="java.lang.Integer">
+        SELECT
+        count(1)
+
+        FROM pscp_invoice p
+
+        LEFT JOIN pscp_member_pay_order o ON o.invoice_order_id=p.order_id AND o.deleted=0
+        LEFT JOIN pscp_company_renter r ON r.member_id=p.apply_uid AND r.deleted=0
+
+        WHERE p.deleted = 0
+
+        <if test="status != null">AND p.status = #{status}</if>
+        <if test="companyId != null">AND p.print_company_id = #{companyId}</if>
+        <if test="payCompany != null and payCompany != ''">AND r.name = #{payCompany}</if>
+        <if test="payDate != null ">AND to_char(o.pay_time,'yyyy-MM-dd') like concat
+            ('%',#{payDate},'%')
+        </if>
+
+    </select>
+
+
+    <!--申请开发票-->
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.MemberInvoiceInfo">
+        INSERT INTO pscp_invoice(
+        id,
+        order_id,
+        pay_order_ids,
+        title_name,
+        title_taxpayer_no,
+        title_contact_number,
+        title_bank_card_no,
+        title_bank_card_address,
+        apply_time,
+        apply_uid,
+        print_company_id,
+        status,
+        create_time,
+        create_user,
+        deleted
+        )VALUES (
+        nextval('seq_pscp_invoice'),
+        #{orderId},
+        #{payOrderIds},
+        #{titleName},
+        #{titleTaxpayerNo},
+        #{titleContactNumber},
+        #{titleBankCardNo},
+        #{titleBankCardAddress},
+        #{applyTime},
+        #{applyUid},
+        #{printCompanyId},
+        #{status},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_invoice') as id
+        </selectKey>
+
+    </insert>
+
+    <!--获取发票详情数据-->
+    <select id="getInvoiceInfoById" parameterType="java.lang.String"
+            resultType="com.edianniu.pscp.mis.domain.MemberInvoiceInfo">
+        SELECT
+        <include refid="base_invoice_info"></include>
+
+        FROM pscp_invoice
+        WHERE deleted = 0
+        AND order_id = #{orderId}
+
+    </select>
+
+    <!--获取发票详情数据-->
+    <select id="getInvoiceInfoByPayOrderId" parameterType="java.lang.String"
+            resultType="com.edianniu.pscp.mis.domain.MemberInvoiceInfo">
+        SELECT
+        <include refid="base_invoice_info"></include>
+
+        FROM pscp_invoice
+        WHERE deleted = 0
+        AND pay_order_ids = #{payOrderId}
+
+    </select>
+
+    <!--更新发票状态-->
+    <update id="update" parameterType="map">
+        UPDATE pscp_invoice
+        <set>
+            <if test="status!=null">
+                status = #{status},
+            </if>
+            <if test="modifiedUser!=null">
+                modified_user = #{modifiedUser},
+            </if>
+            modified_time = now(),
+            <if test="printUid!=null">
+                print_uid=#{printUid},
+            </if>
+            print_time= now()
+        </set>
+        where deleted = 0
+        <if test="orderId != null">AND order_id = #{orderId}</if>
+    </update>
+
+    <!--查询发票状态-->
+    <select id="getInvoiceStatus" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT status
+        FROM pscp_invoice
+        WHERE deleted = 0
+        AND order_id = #{orderId}
+
+    </select>
+
+</mapper>

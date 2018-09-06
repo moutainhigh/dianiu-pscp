@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.UserFeedbackDao">
+
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.UserFeedback">
+        INSERT INTO pscp_member_feedback (
+            id,
+            uid,
+            content,
+            version,
+			show_version,
+			did,
+			os_type,
+			os_version, 
+			pbrand,
+			ptype ,
+			screen_width ,
+			screen_height, 
+			network_type ,
+			ram_size,
+			rom_size,
+			client_id, 
+			device_token ,
+			app_pkg,
+			client_ip,
+            create_time,
+            create_user,
+            deleted)
+        VALUES (
+            nextval('seq_pscp_member_feedback'),
+            #{uid},
+            #{content},
+            #{version},
+			#{showVersion},
+			#{did},
+			#{osType},
+			#{osVersion}, 
+			#{pbrand},
+			#{ptype},
+			#{screenWidth} ,
+			#{screenHeight}, 
+			#{networkType} ,
+			#{ramSize},
+			#{romSize},
+			#{clientId}, 
+			#{deviceToken} ,
+			#{appPkg},
+			#{clientIp},
+            now(),
+            #{createUser},
+            0
+        );
+    </insert>
+
+</mapper>

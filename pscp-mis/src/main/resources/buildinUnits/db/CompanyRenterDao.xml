@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CompanyRenterDao">
+    <sql id="base_column_list">
+        id,
+        member_id,
+        name,
+        status,
+        company_id,
+        create_time,
+        create_user,
+        modified_time,
+        modified_user,
+        deleted
+    </sql>
+
+    <select id="getById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyRenter">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_company_renter
+        WHERE id = #{id}
+        AND deleted=0
+        limit 1
+    </select>
+    <select id="getCompanyRenterByUid" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyRenter">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_company_renter
+        WHERE member_id = #{uid}
+        AND deleted=0
+        limit 1
+    </select>
+
+    <!--通过uid 获取企业租客信息-->
+    <select id="getCompanyIdByUid" parameterType="long"
+            resultType="long">
+        SELECT
+        company_id
+        FROM pscp_company_renter
+        WHERE member_id = #{uid}
+        AND deleted=0
+        limit 1
+    </select>
+
+</mapper>

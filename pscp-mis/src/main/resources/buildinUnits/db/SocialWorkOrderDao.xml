@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.SocialWorkOrderDao">
+    <select id="queryCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.mis.bean.workorder.SocialWorkOrderQuery">
+        select count(*) from view_social_work_order t where
+        t.expiry_time >now() and t.status=1
+        <if test="existSocialWorkOrderIds != null and existSocialWorkOrderIds.size()>0">
+            and t.id not in
+            <foreach item="item" index="index" collection="existSocialWorkOrderIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="qualifications!=null and qualifications!=''">
+            and #{qualifications}::jsonb @> t.qualifications
+        </if>
+    </select>
+    <select id="queryList" resultType="com.edianniu.pscp.mis.domain.SocialWorkOrder"
+            parameterType="com.edianniu.pscp.mis.bean.workorder.SocialWorkOrderQuery">
+        select
+        <include refid="social_work_order_columns"/>
+        from view_social_work_order t
+        where t.expiry_time>now() and t.status=1
+        <if test="existSocialWorkOrderIds != null and existSocialWorkOrderIds.size()>0">
+            and t.id not in
+            <foreach item="item" index="index" collection="existSocialWorkOrderIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="qualifications!=null and qualifications!=''">
+            and #{qualifications}::jsonb @> t.qualifications
+        </if>
+        order by
+        <if test="sorts!=null and sorts!=''">
+            ${sorts}
+        </if>
+
+        <if test="sorts==null or sorts==''">
+            distance asc
+        </if>
+        limit #{pageSize} offset #{offset}
+    </select>
+    <select id="queryListByDistance" resultType="com.edianniu.pscp.mis.domain.SocialWorkOrder"
+            parameterType="com.edianniu.pscp.mis.bean.workorder.SocialWorkOrderQuery">
+        select
+        <include refid="social_work_order_columns"/>
+        from view_social_work_order t
+        where t.expiry_time>now() and t.status=1
+        <if test="existSocialWorkOrderIds != null and existSocialWorkOrderIds.size()>0">
+            and t.id not in
+            <foreach item="item" index="index" collection="existSocialWorkOrderIds" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="qualifications!=null and qualifications!=''">
+            and #{qualifications}::jsonb @> t.qualifications
+        </if>
+        and earth_box(ll_to_earth(#{latitude},#{longitude}),#{distance}) @> ll_to_earth(t.latitude, t.longitude)
+        order by distance asc
+    </select>
+    <select id="getByOrderId" resultType="com.edianniu.pscp.mis.domain.SocialWorkOrder">
+        select
+        <include refid="social_work_order_detail_columns"/>
+        from view_social_work_order t
+        where
+        t.order_id=#{orderId}
+        <if test="includeExpiry==false">
+            and t.expiry_time>now()
+        </if>
+    </select>
+    <select id="getEntityByOrderId" resultType="com.edianniu.pscp.mis.domain.SocialWorkOrder">
+        select
+          t.id,
+          t.title,
+          t.content,
+          t.order_id,
+          t.status,
+          t.refund_status,
+          t.pay_type,
+          t.pay_status,
+          t.pay_amount,
+          t.pay_time,
+          t.pay_sync_time,
+          t.pay_async_time,
+          t.pay_memo,
+          t.total_fee,
+          t.fee,
+          t.unit,
+          t.company_id
+        from pscp_social_work_order t
+        where
+        t.order_id=#{orderId} and t.deleted = 0
+        
+    </select>
+    <update id="updateRefundStatus"
+            parameterType="com.edianniu.pscp.mis.domain.SocialWorkOrder">
+        UPDATE pscp_social_work_order SET
+        refund_status= #{refundStatus},
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE id = #{id} and deleted=0
+    </update>
+    <update id="update"
+            parameterType="com.edianniu.pscp.mis.domain.SocialWorkOrder">
+        UPDATE pscp_social_work_order SET
+        status = #{status},
+        <if test="payType!=null">
+            pay_type = #{payType},
+        </if>
+        <if test="payStatus!=null">
+            pay_status = #{payStatus},
+        </if>
+        <if test="payAmount!=null">
+            pay_amount = #{payAmount},
+        </if>
+        <if test="payTime!=null">
+            pay_time = #{payTime},
+        </if>
+        <if test="paySynctime!=null">
+            pay_sync_time = #{paySynctime},
+        </if>
+        <if test="payAsynctime!=null">
+            pay_async_time = #{payAsynctime},
+        </if>
+        <if test="payMemo!=null">
+            pay_memo = #{payMemo},
+        </if>
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE id = #{id} and deleted=0
+        and COALESCE(to_char(modified_time, 'yyyyMMddHHmmssSS'),'0')=#{modifiedTimeStr}
+    </update>
+
+    <update id="updateStatusById" parameterType="map">
+        UPDATE pscp_social_work_order
+        SET status = #{nstatus},
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        WHERE deleted = 0 AND status = #{bstatus}
+        <if test="id != null">AND id = #{id}</if>
+        <if test="workOrderId != null">AND work_order_id = #{workOrderId}</if>
+    </update>
+
+    <select id="getSocialElectricianFee" parameterType="java.lang.Long" resultType="java.lang.Double">
+		select fee from view_social_work_order where id = #{id}
+	</select>
+
+    <select id="getEntityById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.SocialWorkOrder">
+        SELECT * FROM pscp_social_work_order
+        WHERE id = #{id}
+    </select>
+
+    <select id="queryCountByWorkOrderId" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM  pscp_social_work_order
+          WHERE deleted = 0 AND work_order_id = #{workOrderId}
+    </select>
+
+    <select id="getMapIdToTitleByIds" resultType="java.util.Map">
+        SELECT id, title FROM pscp_social_work_order
+        WHERE deleted = 0 AND id IN
+        <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="queryListByWorkOrderIds" resultType="com.edianniu.pscp.mis.domain.SocialWorkOrder">
+        SELECT * FROM pscp_social_work_order WHERE work_order_id IN
+        <foreach collection="array" item="workOrderId" index="index" open="(" close=")" separator=",">
+            #{workOrderId}
+        </foreach>
+    </select>
+
+    <sql id="social_work_order_columns">
+        t.id,
+        t.order_id as orderId,
+        t.title,
+        t.content,
+        t.total_fee,
+        t.fee,
+        t.unit,
+        t.qualifications,
+        t.quantity,
+        t.status,
+        t.expiry_time as expiryTime,
+        t.begin_work_time as beginWorkTime,
+        t.end_work_time as endWorkTime,
+        t.work_order_id as workOrderId,
+        t.company_id as companyId,
+        t.name,
+        t.content as description,
+        t.devices,
+        t.address,
+        t.latitude,
+        t.longitude,
+        t.create_time,
+        t.create_user,
+        earth_distance(ll_to_earth(t.latitude, t.longitude), ll_to_earth(#{latitude}, #{longitude})) as distance
+    </sql>
+    <sql id="social_work_order_detail_columns">
+        t.id,
+        t.order_id as orderId,
+        t.title,
+        t.content,
+        t.total_fee,
+        t.fee,
+        t.unit,
+        t.qualifications,
+        t.quantity,
+        t.status,
+        t.pay_type,
+        t.pay_status,
+        t.pay_amount,
+        t.pay_time,
+        t.pay_sync_time,
+        t.pay_async_time,
+        t.pay_memo,
+        t.expiry_time as expiryTime,
+        t.begin_work_time as beginWorkTime,
+        t.end_work_time as endWorkTime,
+        t.work_order_id as workOrderId,
+        t.company_id as companyId,
+        t.name,
+        t.content as description,
+        t.devices,
+        t.address,
+        t.latitude,
+        t.longitude,
+        t.create_time,
+        t.create_user,
+        t.type,
+        COALESCE (to_char(t.modified_time, 'yyyyMMddHHmmssSS'), '0') as modifiedTimeStr
+    </sql>
+</mapper>

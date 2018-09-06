@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.MemberDao">
+
+    <insert id="saveUser" parameterType="com.edianniu.pscp.mis.domain.Member">
+        INSERT INTO pscp_member(
+        id ,
+        identifier ,
+        mobile ,
+        passwd ,
+        nick_name ,
+        login_name ,
+        sex ,
+        age ,
+        tx_img ,
+        remark ,
+        status ,
+        is_customer ,
+        is_facilitator ,
+        is_electrician ,
+        is_admin ,
+        create_time ,
+        create_user ,
+        deleted
+        )
+        VALUES(
+        nextval('seq_pscp_member'),
+        #{identifier},
+        #{mobile},
+        #{passwd},
+        #{nickName},
+        #{loginName},
+        #{sex},
+        #{age},
+        #{txImg},
+        #{remark},
+        #{status},
+        #{isCustomer},
+        #{isFacilitator},
+        #{isElectrician},
+        #{isAdmin},
+        now(),
+        #{modifiedUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="uid">
+            SELECT currval('seq_pscp_member') as uid;
+        </selectKey>
+    </insert>
+    
+    <update id="updateUser"
+            parameterType="com.edianniu.pscp.mis.domain.Member">
+        UPDATE pscp_member SET
+        <if test="txImg !=null">
+            tx_img= #{txImg},
+        </if>
+        <if test="nickName !=null">
+            nick_name=#{nickName},
+        </if>
+        <if test="realName != null">
+            real_name = #{realName},
+        </if>
+        <if test="age !=null">
+            age=#{age},
+        </if>
+        <if test="sex !=null">
+            sex=#{sex},
+        </if>
+        <if test="mobile !=null and mobile.trim() !=''">
+            mobile=#{mobile},
+        </if>
+        <if test="loginName != null and loginName.trim() != ''">
+        	login_name=#{loginName},
+        </if>
+        <if test="companyId !=null">
+            company_id=#{companyId},
+        </if>
+        <if test="isFacilitator !=null">
+            is_facilitator =#{isFacilitator},
+        </if>
+        <if test="isElectrician !=null">
+            is_electrician =#{isElectrician},
+        </if>
+        <if test="isAdmin !=null">
+            is_admin =#{isAdmin},
+        </if>
+        <if test="isCustomer !=null">
+            is_customer =#{isCustomer},
+        </if>
+        <if test="switchpwd  != null and switchpwd.trim() != ''">
+            switchpwd =#{switchpwd},
+        </if>
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE id = #{uid} and deleted=0
+    </update>
+
+    <update id="updateUserPwd" parameterType="com.edianniu.pscp.mis.domain.Member">
+        UPDATE pscp_member
+        SET
+            passwd        = #{passwd},
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        WHERE id = #{uid} AND deleted = 0
+    </update>
+    
+    <update id="updateSwitchpwd" parameterType="com.edianniu.pscp.mis.domain.Member">
+    	UPDATE pscp_member
+    	SET switchpwd = #{switchpwd},
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        WHERE id = #{uid} and deleted=0
+    </update>
+    
+    <update id="updateUserMobile" parameterType="com.edianniu.pscp.mis.domain.Member">
+    	UPDATE pscp_member
+    	SET mobile=#{mobile},
+    		login_name=#{loginName},
+    		modified_time = now(),
+            modified_user = #{modifiedUser}
+    	WHERE id = #{uid} AND deleted = 0	
+    </update>
+    
+    <select id="getByUid"
+            resultType="com.edianniu.pscp.mis.domain.Member"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="member_default_columns"/>
+        FROM pscp_member T
+        WHERE T.id = #{uid} and T.deleted = 0
+        limit 1
+    </select>
+    
+    <select id="getByMobile" resultType="com.edianniu.pscp.mis.domain.Member">
+        SELECT
+        <include refid="member_default_columns"/>
+        FROM pscp_member T
+        WHERE T.mobile=#{mobile} and T.deleted=0 limit 1
+    </select>
+    
+    <select id="getByCompanyName" resultType="com.edianniu.pscp.mis.domain.Member">
+    	SELECT
+        <include refid="member_default_columns"/>
+        FROM pscp_member T
+        INNER JOIN pscp_company c ON c.id = T.company_id 
+    	WHERE T.deleted = 0 AND T.is_admin = 1 AND c.deleted = 0 AND c.name = #{companyName}
+    	limit 1
+    </select>
+    
+    <select id="getByCompanyIdAndMobile"
+            resultType="com.edianniu.pscp.mis.domain.Member">
+        SELECT
+        <include refid="member_default_columns"/>
+        FROM pscp_member T
+        WHERE T.company_id=#{companyId} and T.mobile=#{mobile} and T.deleted=0 limit 1
+    </select>
+
+    <select id="getByLoginName" resultType="com.edianniu.pscp.mis.domain.Member">
+        SELECT
+        <include refid="member_default_columns"/>
+        FROM pscp_member T
+        WHERE T.login_name=#{loginName} and T.deleted=0 limit 1
+    </select>
+    
+    <select id="getSimpleByUid"
+            resultType="com.edianniu.pscp.mis.domain.Member"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="member_default_columns"/>
+        FROM pscp_member T
+        WHERE T.id = #{uid} and T.deleted = 0
+        limit 1
+    </select>
+    
+    <select id="getFacilitatorAdminByCompanyId"
+            resultType="com.edianniu.pscp.mis.domain.Member"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="member_default_columns"/>
+
+        FROM pscp_member T
+
+        WHERE T.company_id = #{companyId} and T.is_facilitator=1 and T.is_admin=1  and T.deleted = 0
+        limit 1
+    </select>
+    
+    <select id="getCustomerAdminByCompanyId"
+            resultType="com.edianniu.pscp.mis.domain.Member"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="member_default_columns"/>
+
+        FROM pscp_member T
+
+        WHERE T.company_id = #{companyId} and T.is_customer=1 and T.is_admin=1  and T.deleted = 0
+        limit 1
+    </select>
+    
+    <select id="getFacilitatorAdminUidByCompanyId"
+            resultType="java.lang.Long"
+            parameterType="java.lang.Long">
+		 SELECT
+           T.id
+        FROM pscp_member T
+            
+        WHERE T.company_id = #{companyId} and T.is_facilitator=1 and T.is_admin=1 and T.deleted = 0 
+        limit 1
+	</select>
+    <select id="getSimpleByMobile"
+            resultType="com.edianniu.pscp.mis.domain.Member">
+        SELECT
+        <include refid="member_default_columns"/>
+
+        FROM pscp_member T
+        WHERE T.mobile=#{mobile} and T.deleted=0 limit 1
+    </select>
+    <select id="checkExistMobile"
+            resultType="java.lang.Integer">
+		SELECT
+		count(*)
+		FROM pscp_member T
+		WHERE  T.mobile=#{mobile} and deleted=0
+	</select>
+    <update id="editUser" parameterType="com.edianniu.pscp.mis.domain.Member">
+        UPDATE pscp_member SET
+        mobile =#{mobile},
+        sex =#{sex},
+        <if test="nickname!=''">
+            nickname =#{nickname},
+        </if>
+        modified_time = now(),
+        modified_user = #{modifiedUser}
+        WHERE id =#{uid} AND deleted=0
+    </update>
+
+    <sql id="member_default_columns">
+        T.id as uid,
+        T.identifier,
+        T.mobile,
+        T.passwd,
+        T.switchpwd,
+        T.nick_name as nickName,
+        T.real_name as realName,
+        T.sex,
+        T.age,
+        T.tx_img        txImg,
+        T.remark,
+        T.login_name as loginName,
+        T.status,
+        T.is_customer as isCustomer,
+        T.is_facilitator as isFacilitator,
+        T.is_electrician as isElectrician,
+        T.is_admin as isAdmin,
+        T.company_id,
+        T.deleted
+    </sql>
+</mapper>

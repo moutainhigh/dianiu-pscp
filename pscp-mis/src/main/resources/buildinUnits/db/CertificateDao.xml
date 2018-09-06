@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CertificateDao">
+    <select id="getCertificateListByIds" resultType="com.edianniu.pscp.mis.domain.Certificate">
+        select
+        <include refid="certificate_columns"/>
+        from pscp_certificate t where t.deleted=0
+        <if test="ids != null and ids.length!=0">
+            and
+            t.id in
+            <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+
+    </select>
+    <select id="get" resultType="com.edianniu.pscp.mis.domain.Certificate">
+        select
+        <include refid="certificate_columns"/>
+        from pscp_certificate t where t.id=#{value} and t.deleted=0
+    </select>
+    <select id="getAllCertificateList" resultType="com.edianniu.pscp.mis.domain.Certificate">
+        select
+        <include refid="certificate_columns"/>
+        from pscp_certificate t where t.deleted=0
+    </select>
+
+    <select id="queryAllList" resultType="com.edianniu.pscp.mis.domain.Certificate">
+        select * from pscp_certificate
+        where deleted=0
+        order by create_time desc
+    </select>
+
+    <sql id="certificate_columns">
+        t.id,
+        t.name,
+        t.type,
+        t.remark,
+        t.create_time,
+        t.create_user,
+        t.modified_user,
+        t.modified_time
+    </sql>
+</mapper>

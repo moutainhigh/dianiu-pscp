@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.MemberRefundDao">
+
+    <sql id="Base_Column_List">
+        id, 
+        uid,
+        app_id,
+        mch_id,
+        pay_type,
+        order_type,
+        out_trade_no,
+        trade_no,
+        trade_type,
+        out_refund_no,
+        refund_no,
+        total_fee,
+        refund_fee,
+        refund_fee_type,
+        refund_reason,
+        refund_status,
+        refund_msg,
+        refund_memo,
+        refund_time,
+        refund_count,
+        create_user, 
+        create_time, 
+        modified_user,
+        modified_time,  
+        deleted
+    </sql>
+	<insert id="save" parameterType="com.edianniu.pscp.mis.domain.MemberRefund">
+		INSERT INTO pscp_member_refund(
+		id, 
+        uid,
+        app_id,
+        mch_id,
+        pay_type,
+        order_type,
+        out_trade_no,
+        trade_no,
+        trade_type,
+        out_refund_no,
+        refund_no,
+        total_fee,
+        refund_fee,
+        refund_fee_type,
+        refund_reason,
+        refund_status,
+        refund_msg,
+        refund_memo,
+        refund_time,
+        refund_count,
+        create_user, 
+        create_time,   
+        deleted
+		)
+		VALUES(
+		nextval('seq_pscp_member_refund'),
+		#{uid},
+		#{appId},
+		#{mchId},
+		#{payType},
+		#{orderType},
+		#{outTradeNo},
+		#{tradeNo},
+		#{tradeType},
+		#{outRefundNo},
+		#{refundNo},
+		#{totalFee},
+        #{refundFee},
+        #{refundFeeType},
+        #{refundReason},
+        #{refundStatus},
+        #{refundMsg},
+        #{refundMemo},
+        #{refundTime},
+        #{refundCount},
+        #{createUser},
+		now(),
+		0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+        SELECT currval('seq_pscp_member_refund') as id;
+        </selectKey>
+	</insert>
+	<update id="update" parameterType="com.edianniu.pscp.mis.domain.MemberRefund">
+        UPDATE pscp_member_refund
+        set 
+        refund_status = #{refundStatus},
+        refund_msg = #{refundMsg},
+        refund_no=#{refundNo},
+        refund_memo=#{refundMemo},
+        refund_time=#{refundTime},
+        refund_count=#{refundCount},
+        modified_user = #{modifiedUser},
+        modified_time = now()
+        where deleted = 0 AND id = #{id}  
+    </update>
+    <select id="getById" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.MemberRefund">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_refund
+        WHERE deleted = 0
+        AND id = #{id}
+    </select>
+
+    <select id="queryList"
+            resultType="com.edianniu.pscp.mis.domain.MemberRefund">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_member_refund
+        WHERE deleted = 0
+        AND refund_status = #{status}
+        ORDER BY create_time DESC
+        limit #{limit}
+    </select>
+</mapper>

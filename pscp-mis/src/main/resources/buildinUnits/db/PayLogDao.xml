@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.PayLogDao">
+
+    <insert id="saveAliLog" parameterType="com.edianniu.pscp.mis.domain.AliPushLog">
+        INSERT INTO pscp_pay_alipay_log (
+            id
+            , notify_time
+            , notify_type
+            , notify_id
+            , sign_type
+            , sign
+            , out_trade_no
+            , subject
+            , payment_type
+            , trade_no
+            , trade_status
+            , seller_id
+            , seller_email
+            , buyer_id
+            , buyer_email
+            , total_fee
+            , quantity
+            , price
+            , body
+            , gmt_create
+            , gmt_payment
+            , is_total_fee_adjust
+            , use_coupon
+            , discount
+            , refund_status
+            , gmt_refund
+            , create_time
+            , create_user
+            , deleted
+        ) VALUES (
+            nextval('seq_pscp_pay_alipay_log'),
+            #{notifyTime},
+            #{notifyType},
+            #{notifyId},
+            #{signType},
+            #{sign},
+            #{outTradeNo},
+            #{subject},
+            #{paymentType},
+            #{tradeNo},
+            #{tradeStatus},
+            #{sellerId},
+            #{sellerEmail},
+            #{buyerId},
+            #{buyerEmail},
+            #{totalFee},
+            #{quantity},
+            #{price},
+            #{body},
+            #{gmtCreate},
+            #{gmtPayment},
+            #{isTotalFeeAdjust},
+            #{useCoupon},
+            #{discount},
+            #{refundStatus},
+            #{gmtRefund},
+            now(),
+            #{createUser},
+            0
+        )
+    </insert>
+     <select id="getAliPushLogByOrderId"
+            resultType="com.edianniu.pscp.mis.domain.AliPushLog"
+            parameterType="java.lang.String">
+        SELECT
+            trade_no as tradeNo, buyer_id as buyerId, buyer_email as buyerEmail,total_fee as totalFee
+        FROM pscp_pay_alipay_log as T
+        WHERE T.out_trade_no=#{orderId} AND T.deleted=0 LIMIT 1
+    </select>
+     <select id="getWxPushLogByOrderId"
+            resultType="com.edianniu.pscp.mis.domain.WxPushLog"
+            parameterType="java.lang.String">
+        SELECT
+            transaction_id as transactionId,order_id as orderId,out_trade_no as outTradeNo,total_fee as totalFee
+        FROM pscp_pay_wxpay_log as T
+        WHERE T.order_id=#{orderId} AND T.deleted=0 LIMIT 1
+    </select>
+    <insert id="saveWxLog" parameterType="com.edianniu.pscp.mis.domain.WxPushLog">
+        INSERT INTO pscp_pay_wxpay_log (id
+            , appid
+            , mch_id
+            , device_info
+            , nonce_str
+            , sign
+            , attach
+            , transaction_id
+            , out_trade_no
+            , order_id
+            , fee_type
+            , total_fee
+            , cash_fee
+            , cash_fee_type
+            , coupon_fee
+            , coupon_count
+            , trade_type
+            , bank_type
+            , openid
+            , time_end
+            , result_code
+            , err_code
+            , err_code_des
+            , create_time
+            , create_user
+            , deleted)
+        VALUES (nextval('seq_pscp_pay_wxpay_log')
+            , #{appid}
+            , #{mchId}
+            , #{deviceInfo}
+            , #{nonceStr}
+            , #{sign}
+            , #{attach}
+            , #{transactionId}
+            , #{outTradeNo}
+            , #{orderId}
+            , #{feeType}
+            , #{totalFee}
+            , #{cashFee}
+            , #{cashFeeType}
+            , #{couponFee}
+            , #{couponCount}
+            , #{tradeType}
+            , #{bankType}
+            , #{openid}
+            , #{timeEnd}
+            , #{resultCode}
+            , #{errCode}
+            , #{errCodeDes}
+            , now()
+            , #{createUser}
+            , 0
+        )
+    </insert>
+
+    <insert id="insertPayPushError" parameterType="com.edianniu.pscp.mis.domain.PayPushError">
+        INSERT INTO
+            pscp_pay_push_error_log (id, push, err_msg, pay_type, create_time, create_user, deleted)
+        VALUES (nextval('seq_pscp_pay_push_error_log'), #{push}, #{errMsg}, #{payType}, now(), #{createUser}, 0)
+    </insert>
+	
+	<insert id="saveUniondfLog" parameterType="com.edianniu.pscp.mis.domain.UnionpayPushLog">
+		INSERT INTO pscp_pay_unionpay_log(
+			id,
+			signature,
+			cert_id,
+			encrypt_cert_id,
+			txn_type,
+			txn_sub_type,
+			biz_type,
+			channel_type,
+			access_type,
+			order_id,
+			txn_amt,
+			txn_time,
+			acc_no,
+			order_desc,
+			tn,
+			query_id,
+			resp_code,
+			resp_msg,
+			trace_no,
+			trace_time,
+			settle_date,
+			certif_tp,
+			certif_id,
+			customer_nm,
+			type,
+			status,
+			orig_resp_code,
+			orig_resp_msg	,
+			create_time, 
+			create_user, 
+			deleted		
+		)VALUES(
+			nextval('seq_pscp_pay_unionpay_log'),
+			#{signature},
+			#{certId},
+			#{encryptCertId},
+			#{txnType},
+			#{txnSubType},
+			#{bizType},
+			#{channelType},
+			#{accessType},
+			#{orderId},
+			#{txnAmt},
+			#{txnTime},
+			#{accNo},
+			#{orderDesc},
+			#{tn},
+			#{queryId},
+			#{respCode},
+			#{respMsg},
+			#{traceNo},
+			#{traceTime},
+			#{settleDate},
+			#{certifTp},
+			#{certifId},
+			#{customerNm},
+			#{type},
+			#{status},
+			#{origRespCode},
+			#{origRespMsg}	,
+			now(),
+			#{createUser},
+			0			
+		);
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_pay_unionpay_log') as id;
+		</selectKey>
+	</insert>
+	
+	<insert id="saveUnionLog" parameterType="com.edianniu.pscp.mis.domain.UnionpayPushLog">
+		INSERT INTO pscp_pay_unionpay_log(
+			id,
+			signature,
+			cert_id,			
+			txn_type,
+			txn_sub_type,
+			biz_type,
+			channel_type,
+			access_type,
+			order_id,
+			txn_amt,
+			txn_time,
+			acc_no,
+			order_desc,
+			tn,
+			query_id,
+			resp_code,
+			resp_msg,
+			trace_no,
+			trace_time,
+			settle_date,			
+			type,
+			status,
+			orig_resp_code,
+			orig_resp_msg,
+			create_time, 
+			create_user, 
+			deleted			
+		)VALUES(
+			nextval('seq_pscp_pay_unionpay_log'),
+			#{signature},
+			#{certId},
+			#{txnType},
+			#{txnSubType},
+			#{bizType},
+			#{channelType},
+			#{accessType},
+			#{orderId},
+			#{txnAmt},
+			#{txnTime},
+			#{accNo},
+			#{orderDesc},
+			#{tn},
+			#{queryId},
+			#{respCode},
+			#{respMsg},
+			#{traceNo},
+			#{traceTime},
+			#{settleDate},
+			#{type},
+			#{status},
+			#{origRespCode},
+			#{origRespMsg}	,
+			now(),
+			#{createUser},
+			0
+		);
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_edn_unionpay_log') as id;
+		</selectKey>
+	</insert>
+	
+	<select id="getUnionpayPushLog" parameterType="java.lang.Long" resultType="com.edianniu.pscp.mis.domain.UnionpayPushLog">
+		SELECT 
+			id,
+			signature,
+			cert_id               as certId,
+			encrypt_cert_id       as encryptCertId,
+			txn_type               as txnType,
+			txn_sub_type            as txnSubType,
+			biz_type               as bizType,
+			channel_type           as channelType,
+			access_type           as accessType,
+			order_id               as orderId,
+			txn_amt                as txnAmt,
+			txn_time               as txnTime,
+			acc_no                 as accNo,
+			order_desc             as orderDesc,
+			tn                     as tn,
+			query_id               as queryId,
+			resp_code              as respCode,
+			resp_msg               as respMsg,
+			trace_no               as traceNo,
+			trace_time              as traceTime,
+			settle_date            as settleDate,
+			certif_tp              as certifTp,
+			certif_id              as certifId,
+			customer_nm            as customerNm,
+			type,
+			status,
+			orig_resp_code          as origRespCode,
+			orig_resp_msg           as origRespMsg
+		FROM pscp_pay_unionpay_log
+			WHERE id =#{id} and deleted=0;			
+	</select>
+	<update id="updateUnionpayPushLog" parameterType="com.edianniu.pscp.mis.domain.UnionpayPushLog">
+		UPDATE pscp_pay_unionpay_log SET
+			orig_resp_code=#{origRespCode},
+			orig_resp_msg=#{origRespMsg},
+			status=#{status},
+			modified_user=#{modifiedUser},
+        	modified_time=now()
+			WHERE id = #{id} and deleted=0;
+	</update>
+	
+	<select id="getUnionpayPushLogByOrderId" parameterType="java.util.List" resultType="com.edianniu.pscp.mis.domain.UnionpayPushLog">
+		SELECT 
+			id,
+			signature,
+			cert_id               as certId,
+			encrypt_cert_id       as encryptCertId,
+			txn_type               as txnType,
+			txn_sub_type            as txnSubType,
+			biz_type               as bizType,
+			channel_type           as channelType,
+			access_type           as accessType,
+			order_id               as orderId,
+			txn_amt                as txnAmt,
+			txn_time               as txnTime,
+			acc_no                 as accNo,
+			order_desc             as orderDesc,
+			tn                     as tn,
+			query_id               as queryId,
+			resp_code              as respCode,
+			resp_msg               as respMsg,
+			trace_no               as traceNo,
+			trace_time              as traceTime,
+			settle_date            as settleDate,
+			certif_tp              as certifTp,
+			certif_id              as certifId,
+			customer_nm            as customerNm,
+			type,
+			status,
+			orig_resp_code          as origRespCode,
+			orig_resp_msg           as origRespMsg
+		FROM pscp_pay_unionpay_log
+			WHERE order_id =#{orderId}
+			 and deleted=0 limit 1;			
+	</select>
+	<select id="getUnionpayPushLogByOrderIds" parameterType="java.util.List" resultType="com.edianniu.pscp.mis.domain.UnionpayPushLog">
+		SELECT 
+			id,
+			signature,
+			cert_id               as certId,
+			encrypt_cert_id       as encryptCertId,
+			txn_type               as txnType,
+			txn_sub_type            as txnSubType,
+			biz_type               as bizType,
+			channel_type           as channelType,
+			access_type           as accessType,
+			order_id               as orderId,
+			txn_amt                as txnAmt,
+			txn_time               as txnTime,
+			acc_no                 as accNo,
+			order_desc             as orderDesc,
+			tn                     as tn,
+			query_id               as queryId,
+			resp_code              as respCode,
+			resp_msg               as respMsg,
+			trace_no               as traceNo,
+			trace_time              as traceTime,
+			settle_date            as settleDate,
+			certif_tp              as certifTp,
+			certif_id              as certifId,
+			customer_nm            as customerNm,
+			type,
+			status,
+			orig_resp_code          as origRespCode,
+			orig_resp_msg           as origRespMsg
+		FROM pscp_pay_unionpay_log
+			WHERE order_id in
+			<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+			 and deleted=0;			
+	</select>
+</mapper>

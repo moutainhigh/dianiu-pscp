@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    <import resource="classpath:stc/skymobi/ebus/spring/Configurable.xml"/>
+    <import resource="classpath:unitrepo/stc/part/fsm/SmartFSMImpl.xml"/>
+    <import resource="classpath:unitrepo/stc/part/fsm/SmartFSMJmxExporter.xml"/>
+
+    <context:annotation-config/>
+
+    <bean id="businessFlow"
+          class="com.edianniu.pscp.mis.biz.electricianresume.DetailBiz">
+        <property name="eventBus" ref="eventBus"/>
+        <property name="timeout" value="${event.timeout}"/>
+    </bean>
+
+    <bean id="businessContext"
+          class="stc.skymobi.fsm.core.SmartContextImpl" scope="prototype">
+        <constructor-arg ref="smartFsm"/>
+        <property name="eventBus" ref="eventBus"/>
+    </bean>
+</beans>

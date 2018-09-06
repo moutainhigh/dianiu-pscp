@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.NeedsDao">
+
+    <select id="getById"
+            resultType="com.edianniu.pscp.mis.domain.Needs">
+        SELECT
+        <include refid="needs_default_columns"/>
+        FROM pscp_customer_needs t
+        WHERE
+        t.id=#{value} and t.deleted=0 limit 1
+    </select>
+
+    <select id="getByProjectId" resultType="com.edianniu.pscp.mis.domain.Needs">
+        SELECT
+        <include refid="needs_default_columns"/>
+        FROM pscp_engineering_project t1
+        LEFT JOIN pscp_customer_needs t ON t1.needs_id = t.id
+        WHERE t1.deleted = 0 AND t.deleted = 0 AND t1.id = #{projectId}
+        limit 1
+    </select>
+
+    <sql id="needs_default_columns">
+        t.id,
+        t.company_id,
+        t.order_id,
+        t.name,
+        t.describe,
+        t.publish_cutoff_time,
+        t.working_start_time,
+        t.working_end_time,
+        t.contact_person,
+        t.contact_number,
+        t.contact_addr,
+        t.status,
+        t.distribution_room_ids
+    </sql>
+
+</mapper>

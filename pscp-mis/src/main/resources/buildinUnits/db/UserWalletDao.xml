@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.UserWalletDao">
+
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.UserWallet">
+        INSERT INTO pscp_member_wallet (
+            id,
+            uid,
+            amount,
+            freezing_amount,
+            create_time,
+            create_user,
+            deleted
+        )
+        VALUES (
+            nextval('seq_pscp_member_wallet'),
+            #{uid},
+            #{amount},
+            #{freezingAmount},
+            now(),
+            #{createUser},
+            0
+        )
+    </insert>
+
+    <update id="update"
+            parameterType="com.edianniu.pscp.mis.domain.UserWallet">
+        UPDATE pscp_member_wallet
+        SET
+            amount          = #{amount},
+            freezing_amount = #{freezingAmount},
+            modified_time   = now(),
+            modified_user   = #{modifiedUser}
+        WHERE id = #{id}
+              AND deleted = 0
+
+    </update>
+    <update id="addAmount" parameterType="map">
+        UPDATE pscp_member_wallet
+        SET
+        <if test="amount != null">amount = amount + #{amount},</if>
+        <if test="modifiedUser != null">
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        </if>
+        WHERE deleted = 0 AND uid = #{uid}
+    </update>
+    <update id="subtractFreezingAmount" parameterType="map">
+        UPDATE pscp_member_wallet
+        SET
+        <if test="amount != null">
+            freezing_amount = freezing_amount - #{amount},
+        </if>
+        <if test="modifiedUser != null">
+            modified_time = now(),
+            modified_user = #{modifiedUser}
+        </if>
+        WHERE deleted = 0
+        AND uid = #{uid}
+        AND freezing_amount &gt;= #{amount}
+    </update>
+    <select id="get"
+            resultType="com.edianniu.pscp.mis.domain.UserWallet"
+            parameterType="java.lang.Long">
+        SELECT
+            T.id,
+            T.uid,
+            T.amount,
+            T.freezing_amount AS freezingAmount,
+            COALESCE(to_char(T.modified_time, 'yyyyMMddHHmmssSS'), '0') AS modifiedTimeStr
+        FROM pscp_member_wallet as T
+            LEFT JOIN pscp_member u ON T.uid = u.id AND u.deleted = 0
+        WHERE T.uid =#{uid} AND T.deleted=0 LIMIT 1
+    </select>
+    <select id="getByUid"
+            resultType="com.edianniu.pscp.mis.domain.UserWallet"
+            parameterType="java.lang.Long">
+        SELECT
+            T.id,
+            T.uid,
+            T.amount,          
+            T.freezing_amount                                           AS freezingAmount,
+            COALESCE(to_char(T.modified_time, 'yyyyMMddHHmmssSS'), '0') AS modifiedTimeStr
+        FROM pscp_member_wallet T           
+        WHERE T.uid =#{uid} AND T.deleted=0 LIMIT 1
+    </select>
+    <select id="exist"
+            resultType="java.lang.Integer"
+            parameterType="java.lang.Long">
+        SELECT count(*)
+        FROM pscp_member_wallet T
+        WHERE T.uid =#{uid} AND deleted=0
+    </select>
+
+    <select id="queryDaybookCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.mis.bean.wallet.WalletQuery">
+        SELECT count(0)
+        FROM pscp_member_wallet_detail
+        WHERE
+            uid = #{uid}
+            AND deleted = 0;
+    </select>
+
+    <select id="queryDaybook" resultType="com.edianniu.pscp.mis.domain.UserWalletDetail"
+            parameterType="com.edianniu.pscp.mis.bean.wallet.WalletQuery">
+        SELECT
+           		t.id,
+	            t.uid,
+	            t.type,
+	            t.deal_type          				as dealType,
+	            t.order_id           				as orderId,	           
+	            t.fund_target		   				as fundTarget,
+	            t.fund_source		   				as fundSource, 
+	            t.remark,
+	            t.create_user 	   				as createUser,
+	            t.modified_time					as modifiedTime,
+	            t.modified_user					as modifiedUser,
+	            t.deleted,
+	            t.check_status					as checkStatus,
+	            t.check_user						as checkUser,
+	            t.check_time						as checkTime,
+	            t.check_memo						as checkMemo,
+	            t.pay_status						as payStatus,
+	            t.pay_user						as payUser,
+	            t.pay_memo						as payMemo,
+	            t.pay_time						as payTime,
+	            t.transaction_id	   				as transactionId,
+	            t.amount,
+	            t.available_amount   				as availableAmount,
+	            t.available_freezing_amount		as availableFreezingAmount,
+	            t.deal_account					as dealAccount	 ,           
+            	t.create_time 					as dealTime
+        FROM pscp_member_wallet_detail t
+        WHERE
+            uid = #{uid}
+            AND deleted = 0
+        ORDER BY id DESC
+        LIMIT #{pageSize}
+        OFFSET #{offset};
+    </select>
+
+</mapper>

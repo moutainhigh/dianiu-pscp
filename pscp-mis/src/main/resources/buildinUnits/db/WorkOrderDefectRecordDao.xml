@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.WorkOrderDefectRecordDao">
+    
+    <select id="queryList" resultType="com.edianniu.pscp.mis.domain.WorkOrderDefectRecord"
+            parameterType="com.edianniu.pscp.mis.bean.query.DefectRecordQuery">
+        select * from pscp_work_order_defect_record
+        where deleted=0
+        <if test="workOrderId != null">
+            and work_order_id = #{workOrderId}
+        </if>
+       <if test="projectId != null">
+            and project_id = #{projectId}
+        </if>
+        <if test="roomId != null">
+            and room_id = #{roomId}
+        </if>
+        order by discovery_date desc
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.mis.bean.query.DefectRecordQuery">
+        select count(1) from pscp_work_order_defect_record
+        where deleted=0
+        <if test="workOrderId != null">
+            and work_order_id = #{workOrderId}
+        </if>
+       <if test="projectId != null">
+            and project_id = #{projectId}
+        </if>
+        <if test="roomId != null">
+            and room_id = #{roomId}
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="roomIds != null and roomIds.size() &gt; 0">
+            and room_id in
+            <foreach item="roomId" index="index" collection="roomIds" open="(" separator="," close=")">
+                #{roomId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getEntityById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.WorkOrderDefectRecord">
+        SELECT
+        *
+        FROM pscp_work_order_defect_record
+        WHERE deleted = 0 AND id = #{id}
+    </select>
+
+    <select id="getDefectRecordVOById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.bean.defectrecord.vo.DefectRecordDetailsVO">
+        SELECT
+        t.id, t.device_name AS deviceName, t.defect_content AS defectContent,
+        to_char(t.discovery_date, 'yyyy-mm-dd') AS discoveryDate, t.status,
+        t.discoverer, t.discovery_company AS discoveryCompany,
+        t.contact_number AS contactNumber,t.remark,
+        t.solver, to_char(t.solve_date, 'yyyy-mm-dd') AS solveDate,
+        t.solve_remark AS solveRemark, r.name AS roomName
+        FROM pscp_work_order_defect_record t
+        LEFT JOIN pscp_customer_distribution_room r ON t.room_id = r.id
+        WHERE t.deleted = 0 AND t.id = #{id}
+    </select>
+
+    <select id="getRepairDefectRecord"
+            resultType="com.edianniu.pscp.mis.bean.defectrecord.vo.DefectRecordVO">
+        SELECT
+        t.id, t.device_name AS deviceName, t.status,
+        to_char(t.discovery_date, 'yyyy-mm-dd') as discoveryDate,
+        t.discovery_order_name AS workOrderName,
+        r.name AS roomName, p.name AS projectName
+        FROM pscp_work_order_defect_record t
+        LEFT JOIN pscp_customer_distribution_room r ON t.room_id = r.id
+        LEFT JOIN pscp_engineering_project p ON t.project_id = p.id
+        WHERE t.deleted = 0 AND t.id IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    
+    <select id="queryDefectRecordVOCount" resultType="java.lang.Integer"
+            parameterType="com.edianniu.pscp.mis.bean.query.DefectRecordQuery">
+        select count(1) from pscp_work_order_defect_record
+        where deleted=0
+        <if test="workOrderId != null">
+            and work_order_id = #{workOrderId}
+        </if>
+       <!--  <if test="projectId != null">
+            and project_id = #{projectId}
+        </if> -->
+        <if test="roomId != null">
+            and room_id = #{roomId}
+        </if>
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="roomIds != null and roomIds.size() &gt; 0">
+            and room_id in
+            <foreach item="roomId" index="index" collection="roomIds" open="(" separator="," close=")">
+                #{roomId}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="queryListDefectRecordVO"
+            parameterType="com.edianniu.pscp.mis.bean.query.DefectRecordQuery"
+            resultType="com.edianniu.pscp.mis.bean.defectrecord.vo.DefectRecordVO">
+        SELECT
+        t.id, t.device_name AS deviceName, t.status,
+        to_char(t.discovery_date, 'yyyy-mm-dd') as discoveryDate,
+        t.discovery_order_name AS workOrderName,
+        r.name AS roomName, p.name AS projectName
+        FROM pscp_work_order_defect_record t
+        LEFT JOIN pscp_customer_distribution_room r ON t.room_id = r.id
+        LEFT JOIN pscp_engineering_project p ON t.project_id = p.id
+        WHERE t.deleted = 0
+        <if test="workOrderId != null">
+            and t.work_order_id = #{workOrderId}
+        </if>
+        <!-- <if test="projectId != null">
+            and t.project_id = #{projectId}
+        </if> -->
+        <if test="roomId != null">
+            and t.room_id = #{roomId}
+        </if>
+        <if test="status != null">
+            and t.status = #{status}
+        </if>
+        <if test="roomIds != null and roomIds.size() &gt; 0">
+            and t.room_id in
+            <foreach item="roomId" index="index" collection="roomIds" open="(" separator="," close=")">
+                #{roomId}
+            </foreach>
+        </if>
+        order by t.discovery_date desc
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryListDefectRecord"
+            resultType="com.edianniu.pscp.mis.bean.defectrecord.vo.DefectRecordVO">
+        SELECT
+        t.id, t.device_name AS deviceName, t.status,
+        to_char(t.discovery_date, 'yyyy-mm-dd') as discoveryDate,
+        t.discovery_order_name AS workOrderName,
+        r.name AS roomName, p.name AS projectName
+        FROM pscp_work_order_defect_record t
+        LEFT JOIN pscp_customer_distribution_room r ON t.room_id = r.id
+        LEFT JOIN pscp_engineering_project p ON t.project_id = p.id
+        WHERE t.deleted = 0
+        <if test="workOrderId != null">
+            and t.work_order_id = #{workOrderId}
+        </if>
+        <!-- <if test="projectId != null">
+            and t.project_id = #{projectId}
+        </if> -->
+        <if test="roomIds != null and roomIds.size() &gt; 0">
+            and t.room_id in
+            <foreach item="roomId" index="index" collection="roomIds" open="(" separator="," close=")">
+                #{roomId}
+            </foreach>
+        </if>
+        <if test="roomId != null">
+            and t.room_id = #{roomId}
+        </if>
+        <if test="status != null">
+            and t.status = #{status}
+        </if>
+        order by t.discovery_date desc
+    </select>
+
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.WorkOrderDefectRecord">
+		insert into pscp_work_order_defect_record
+		(
+			id, 
+			project_id, 
+			work_order_id,
+			room_id,
+			status, 
+			device_name, 
+			defect_content, 
+			discovery_date, 
+			discoverer, 
+			discovery_company, 
+			discovery_order_name, 
+			contact_number,
+			solver, 
+			solve_order_id,
+			remark, 
+			create_time, 
+			create_user,
+			deleted
+		)
+		values
+		(
+			nextval('seq_pscp_work_order_defect_record'),
+			#{projectId}, 
+			#{workOrderId},
+			#{roomId},
+			#{status}, 
+			#{deviceName}, 
+			#{defectContent}, 
+			#{discoveryDate}, 
+			#{discoverer}, 
+			#{discoveryCompany}, 
+			#{discoveryOrderName}, 
+			#{contactNumber},
+			#{solver}, 
+			#{solveOrderId},
+			#{remark},
+			now(),
+			#{createUser},
+			0
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_work_order_defect_record') as id;
+        </selectKey>
+	</insert>
+
+    <update id="updateSolveInfo">
+        UPDATE pscp_work_order_defect_record
+        SET solver         = #{solver},
+            status         = #{status},
+            solve_order_id = #{solveOrderId},
+            solve_date     = #{solveDate},
+            solve_remark   = #{solveRemark},
+            modified_user  = #{modifiedUser},
+            modified_time  = now()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="updateMapCondition">
+        UPDATE pscp_work_order_defect_record
+        <set>
+            <if test="deleted != null">deleted = #{deleted},</if>
+            <if test="modifiedUser != ''">
+                modified_user = #{modifiedUser},
+                modified_time = now(),
+            </if>
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <delete id="delete">
+        UPDATE pscp_work_order_defect_record
+        SET deleted = -1, modified_time = now(), modified_user = ${modifiedUser}
+        WHERE id = #{value}
+    </delete>
+
+    <delete id="deleteBatch">
+        update pscp_work_order_defect_record set deleted=-1,modified_time=now(),modified_user=${modifiedUser} where id
+        in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.RenterChargeOrderDao">
+    <update id="update"
+            parameterType="com.edianniu.pscp.mis.domain.RenterChargeOrder">
+		UPDATE pscp_renter_charge_order SET
+		pay_status     = #{payStatus},
+		pay_memo     = #{payMemo},
+		pay_sync_time=#{paySyncTime},
+		pay_async_time=#{payAsyncTime},
+		pay_type=#{payType},
+		pay_time=#{payTime},
+		prepaid_charge=#{prepaidCharge},
+		pay_order_id=#{payOrderId},
+		modified_time         = now(),
+		modified_user         = #{modifiedUser}
+		WHERE id = #{id} and deleted=0
+              and COALESCE(to_char(modified_time, 'yyyyMMddHHmmssSS'),'0')=#{modifiedTimeStr}
+	</update>
+    <select id="getById"
+            resultType="com.edianniu.pscp.mis.domain.RenterChargeOrder">
+        SELECT
+        <include refid="RenterCharge_order_default_columns"/>
+        FROM pscp_renter_charge_order t left join pscp_renter_config t1 on t.renter_id=t1.renter_id
+        WHERE
+        t.id=#{value} and t.deleted=0 and t1.deleted=0 limit 1
+    </select>
+
+    <select id="getByOrderId"
+            resultType="com.edianniu.pscp.mis.domain.RenterChargeOrder">
+        SELECT
+        <include refid="RenterCharge_order_default_columns"/>
+		FROM pscp_renter_charge_order t left join pscp_renter_config t1 on t.renter_id=t1.renter_id
+        WHERE
+        t.order_id=#{orderId} and t.deleted=0 and t1.deleted=0 limit 1
+    </select>
+
+
+    <!--根据payOrderId获取订单-->
+    <select id="getByPayOrderId"
+            resultType="com.edianniu.pscp.mis.domain.RenterChargeOrder">
+        SELECT
+        <include refid="RenterCharge_order_default_columns"/>
+		FROM pscp_renter_charge_order t left join pscp_renter_config t1 on t.renter_id=t1.renter_id
+        WHERE
+        t.pay_order_id=#{payOrderId} and t.deleted=0 and t1.deleted=0 limit 1
+    </select>
+
+
+    <select id="getCountByOrderId"
+            resultType="int">
+		SELECT 
+		count(*)
+		FROM pscp_renter_charge_order t
+		WHERE
+            t.order_id=#{orderId} and t.deleted=0
+	</select>
+
+    <sql id="RenterCharge_order_default_columns">
+		t.id,
+		t1.charge_mode as type,
+		t.renter_id,
+		t.last_check_date,
+		t.this_check_date,
+		t.order_id,
+		t.pay_order_id,
+		t.prepaid_charge,
+		t.status,
+		t.pay_status,
+		t.pay_type,
+		t.pay_memo,
+	    t.pay_time,
+	    t.pay_sync_time,
+		t.pay_async_time,
+		t.charge,
+        COALESCE(to_char(t.modified_time, 'yyyyMMddHHmmssSS'),'0') as modifiedTimeStr
+	</sql>
+
+</mapper>

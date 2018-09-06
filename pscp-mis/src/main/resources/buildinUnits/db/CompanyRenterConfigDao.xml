@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CompanyRenterConfigDao">
+    <sql id="base_column_list">
+        id,
+        renter_id,
+        switch_status,
+        amount_limit,
+        charge_mode,
+        create_time,
+        create_user,
+        modified_time,
+        modified_user,
+        deleted
+    </sql>
+    <select id="getById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyRenterConfig">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_renter_config
+        WHERE id = #{id}
+        AND deleted=0
+        limit 1
+    </select>
+    <select id="getByRenterId" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyRenterConfig">
+        SELECT
+        <include refid="base_column_list"/>
+        FROM pscp_renter_config
+        WHERE renter_id = #{renterId}
+        AND deleted=0
+        limit 1
+    </select>
+    <update id="updateSwitchStatus"
+            parameterType="com.edianniu.pscp.mis.domain.CompanyRenterConfig">
+        UPDATE pscp_renter_config
+        set 
+           switch_status=#{switchStatus},
+           modified_user = #{modifiedUser},
+           modified_time = #{modifiedTime}
+        WHERE 
+        id = #{id} and 
+        deleted=0
+    </update>
+
+</mapper>

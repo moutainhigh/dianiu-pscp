@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:test.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="rootRegistry" class="stc.skymobi.util.SimpleRegistry"/>
+
+    <bean id="eventBus" class="stc.skymobi.ebus.SoftBus" />
+
+    <bean id="appMBeanPrefix" class="java.lang.String" >
+        <constructor-arg value="test"/>
+    </bean>
+</beans>

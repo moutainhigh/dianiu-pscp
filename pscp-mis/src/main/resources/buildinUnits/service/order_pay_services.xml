@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+	<bean id="orderPayService" class="com.edianniu.pscp.mis.service.orderpay.impl.DefaultOrderPayService">
+       <property name="serviceMap">
+           <map>
+               <entry key="1" value-ref="rechargeOrderPayService"/>
+               <entry key="2" value-ref="socialWorkOrderPayService"/>
+               <entry key="3" value-ref="socialElectricianWorkOrderPayService"/>
+               <entry key="4" value-ref="needsOrderPayService"/>
+               <entry key="5" value-ref="projectOrderPayService"/>
+               <entry key="6" value-ref="renterChargeOrderPayService"/>
+           </map>
+       </property>
+    </bean>
+    <bean id="rechargeOrderPayService" class="com.edianniu.pscp.mis.service.orderpay.impl.RechargeOrderPayService">
+       
+    </bean>
+    <bean id="socialWorkOrderPayService" class="com.edianniu.pscp.mis.service.orderpay.impl.SocialWorkOrderPayService">
+      
+    </bean>
+    <bean id="socialElectricianWorkOrderPayService" class="com.edianniu.pscp.mis.service.orderpay.impl.SocialElectricianWorkOrderPayService">
+      
+    </bean>
+    <bean id="needsOrderPayService" class="com.edianniu.pscp.mis.service.orderpay.impl.NeedsOrderPayService">
+     
+    </bean>
+    <bean id="projectOrderPayService" class="com.edianniu.pscp.mis.service.orderpay.impl.ProjectOrderPayService">
+       
+    </bean>
+    <bean id="renterChargeOrderPayService" class="com.edianniu.pscp.mis.service.orderpay.impl.RenterChargeOrderPayService">
+       
+    </bean>
+</beans>

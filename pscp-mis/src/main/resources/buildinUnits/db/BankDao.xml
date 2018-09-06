@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.mis.dao.BankDao">
+
+    <select id="selectAllBank" resultType="com.edianniu.pscp.mis.domain.Bank">
+        SELECT * FROM pscp_bank WHERE deleted = 0
+    </select>
+    <select id="getBankIdToCardIcon" resultType="map">
+        SELECT
+        id, card_icon AS "cardIcon"
+        FROM pscp_bank
+        WHERE deleted = 0
+    </select>
+    <select id="getBankIdToName" resultType="map">
+        SELECT
+        id, name
+        FROM pscp_bank
+        WHERE deleted = 0
+    </select>
+    <select id="selectAllBankType" resultType="com.edianniu.pscp.mis.bean.wallet.BankType">
+        SELECT
+        id, name
+        FROM pscp_bank
+        WHERE deleted = 0
+    </select>
+</mapper>

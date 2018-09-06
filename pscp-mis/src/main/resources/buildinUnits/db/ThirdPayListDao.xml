@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.mis.dao.ThirdPayListDao">
+	
+	<select id="getPayList" resultType="com.edianniu.pscp.mis.bean.pay.PayList">
+		SELECT description as desc,name,type,status FROM edn_base_pay_list WHERE deleted = 0 and status = 0 ORDER BY create_time DESC
+	</select>
+	
+	<select id="getPayListDelWalletPay" resultType="com.edianniu.pscp.mis.bean.pay.PayList">
+		SELECT description as desc,name,type,status FROM edn_base_pay_list WHERE deleted = 0 and type !='walletPay' and
+		status = 0 ORDER BY create_time DESC
+	</select>
+	
+</mapper>

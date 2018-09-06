@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.PayTypeDao">
+
+    <select id="getPayTypes"
+            resultType="com.edianniu.pscp.mis.domain.PayType">
+        SELECT
+            id,
+            type,
+            name,
+            description,
+            status
+        FROM pscp_pay_type t
+        WHERE t.deleted = 0 order by t.order_num
+    </select>
+</mapper>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.mis.dao.CommonAttachmentDao">
+    <sql id="Base_Column_List">
+        id, foreign_key, company_id, member_id, business_type, type, fid, order_num,
+        is_open, create_time, create_user, deleted
+    </sql>
+
+    <select id="getAttachmentById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CommonAttachment">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_common_attachment
+        WHERE deleted=0 AND id = #{id}
+        ORDER BY order_num DESC, create_time DESC
+    </select>
+
+    <select id="queryListAttachment"
+            resultType="com.edianniu.pscp.mis.domain.CommonAttachment"
+            parameterType="com.edianniu.pscp.mis.bean.attachment.common.AttachmentQuery">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_common_attachment
+        <where>
+            deleted = 0
+            <if test="businessType != null">AND business_type = #{businessType}</if>
+            <if test="foreignKey != null">AND foreign_key = #{foreignKey}</if>
+            <if test="companyId != null">AND company_id = #{companyId}</if>
+            <if test="memberId != null">AND member_id = #{memberId}</if>
+            <if test="type != null">AND type = #{type}</if>
+        </where>
+        ORDER BY order_num ASC, create_time DESC
+        <if test="offset != null and pageSize != null">
+            limit #{pageSize} offset #{offset}
+        </if>
+    </select>
+
+    <insert id="saveBatchEntity" parameterType="list">
+        <selectKey resultType="long" keyProperty="id">
+            SELECT currval('seq_pscp_common_attachment') as id;
+        </selectKey>
+
+        INSERT INTO pscp_common_attachment(<include refid="Base_Column_List"/>)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (nextval('seq_pscp_common_attachment'), #{item.foreignKey}, #{item.companyId},
+            #{item.memberId}, #{item.businessType}, #{item.type}, #{item.fid},
+            #{item.orderNum}, #{item.isOpen}, now(), #{item.createUser}, 0)
+        </foreach>
+    </insert>
+
+    <delete id="deleteBatchEntity">
+        UPDATE pscp_common_attachment
+        SET deleted=-1, modified_time=now(), modified_user=#{modifiedUser}
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateBatchEntity">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update pscp_common_attachment
+            <set>
+                <if test="item != null and item.fid != null">
+                    fid = #{item.fid},
+                </if>
+                <if test="item != null and item.isOpen != null">
+                    is_open = #{item.isOpen},
+                </if>
+                <if test="item != null and item.orderNum != null">
+                    order_num = #{item.orderNum},
+                </if>
+                modified_user = #{item.modifiedUser},
+                modified_time = #{item.modifiedTime}
+            </set>
+            where id = #{item.id}
+        </foreach>
+    </update>
+</mapper>

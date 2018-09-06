@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.edianniu.pscp.mis.dao.ElectricianWorkExperienceDao">
+    <sql id="Base_Column_List">
+        id, resume_id, start_time, end_time, company_name, work_content, order_num,
+        ext, create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <insert id="saveEntity" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkExperience">
+        INSERT INTO pscp_electrician_work_experience(
+        id,resume_id, start_time, end_time, company_name, work_content, order_num,
+        ext, create_time, create_user, deleted)
+        VALUES (
+        nextval('seq_pscp_electrician_work_experience'),
+        #{resumeId}, #{startTime}, #{endTime},#{companyName},#{workContent},
+        #{orderNum}, #{ext}, now(),#{createUser}, #{deleted}
+        )
+
+        <selectKey keyProperty="id" resultType="long">
+            SELECT currval('seq_pscp_electrician_work_experience') as id;
+        </selectKey>
+    </insert>
+
+    <update id="updateEntity" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkExperience">
+        UPDATE pscp_electrician_work_experience
+        <set>
+            <if test="companyName != null">company_name = #{companyName},</if>
+            <if test="workContent != null">work_content = #{workContent},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="modifiedTime != null">modified_time = now(),</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+        </set>
+        <where>
+            id = #{id}
+            <if test="resumeId !=null">AND resume_id = #{resumeId}</if>
+        </where>
+    </update>
+
+    <select id="getAllListByResumeId" parameterType="Long"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianWorkExperience">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_electrician_work_experience
+        WHERE deleted = 0 AND resume_id = #{resumeId}
+        ORDER BY start_time DESC, create_time DESC
+    </select>
+
+    <select id="getEntityById" parameterType="Long"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianWorkExperience">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_electrician_work_experience
+        WHERE deleted = 0 AND id = #{id} AND resume_id = #{resumeId}
+    </select>
+
+    <select id="selectCountByCompanyName" parameterType="map" resultType="int">
+        SELECT count(1) FROM pscp_electrician_work_experience
+        WHERE deleted = 0
+        AND resume_id = #{resumeId}
+        AND company_name = #{companyName}
+        <if test="id != null">AND id != #{id}</if>
+    </select>
+</mapper>

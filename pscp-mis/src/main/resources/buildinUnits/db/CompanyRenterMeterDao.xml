@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CompanyRenterMeterDao">
+    <sql id="base_column_list">
+        t1.id,
+        t1.renter_id,
+        t2.meter_id,
+        t1.switch_status,
+        t1.rate,
+        t1.create_time,
+        t1.create_user,
+        t1.modified_time,
+        t1.modified_user,
+        t1.deleted
+    </sql>
+
+    <select id="getById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyRenterMeter">
+        SELECT
+        <include refid="base_column_list"/>
+        from pscp_renter_meter t1 left join pscp_company_meter t2 on t1.meter_id=t2.id
+        WHERE t1.id = #{id}
+        AND t1.deleted=0 and t2.deleted=0
+        limit 1
+    </select>
+    <select id="getByRenterId" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyRenterMeter">
+        SELECT
+        <include refid="base_column_list"/>
+        from pscp_renter_meter t1 left join pscp_company_meter t2 on t1.meter_id=t2.id
+        WHERE t1.renter_id = #{renterId}
+        AND t1.deleted=0 and t2.deleted=0
+    </select>
+   <select id="getByRenterIdAndMeterNo" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.CompanyRenterMeter">
+        SELECT
+        <include refid="base_column_list"/>
+        from pscp_renter_meter t1 left join pscp_company_meter t2 on t1.meter_id=t2.id
+        WHERE 
+              t1.renter_id = #{renterId} and 
+              t1.deleted=0 and 
+              t2.deleted=0
+              limit 1
+    </select>
+   <update id="updateSwitchStatus"
+            parameterType="com.edianniu.pscp.mis.domain.CompanyRenterMeter">
+        UPDATE pscp_renter_meter
+        set 
+           switch_status=#{switchStatus},
+           modified_user = #{modifiedUser},
+           modified_time = #{modifiedTime}
+        WHERE 
+        id = #{id} and 
+        deleted=0
+    </update>
+
+</mapper>

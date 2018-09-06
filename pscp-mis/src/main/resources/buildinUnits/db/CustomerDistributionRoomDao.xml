@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.edianniu.pscp.mis.dao.CustomerDistributionRoomDao">
+    <select id="getEntityById" resultType="com.edianniu.pscp.mis.domain.CustomerDistributionRoom">
+        select * from pscp_customer_distribution_room where id = #{value} and deleted=0
+    </select>
+
+    <select id="queryList" resultType="com.edianniu.pscp.mis.domain.CustomerDistributionRoom">
+        select * from pscp_customer_distribution_room where deleted=0 order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{limit} offset #{offset}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select count(*) from pscp_customer_distribution_room  where deleted=0
+    </select>
+
+    <select id="getRoomInfoByIds" resultType="com.edianniu.pscp.mis.bean.workorder.room.RoomInfo">
+        SELECT id, name
+        FROM pscp_customer_distribution_room
+        WHERE deleted=0 AND id IN
+        <foreach item="id" index="index" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="getRoomInfoByMap" resultType="com.edianniu.pscp.mis.bean.workorder.room.RoomInfo">
+        SELECT id, name
+        FROM pscp_customer_distribution_room
+        WHERE deleted=0
+        <if test="companyId != null">AND company_id = #{companyId}</if>
+    </select>
+
+</mapper>

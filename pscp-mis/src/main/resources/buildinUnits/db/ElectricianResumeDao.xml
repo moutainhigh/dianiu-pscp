@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--suppress ALL -->
+<mapper namespace="com.edianniu.pscp.mis.dao.ElectricianResumeDao">
+    <sql id="Base_Column_List">
+        id, electrician_id, diploma, working_years, city, expected_fee, synopsis,
+        ext, create_time, create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <update id="updateEntity" parameterType="com.edianniu.pscp.mis.domain.ElectricianResume">
+        UPDATE pscp_electrician_resume
+        <set>
+            <if test="diploma != null">diploma = #{diploma},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="synopsis != null">synopsis = #{synopsis},</if>
+            <if test="workingYears != null">working_years = #{workingYears},</if>
+            <if test="expectedFee != null">expected_fee = #{expectedFee},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="modifiedTime != null">modified_time = #{modifiedTime},</if>
+        </set>
+        WHERE deleted = 0 AND id = #{id}
+    </update>
+
+    <select id="getEntityByUid" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianResume">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_electrician_resume
+        WHERE deleted = 0
+        AND electrician_id = #{uid}
+    </select>
+
+    <select id="getEntityById" parameterType="java.lang.Long"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianResume">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM pscp_electrician_resume
+        WHERE deleted = 0
+        AND id = #{id}
+    </select>
+
+    <insert id="saveEntity" parameterType="com.edianniu.pscp.mis.domain.ElectricianResume">
+        INSERT INTO pscp_electrician_resume(
+        id,electrician_id, create_time, create_user, deleted)
+        VALUES (
+        nextval('seq_pscp_electrician_resume'),
+        #{electricianId}, now(), #{createUser}, 0
+        )
+
+        <selectKey keyProperty="id" resultType="long">
+            SELECT currval('seq_pscp_electrician_resume') as id;
+        </selectKey>
+    </insert>
+</mapper>

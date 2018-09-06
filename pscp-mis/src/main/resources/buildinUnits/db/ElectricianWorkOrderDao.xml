@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.ElectricianWorkOrderDao">
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkOrder">
+        INSERT INTO pscp_electrician_work_order(
+        id ,
+        work_order_id ,
+        order_id ,
+        check_option ,
+        type ,
+        social_work_order_id ,
+        work_order_leader ,
+        electrician_id ,
+        status ,
+        settlement_pay_status,
+        company_id ,
+        create_time ,
+        create_user ,
+        deleted
+        )
+        VALUES(
+        nextval('seq_pscp_electrician_work_order'),
+        #{workOrderId},
+        #{orderId},
+        #{checkOption},
+        #{type},
+        #{socialWorkOrderId},
+        #{workOrderLeader},
+        #{electricianId},
+        #{status},
+        #{settlementPayStatus},
+        #{companyId},
+        now(),
+        #{createUser},
+        #{deleted}
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_electrician_work_order') as id;
+        </selectKey>
+    </insert>
+    <select id="queryList" parameterType="com.edianniu.pscp.mis.bean.query.electricianworkorder.ListQuery"
+            resultType="com.edianniu.pscp.mis.bean.electricianworkorder.ListQueryResultInfo">
+        SELECT
+        <include refid="work_order_columns"/>
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_work_order tt ON t.work_order_id = tt."id"
+        WHERE t.deleted = 0 AND tt.deleted = 0 AND t.electrician_id = #{uid}
+        <if test="status != null and status.length!=0">
+            AND t.status in
+            <foreach item="item" index="index" collection="status" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="companyId != null">AND t.company_id = #{companyId}</if>
+        <if test="checkOptionId != null">AND t.check_option_id = #{checkOptionId}</if>
+        <if test="workOrderLeader != null">AND t.work_order_leader = #{workOrderLeader}</if>
+        <!--
+        <if test="latitude != null and longitude != null">
+            and earth_box(ll_to_earth(#{latitude},#{longitude}),#{distance}) @> ll_to_earth(t.latitude, t.longitude)
+        </if>
+        -->
+        ORDER BY t.create_time DESC
+        limit #{pageSize} offset #{offset}
+    </select>
+
+    <select id="queryCount" resultType="integer"
+            parameterType="com.edianniu.pscp.mis.bean.query.electricianworkorder.ListQuery">
+        SELECT COUNT(1) FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_work_order tt ON t.work_order_id = tt."id"
+        WHERE t.deleted = 0 AND tt.deleted = 0 AND t.electrician_id = #{uid}
+        <if test="status != null and status.length!=0">
+            AND t.status in
+            <foreach item="item" index="index" collection="status" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="companyId != null">AND t.company_id = #{companyId}</if>
+        <if test="checkOptionId != null">AND t.check_option_id = #{checkOptionId}</if>
+        <if test="workOrderLeader != null">AND t.work_order_leader = #{workOrderLeader}</if>
+    </select>
+
+    <select id="getByUidAndOrderId" parameterType="map"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianWorkOrder">
+        SELECT
+        <include refid="electrician_work_order_columns"/>
+        FROM pscp_electrician_work_order t
+        WHERE t.deleted = 0 AND t.electrician_id = #{uid} AND t.order_id = #{orderId}
+    </select>
+    <select id="getByOrderId" parameterType="map"
+            resultType="com.edianniu.pscp.mis.domain.ElectricianWorkOrder">
+        SELECT
+        <include refid="electrician_work_order_columns"/>
+        FROM pscp_electrician_work_order t
+        WHERE t.deleted = 0 AND t.order_id = #{orderId}
+    </select>
+    <select id="getSocialWorkOrderOrderIdByOrderId" parameterType="map" resultType="java.lang.String">
+         select order_id from pscp_social_work_order t1
+         where 
+         t1.id=(select t2.social_work_order_id from pscp_electrician_work_order t2 
+         where t2.order_id=#{orderId} and t2.deleted=0)
+         and t1.deleted=0
+    </select>
+
+    <select id="queryElectricianList"
+            resultType="com.edianniu.pscp.mis.bean.electricianworkorder.ElectricianWorkOrderInfo">
+        SELECT
+        t3.status,
+        t3.order_id as orderId,
+        t3.type,
+        t3.user_name AS name,
+        t3.member_id AS uid,
+        t3.check_option AS checkOption,
+        t3.social_work_order_id AS socialWorkOrderId,
+        t4.mobile
+        FROM
+        (
+        SELECT
+        t1.status,
+        t1.order_id,
+        t1.type,
+        t1.check_option,
+        t1.social_work_order_id,
+        t2.user_name,
+        t2.member_id
+        FROM
+        pscp_electrician_work_order t1
+        LEFT JOIN pscp_electrician t2 ON t1.electrician_id = t2.member_id
+        where
+        t1.work_order_id=#{workOrderId} and
+        t1.deleted=0 and t2.deleted=0 AND t1.work_order_leader = 0
+        ) t3
+        LEFT JOIN pscp_member t4 ON t3.member_id = t4. ID where t4.deleted=0
+        <if test="statuss != null and statuss.length!=0">
+            and t3.status in
+            <foreach item="item" index="index" collection="statuss" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getCountByUidAndStatus" resultType="integer">
+        select count(*) from pscp_electrician_work_order t where t.electrician_id = #{uid}
+        <if test="statuss != null and statuss.length!=0">
+            and t.status in
+            <foreach item="item" index="index" collection="statuss" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        and deleted=0
+    </select>
+    <select id="getCountBySocialWorkOrderIdAndStatus" resultType="integer">
+        select count(*) from pscp_electrician_work_order t where t.social_work_order_id = #{socialWorkOrderId}
+        <if test="statuss != null and statuss.length!=0">
+            and t.status in
+            <foreach item="item" index="index" collection="statuss" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        and deleted=0
+    </select>
+    <select id="getTotalActualFeeBySocialWorkOrderId" resultType="double">
+        select COALESCE(sum(actual_fee),0.00) from pscp_electrician_work_order t where t.social_work_order_id =
+        #{socialWorkOrderId}
+        <if test="statuss != null and statuss.length!=0">
+            and t.status in
+            <foreach item="item" index="index" collection="statuss" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        and deleted=0
+    </select>
+
+    <select id="getTotalLiquidatedFeeByUid" resultType="double">
+        select COALESCE(sum(actual_fee),0.00) from pscp_electrician_work_order t 
+        where 
+        t.electrician_id = #{uid}
+        and t.status=5
+        and deleted=0
+    </select>
+    <select id="getTakedSocialWorkOrderIdsByUid" resultType="Long">
+        select social_work_order_id from pscp_electrician_work_order t where t.electrician_id = #{uid}
+        and deleted=0
+    </select>
+
+    <select id="getCountByUidAndSocialWorkOrderIdAndStatus" resultType="integer">
+        select count(*) from pscp_electrician_work_order t where t.electrician_id = #{uid}
+        and t.social_work_order_id=#{socialWorkOrderId}
+        <if test="statuss != null and statuss.length!=0">
+            and t.status in
+            <foreach item="item" index="index" collection="statuss" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        and deleted=0
+    </select>
+
+    <select id="getProjectLeader" parameterType="long" resultType="map">
+        SELECT
+        m.id AS uid,
+        e.user_name AS "projectLeader",
+        m.mobile AS "contactTel"
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        LEFT JOIN pscp_member m ON e.member_id = m.id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND m.deleted = 0
+        AND t.work_order_leader = 1
+        AND t.work_order_id = #{workOrderId}
+        LIMIT 1
+    </select>
+
+    <select id="getAllElectricianInfo" parameterType="map" resultType="java.util.Map">
+        SELECT m.id AS uid, e.user_name AS projectLeader, m.mobile AS contactTel
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON t.electrician_id = e.member_id
+        LEFT JOIN pscp_member m ON e.member_id = m.id
+        WHERE t.deleted = 0
+        AND e.deleted = 0
+        AND m.deleted = 0
+        AND t.work_order_id = #{workOrderId}
+        <if test="uid != null">AND t.electrician_id != #{uid}</if>
+    </select>
+
+    <select id="selectAllCheckOption" parameterType="map" resultType="map">
+        SELECT
+        t.electrician_id AS "electricianId",
+        e.user_name AS "userName",
+        t.check_option as "checkOption",
+        t.check_option_id as "checkOptionId",
+        t.work_order_leader AS "workOrderLeader"
+        FROM pscp_electrician_work_order t
+        LEFT JOIN pscp_electrician e ON e.member_id = t.electrician_id
+        <where>
+            t.deleted = 0 AND e.deleted = 0
+            <if test="type != null">AND type = #{type}</if>
+            <if test="workOrderId != null">AND work_order_id = #{workOrderId}</if>
+        </where>
+    </select>
+    <select id="queryCountSocial" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM pscp_electrician_work_order
+        WHERE deleted = 0 AND social_work_order_id &gt; 0 AND work_order_id = #{workOrderId}
+    </select>
+
+    <update id="updateSettlementPayStatus" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkOrder">
+        UPDATE pscp_electrician_work_order
+        <set>
+            <if test="settlementPayStatus != null">settlement_pay_status = #{settlementPayStatus},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="modifiedUser != null">modified_time = now(),</if>
+        </set>
+        <where>
+            deleted = 0 and id=#{id} and COALESCE(to_char(modified_time, 'yyyyMMddHHmmssSS'),'0')=#{modifiedTimeStr}
+        </where>
+    </update>
+    <update id="updateEntityByCondition" parameterType="com.edianniu.pscp.mis.domain.ElectricianWorkOrder">
+        UPDATE pscp_electrician_work_order
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="confirmTime != null">confirm_time = #{confirmTime},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="finishTime != null">finish_time = #{finishTime},</if>
+            <if test="modifiedUser != null">modified_user = #{modifiedUser},</if>
+            <if test="modifiedUser != null">modified_time = now(),</if>
+        </set>
+        <where>
+            deleted = 0
+            <if test="id != null">AND id = #{id}</if>
+            <if test="orderId != null">AND order_id = #{orderId}</if>
+            <if test="status != null">AND status != #{status}</if>
+            <if test="electricianId != null">AND electrician_id = #{electricianId}</if>
+        </where>
+    </update>
+    <sql id="work_order_columns">
+        t.id,
+        t.order_id as orderId,
+        t.check_option as checkOption,
+        t.work_order_id as workOrderId,
+        t.social_work_order_id as socialWorkOrderId,
+        to_char(t.create_time, 'yyyy-mm-dd') as pubTime,
+        t.status,
+        t.work_order_leader as workOrderLeader,
+        tt.type,
+        tt.name,
+        tt.content as description,
+        tt.address,
+        tt.latitude,
+        tt.longitude,
+        tt.safety_measures_other as safetyMeasuresOther,
+        tt.identification_other as hazardFactorOther,
+        earth_distance(ll_to_earth(tt.latitude, tt.longitude), ll_to_earth(#{latitude}, #{longitude})) as distance
+    </sql>
+    <sql id="electrician_work_order_columns">
+        t.id,
+        t.work_order_id,
+        t.order_id,
+        t.check_option,
+        t.type,
+        t.social_work_order_id,
+        t.work_order_leader,
+        t.electrician_id,
+        t.status,
+        t.settlement_pay_status,
+        t.actual_work_time,
+        t.actual_fee,
+        t.confirm_time,
+        t.begin_time,
+        t.finish_time,
+        t.evaluate_time,
+        t.cancle_time,
+        t.memo,
+        t.company_id,
+        COALESCE (to_char(t.modified_time, 'yyyyMMddHHmmssSS'), '0') as modifiedTimeStr
+    </sql>
+</mapper>

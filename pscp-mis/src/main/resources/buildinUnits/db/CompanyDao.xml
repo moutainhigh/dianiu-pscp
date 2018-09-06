@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.mis.dao.CompanyDao">
+    <sql id="company_column_list">
+        id, identifier, member_id,member_type, user_name, id_card_no, id_card_front_img,
+        id_card_back_img, name, type, legal_person, business_licence, business_licence_img,
+        contacts, mobile, email, phone, province_id, city_id,organization_code_img,
+        area_id, address, website, application_letter_fid, status, remark,audit_time,audit_user, create_time,
+        create_user, modified_time, modified_user, deleted
+    </sql>
+
+    <select id="getById" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.Company">
+        SELECT
+        <include refid="company_column_list"/>
+        FROM pscp_company
+        WHERE deleted = 0 AND id = #{id}
+    </select>
+
+    <select id="getByName" parameterType="java.lang.String"
+            resultType="com.edianniu.pscp.mis.domain.Company">
+        SELECT
+        <include refid="company_column_list"/>
+        FROM pscp_company
+        WHERE deleted = 0 AND name = #{name}
+    </select>
+    <select id="getCountByName" parameterType="map"
+            resultType="int">
+        SELECT
+        count(*)
+        FROM pscp_company t
+        WHERE 
+        t.deleted = 0 AND t.name = #{name} 
+        <if test="statuss != null and statuss.length!=0">
+            AND t.status in
+            <foreach item="item" index="index" collection="statuss" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+    <select id="getByMemberId" parameterType="long"
+            resultType="com.edianniu.pscp.mis.domain.Company">
+        SELECT
+        <include refid="company_column_list"/>
+        FROM pscp_company
+        WHERE deleted = 0 AND member_id = #{memberId}
+    </select>
+    <insert id="save" parameterType="com.edianniu.pscp.mis.domain.Company">
+        insert into pscp_company
+        (
+        id,
+        identifier,
+        member_id,
+        member_type,
+        user_name,
+        id_card_no,
+        id_card_front_img,
+        id_card_back_img,
+        organization_code_img,
+        name,
+        type,
+        legal_person,
+        business_licence,
+        business_licence_img,
+        contacts,
+        mobile,
+        email,
+        phone,
+        province_id,
+        city_id,
+        area_id,
+        address,
+        website,
+        application_letter_fid,
+        status,
+        remark,
+        create_time,
+        create_user,
+        deleted
+        )
+        values
+        (
+        nextval('seq_pscp_company'),
+        #{identifier},
+        #{memberId},
+        #{memberType},
+        #{userName},
+        #{idCardNo},
+        #{idCardFrontImg},
+        #{idCardBackImg},
+        #{organizationCodeImg},
+        #{name},
+        #{type},
+        #{legalPerson},
+        #{businessLicence},
+        #{businessLicenceImg},
+        #{contacts},
+        #{mobile},
+        #{email},
+        #{phone},
+        #{provinceId},
+        #{cityId},
+        #{areaId},
+        #{address},
+        #{website},
+        #{applicationLetterFid},
+        #{status},
+        #{remark},
+        now(),
+        #{createUser},
+        0
+        )
+        <selectKey resultType="java.lang.Long" keyProperty="id">
+            SELECT currval('seq_pscp_company') as id;
+        </selectKey>
+
+    </insert>
+    <update id="update" parameterType="com.edianniu.pscp.mis.domain.Company">
+        update pscp_company
+        <set>
+            <if test="identifier != null">identifier = #{identifier},</if>
+            <if test="memberId != null">member_id = #{memberId},</if>
+            <if test="memberType != null">member_type = #{memberType},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="idCardNo != null">id_card_no = #{idCardNo},</if>
+            <if test="idCardFrontImg != null">id_card_front_img = #{idCardFrontImg},</if>
+            <if test="idCardBackImg != null">id_card_back_img = #{idCardBackImg},</if>
+            <if test="organizationCodeImg != null">organization_code_img = #{organizationCodeImg},</if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="type != null">type= #{type},</if>
+            <if test="legalPerson != null">legal_person = #{legalPerson},</if>
+            <if test="businessLicence != null">business_licence = #{businessLicence},</if>
+            <if test="businessLicenceImg != null">business_licence_img = #{businessLicenceImg},</if>
+            <if test="contacts != null">contacts = #{contacts},</if>
+            <if test="mobile != null">mobile = #{mobile},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="provinceId != null">province_id = #{provinceId},</if>
+            <if test="cityId != null">city_id = #{cityId},</if>
+            <if test="areaId != null">area_id = #{areaId},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="website != null">website = #{website},</if>
+            <if test="applicationLetterFid != null">application_letter_fid = #{applicationLetterFid},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="auditUser != null">audit_user = #{auditUser},</if>
+            modified_user = #{modifiedUser},
+            modified_time = now()
+        </set>
+        where member_id=#{memberId} and deleted=0;
+    </update>
+
+</mapper>
