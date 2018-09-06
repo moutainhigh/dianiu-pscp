@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Specification-Title: pscp-renter-mis
+Specification-Version: V1.0.0
+Implementation-Title: pscp-renter-mis
+Implementation-Version: V1.0.0-unknown-1527644341575-unformal
+Specification-Vendor: EDIANNIU CO.,LTD
+Implementation-Vendor: EDIANNIU CO.,LTD
+Main-Class: com.edianniu.pscp.renter.mis.AppServer
+Class-Path: ./
+

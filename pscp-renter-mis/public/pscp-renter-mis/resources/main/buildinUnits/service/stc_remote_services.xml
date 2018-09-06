@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+   	<bean id="stcProtocol"
+   		class="stc.skymobi.remote.StcProtocol"/>
+	<bean class="stc.skymobi.remote.spring.ServiceScannerConfigurer">
+		<property name="basePackage" value="com.edianniu.pscp.mis.service" />
+		<property name="stcProtocol" ref="stcProtocol"/>
+		<property name="registryServiceName" value="registryService"/>
+	</bean>
+</beans>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.renter.mis.dao.RenterConfigDao">
+
+	<select id="queryCount" parameterType="map"
+			resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM pscp_renter_config
+		WHERE deleted = 0
+		<if test="id != null">AND id = #{id}</if>
+		<if test="renterId != null">AND renter_id = #{renterId}</if>
+	</select>
+	
+    <insert id="save" parameterType="com.edianniu.pscp.renter.mis.domain.RenterConfig">
+		INSERT INTO pscp_renter_config(
+		id,
+		renter_id,
+		charge_mode,
+		amount_limit,
+		start_time,
+		end_time,
+		next_bill_create_time,
+		switch_status,
+		sub_charge_mode,
+		base_price,
+		apex_price,
+		peak_price,
+		flat_price,
+		valley_price,
+		create_time,
+		create_user,
+		deleted
+		)
+		VALUES(
+		nextval('seq_pscp_renter_config'),
+		#{renterId},
+		#{chargeMode},
+		#{amountLimit},
+		#{startTime},
+		#{endTime},
+		#{nextBillCreateTime},
+		#{switchStatus},
+		#{subChargeMode},
+		#{basePrice},
+		#{apexPrice},
+		#{peakPrice},
+		#{flatPrice},
+		#{valleyPrice},
+		now(),
+		#{createUser},
+		#{deleted}
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_renter_config') as id;
+		</selectKey>
+	</insert>
+
+	<update id="update" parameterType="com.edianniu.pscp.renter.mis.domain.RenterConfig">
+		UPDATE pscp_renter_config
+		<set>
+			<if test="chargeMode != null">charge_mode = #{chargeMode},</if>
+			<if test="amountLimit != null">amount_limit = #{amountLimit},</if>
+			<if test="switchStatus != null">switch_status = #{switchStatus},</if>
+			<if test="subChargeMode != null">sub_charge_mode = #{subChargeMode},</if>
+			<if test="basePrice != null">base_price = #{basePrice},</if>
+			<if test="apexPrice != null">apex_price = #{apexPrice},</if>
+			<if test="peakPrice != null">peak_price = #{peakPrice},</if>
+			<if test="flatPrice != null">flat_price = #{flatPrice},</if>
+			<if test="valleyPrice != null">valley_price = #{valleyPrice},</if>
+			<if test="endTime != null">end_time = #{endTime},</if>
+			<if test="deleted != null">deleted = #{deleted},</if>
+			modified_user = #{modifiedUser},
+			modified_time = now()
+		</set>
+		WHERE deleted = 0
+		<if test="id != null">AND id = #{id}</if>
+		<if test="renterId != null">AND renter_id = #{renterId}</if>
+	</update>
+	<update id="updateBillTaskInfo"  parameterType="com.edianniu.pscp.renter.mis.domain.RenterConfig">
+    	UPDATE pscp_renter_config
+    	<set>
+    	    prev_bill_create_time = #{prevBillCreateTime},
+    	    next_bill_create_time = #{nextBillCreateTime},
+    	    bill_task_status=#{billTaskStatus},
+    	    bill_task_excute_time=#{billTaskExcuteTime},
+    		modified_user    = #{modifiedUser},
+    		modified_time    = now()
+    	</set>
+    	WHERE  id = #{id}  AND  deleted = 0
+    	
+    </update>
+    <update id="updateBillTaskStatus">
+    	UPDATE pscp_renter_config
+    	<set>
+    	    bill_task_status = #{billTaskStatus},
+    		modified_user    = #{modifiedUser},
+    		modified_time    = now()
+    	</set>
+    	WHERE  id = #{id}  AND  deleted = 0
+    	
+    </update>
+    <select id="queryObject" parameterType="map"
+    		resultType="com.edianniu.pscp.renter.mis.domain.RenterConfig">
+    	SELECT * FROM pscp_renter_config
+    	WHERE deleted = 0
+    	<if test="renterId != null">AND renter_id = #{renterId}</if>
+    	LIMIT 1
+    </select>
+    
+</mapper>

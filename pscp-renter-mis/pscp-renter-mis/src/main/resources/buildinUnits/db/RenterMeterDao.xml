@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.renter.mis.dao.RenterMeterDao">
+
+	<select id="rateSum" parameterType="java.lang.Long"
+			resultType="java.lang.Double">
+		SELECT COALESCE(SUM(rate), 0) FROM pscp_renter_meter
+		WHERE meter_id = #{meterId} AND deleted = 0
+	</select>
+	
+	<select id="getRate" resultType="java.lang.Double">
+		SELECT rate FROM pscp_renter_meter
+		WHERE meter_id = #{meterId} AND renter_id = #{renterId} AND deleted = 0
+	</select>
+	
+	<select id="queryList" parameterType="map"
+			resultType="com.edianniu.pscp.renter.mis.domain.RenterMeter">
+		SELECT m.* , 
+		b.name AS buildingName, 
+		c.meter_id AS meterNo, 
+		c.multiple AS multiple,
+		c.name AS name,
+		l.name AS lineName
+		FROM pscp_renter_meter m
+		LEFT JOIN pscp_company_building b ON b.id = m.building_id AND b.deleted = 0
+		LEFT JOIN pscp_company_meter c ON c.id = m.meter_id AND c.deleted = 0
+		LEFT JOIN pscp_company_line l ON c.id = l.meter_id AND l.deleted = 0
+		WHERE m.deleted = 0
+		<if test="renterId != null">AND m.renter_id = #{renterId}</if>
+		ORDER BY m.create_time desc
+		<if test="offset != null and limit != null">
+			limit #{limit} offset #{offset}
+		</if>
+	</select>
+	
+	<select id="queryTotal" parameterType="map"
+		resultType="int">
+		SELECT COUNT(1) FROM pscp_renter_meter m
+		LEFT JOIN pscp_company_building b ON b.id = m.building_id AND b.deleted = 0
+		LEFT JOIN pscp_company_meter c ON c.id = m.meter_id AND c.deleted = 0
+		LEFT JOIN pscp_company_line l ON c.id = l.meter_id AND l.deleted = 0
+		WHERE m.deleted = 0
+		<if test="renterId != null">AND m.renter_id = #{renterId}</if>
+	</select>
+	
+	<select id="countByCompanyMeterId" parameterType="java.lang.Long" resultType="int">
+		SELECT COUNT(1) FROM pscp_renter_meter
+		WHERE meter_id = #{companyMeterId} 
+		AND deleted = 0 
+	</select>
+	
+	<insert id="saveBatch" parameterType="java.util.List">
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_renter_meter') as id;
+		</selectKey>
+		INSERT INTO pscp_renter_meter(<include refid="sql_column"/>)
+		VALUES
+		<foreach collection="list" item="item" index="index" separator=",">
+			(
+			nextval('seq_pscp_renter_meter'),
+			#{item.renterId},
+			#{item.buildingId},
+			#{item.meterId},
+			#{item.rate},
+			now(),
+			#{item.createUser},
+			#{item.deleted}
+			)
+		</foreach>
+	</insert>
+
+	<delete id="update" parameterType="com.edianniu.pscp.renter.mis.domain.RenterMeter">
+		UPDATE pscp_renter_meter
+		<set>
+			<if test="deleted != null">deleted = #{deleted},</if>
+			modified_user = #{modifiedUser},
+			modified_time = now()
+		</set>
+		WHERE renter_id = #{renterId} AND deleted = 0
+	</delete>
+	
+    <sql id="sql_column">
+		id,
+        renter_id,
+        building_id,
+        meter_id,
+        rate,
+        create_time,
+        create_user,
+        deleted
+	</sql>
+</mapper>

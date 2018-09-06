@@ -1,0 +1,188 @@
+apply from: 'http://111.1.17.197:8080/devconf/build-app.gradle'
+apply plugin: 'java'
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
+configurations {
+    all*.exclude group: 'org.slf4j', module: 'slf4j-log4j12'
+    all*.exclude group: 'log4j', module: 'log4j'
+    all*.exclude group: 'commons-logging', module: 'commons-logging'
+    all { resolutionStrategy.cacheChangingModulesFor 30, 'minutes' }
+}
+
+
+task makeJar(type: Jar, dependsOn: classes) {
+    //指定生成的jar名
+    println jarVersion
+    baseName 'pscp-renter-mis-client'
+    version = jarVersion
+
+    into('com/edianniu/pscp/renter/mis/bean') {
+        from("/bin/com/edianniu/pscp/renter/mis/bean") {
+            //exclude('request')
+            //exclude('response')
+        }
+    }
+    
+    into('com/edianniu/pscp/renter/mis/service/dubbo') {
+        from("/bin/com/edianniu/pscp/renter/mis/service/dubbo") {
+            exclude('impl')
+        }
+    }
+    //include
+
+    destinationDir = rootDir
+}
+
+task makeSourcesJar(type: Jar, dependsOn: classes) {
+    println jarVersion
+    baseName 'pscp-renter-mis-client'
+    version = jarVersion
+    classifier = 'sources'
+    into('com/edianniu/pscp/renter/mis/bean') {
+        from("src/main/java/com/edianniu/pscp/renter/mis/bean") {
+            //exclude('request')
+            //exclude('response')
+        }
+    }
+    into('com/edianniu/pscp/renter/mis/service/dubbo') {
+        from("src/main/java/com/edianniu/pscp/renter/mis/service/dubbo") {
+            exclude('impl')
+        }
+    }
+    //include
+
+    destinationDir = rootDir
+}
+
+task makeJavadocJar(type: Jar, dependsOn: javadoc) {
+    println jarVersion
+    baseName 'pscp-renter-mis-client'
+    version = jarVersion
+    classifier = 'javadoc'
+    into('com/edianniu/pscp/renter/mis/bean') {
+        from("src/main/java/com/edianniu/pscp/renter/mis/bean") {
+            //exclude('request')
+            //exclude('response')
+        }
+    }
+    into('com/edianniu/pscp/renter/mis/service/dubbo') {
+        from("src/main/java/com/edianniu/pscp/renter/mis/service/dubbo") {
+            exclude('impl')
+        }
+    }
+    destinationDir = rootDir
+}
+
+artifacts {
+    archives makeJar
+    archives makeSourcesJar
+    archives makeJavadocJar
+}
+dependencies {
+    /* commons */
+    compile "commons-beanutils:commons-beanutils:1.9.1"
+    compile 'org.apache.commons:commons-lang3:3.3.2'
+    compile 'commons-lang:commons-lang:2.6'
+    compile "commons-io:commons-io:2.4"
+    compile "org.apache.commons:commons-pool2:2.2"
+    compile "com.google.guava:guava:17.0"
+
+    compile 'com.alibaba:fastjson:1.1.41'
+
+    compile "io.netty:netty-all:4.0.19.Final"
+    compile 'redis.clients:jedis:2.5.1'
+    compile "org.apache.curator:curator-recipes:2.5.0"
+
+    compile "org.slf4j:jcl-over-slf4j:1.7.7"
+    compile "org.slf4j:log4j-over-slf4j:1.7.7"
+    compile "ch.qos.logback:logback-classic:1.1.2"
+    compile("org.logback-extensions:logback-ext-spring:0.1.2") { transitive = false }
+
+    /* basics */
+    compile "org.springframework:spring-context-support:${springVersion}"
+    compile "org.springframework:spring-orm:${springVersion}"
+    compile "org.springframework:spring-test:${springVersion}"
+    runtime "cglib:cglib:3.0"
+    runtime "org.aspectj:aspectjweaver:1.7.3"
+
+    /* skymobi */
+    compile group: 'org.jocean', name: 'jocean-common', version: 'latest.release', configuration: 'compile', transitive: false
+    compile group: 'skymobi.stc', name: 'stc-jmx', version: 'latest.release', configuration: 'compile', transitive: false
+    compile group: 'skymobi.stc', name: 'stc-io', version: 'latest.release', configuration: 'compile', transitive: false
+    compile group: 'skymobi.stc', name: 'stc-unit-repo', version: 'latest.release', configuration: 'compile', transitive: false
+    compile group: 'skymobi.stc', name: 'stc-db', version: 'latest.release', configuration: 'compile', transitive: false
+
+    compile('skymobi.stc:stc-util:1.1.1') { transitive = false }
+    compile('skymobi.stc:stc-ebus:latest.release') { transitive = false }
+    compile('skymobi.stc:stc-fsm:latest.integration') { transitive = false }
+    compile('skymobi.stc:stc-bean:1.1.4') { transitive = false }
+	compile('skymobi.stc:stc-cache:1.0.3') { transitive = false }
+    compile('skymobi.stc:stc-nio-netty:2.0.24-SNAPSHOT') { transitive = false }
+	compile 'skymobi.stc:stc-common:1.0.13-SNAPSHOT'
+	compile('skymobi.stc:stc-registry:1.0.3-SNAPSHOT') { transitive = false }
+	compile('skymobi.stc:stc-remote:1.0.1-SNAPSHOT') { transitive = false }
+	
+    /**mongo-java-driver**/
+    /*compile('org.mongodb:mongo-java-driver:2.12.4') { transitive = false }*/
+    /* orm*/
+    compile('org.mybatis:mybatis-spring:1.2.0') { transitive = false }
+    compile('org.mybatis:mybatis:3.2.8') { transitive = false }
+    compile('postgresql:postgresql:9.0-801.jdbc4') { transitive = false }
+    compile('com.jolbox:bonecp:0.8.0.RELEASE') { transitive = false }
+
+    compile('javax.mail:mail:1.4.7') { transitive = false }
+    compile('javax.activation:activation:1.1.1') { transitive = false }
+    runtime 'org.beanshell:bsh:2.0b5'
+    runtime 'org.javassist:javassist:3.18.2-GA'
+    runtime('javax.management:jmxremote-optional:latest.release')
+
+    runtime 'org.postgresql:postgresql:9.3-1101-jdbc41'
+    compile 'com.101tec:zkclient:0.3'
+    runtime 'com.edianniu.3rd:dubbo:2.5.3_netty4.0.18'
+    testCompile 'com.squareup.retrofit2:retrofit:2.0.2'
+    /*http*/
+    compile 'org.apache.httpcomponents:httpcore:4.4.3'
+    compile 'org.apache.httpcomponents:httpclient:4.5.1'
+    testCompile 'org.apache.httpcomponents:httpmime:4.5.1'
+    /*fastdfs */
+    compile 'org.csource:fastdfs-client:1.24'
+
+    /**mis client**/
+    compile 'com.edianniu.pscp.mis:pscp-mis-client:3.8.29'
+    /**cs client**/
+    compile 'com.edianniu.pscp.cs:pscp-cs-client:1.1.36'
+    /** search client **/
+    compile 'com.edianniu.pscp.search:pscp-search-client:2.0.13'
+	/**message client**/
+	compile 'com.edianniu.pscp.message:pscp-message-client:3.27'
+    /* xstream */
+    compile 'com.thoughtworks.xstream:xstream:1.4.7'
+    compile 'net.sourceforge:pinyin4j:2.5.0'
+    compile group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.52'
+    testCompile "junit:junit:4.11"
+
+    /* protostuff */
+    compile group: 'com.dyuproject.protostuff', name: 'protostuff-core', version: '1.1.1'
+    compile group: 'com.dyuproject.protostuff', name: 'protostuff-runtime', version: '1.1.1'
+    compile group: 'org.objenesis', name: 'objenesis', version: '2.5.1'
+    /** alipay sdk**/
+    compile 'com.alipay.api:alipay-sdk:20170511115337'
+
+    /** alipay simpleimage **/
+    compile group: 'com.alibaba', name: 'simpleimage', version: '1.2.3'
+    compile group: 'javax.jai', name: 'core', version: '1.0.0'
+    compile group: 'javax.jai', name: 'codec', version: '1.0.0'
+    compile group: 'net.sf.json-lib', name: 'json-lib', version: '2.5'
+    compile group: 'net.sf.ezmorph', name: 'ezmorph', version: '1.0.6'
+    
+    /** metadata-extractor **/
+    compile group: 'com.drewnoakes', name: 'metadata-extractor', version: '2.10.1'
+    compile group: 'com.adobe.xmp', name: 'xmpcore', version: '5.1.2'
+    
+    /* stc */
+    compile('skymobi.stc:stc-cache:1.0.3') { transitive = false }
+    
+    
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+    <dubbo:application name="client" />
+    <dubbo:registry address="zookeeper://192.168.1.251:2182" />
+    
+    <dubbo:reference  id="renterInfoService" 
+  	interface="com.edianniu.pscp.renter.mis.service.dubbo.RenterInfoService" 
+  	timeout="120000" retries="1" version="1.0" check="false"/>
+    <dubbo:reference  id="renterOrderInfoService" 
+  	interface="com.edianniu.pscp.renter.mis.service.dubbo.RenterOrderInfoService" 
+  	timeout="120000" retries="1" version="1.0" check="false"/>
+  	<!-- 钱包服务-->
+    <dubbo:reference id="walletInfoService" interface="com.edianniu.pscp.mis.service.dubbo.WalletInfoService"
+                     timeout="10000" retries="1" version="1.0" check="false"/>
+
+	
+</beans>

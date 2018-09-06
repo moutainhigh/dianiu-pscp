@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.renter.mis.dao.RenterDao">
+
+	<select id="queryCount" parameterType="map"
+			resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM pscp_company_renter
+		WHERE deleted = 0
+		<if test="companyId != null">AND company_id = #{companyId}</if>
+		<if test="mobile != null and mobile.trim() != ''">AND mobile = #{mobile}</if>
+		<if test="name != null and name.trim() != ''">AND name = #{name}</if>
+	</select>
+
+	<select id="queryTotal" parameterType="map"
+			resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM pscp_company_renter r
+		LEFT JOIN pscp_member_wallet w ON r.member_id = w.uid AND w.deleted = 0
+		LEFT JOIN pscp_renter_config c ON r.id = c.renter_id AND c.deleted = 0
+		WHERE r.deleted = 0
+		<if test="type == 1">
+			AND c.charge_mode = 1
+			AND w.amount &lt;= c.amount_limit
+		</if>
+		<if test="type == 2">
+			AND c.charge_mode = 2
+		</if>
+		<if test="companyId != null">AND r.company_id = #{companyId}</if>
+		<if test="mobile != null and mobile.trim() != ''">AND r.mobile LIKE CONCAT('%', #{mobile}, '%')</if>
+		<if test="name != null and name.trim() != ''">AND r.name LIKE CONCAT('%', #{name}, '%')</if>
+		<if test="sdate != null">AND r.create_time &gt;= #{sdate}</if>
+		<if test="bdate != null">AND r.create_time &lt;= #{bdate}</if>
+	</select>
+	
+	<select id="queryList" parameterType="map"
+			resultType="com.edianniu.pscp.renter.mis.domain.Renter">
+		SELECT r.*, w.amount AS balance, c.id AS configId, c.charge_mode, c.switch_status
+		FROM pscp_company_renter r
+		LEFT JOIN pscp_member_wallet w ON r.member_id = w.uid AND w.deleted = 0
+		LEFT JOIN pscp_renter_config c ON r.id = c.renter_id AND c.deleted = 0
+		WHERE r.deleted = 0 
+		<!-- 预缴费租客 -->
+		<if test="type == 1">
+			AND c.charge_mode = 1
+			AND w.amount &lt;= c.amount_limit
+		</if>
+		<!-- 待缴费租客 -->
+		<if test="type == 2">
+			AND c.charge_mode = 2
+		</if>
+		<if test="companyId != null">AND r.company_id = #{companyId}</if>
+		<if test="mobile != null and mobile.trim() != ''">AND r.mobile LIKE CONCAT('%', #{mobile}, '%')</if>
+		<if test="name != null and name.trim() != ''">AND r.name LIKE CONCAT('%', #{name}, '%')</if>
+		<if test="sdate != null">AND r.create_time &gt;= #{sdate}</if>
+		<if test="bdate != null">AND r.create_time &lt;= #{bdate}</if>
+		ORDER BY r.create_time DESC
+		<if test="offset != null and limit != null">
+			offset #{offset} limit #{limit}
+		</if>
+	</select>
+	
+	<select id="getListByMemberId" parameterType="java.lang.Long"
+			resultType="com.edianniu.pscp.renter.mis.domain.Renter">
+		SELECT r.id, r.name, r.company_id, c.name AS companyName
+		FROM pscp_company_renter r
+		LEFT JOIN pscp_company c ON c.id = r.company_id AND c.deleted = 0 
+		WHERE r.deleted = 0 AND r.member_id = #{uid}
+	</select>
+	
+	<select id="getInfo" parameterType="map"
+			resultType="com.edianniu.pscp.renter.mis.domain.Renter">
+		SELECT r.*, w.amount AS balance, c.name AS companyName, f.switch_status
+		FROM pscp_company_renter r
+		LEFT JOIN pscp_renter_config f ON f.renter_id = r.id AND f.deleted = 0
+		LEFT JOIN pscp_member_wallet w ON r.member_id = w.uid AND w.deleted = 0
+		LEFT JOIN pscp_company c ON c.id = r.company_id AND c.deleted = 0 
+		WHERE r.deleted = 0 AND r.id = #{id}
+		<if test="companyId != null">AND r.company_id = #{companyId}</if>
+		LIMIT 1
+	</select>
+	
+	<select id="queryObject" parameterType="java.lang.Long"
+			resultType="com.edianniu.pscp.renter.mis.domain.Renter">
+		SELECT r.*, w.amount AS balance, c.name AS companyName, f.switch_status
+		FROM pscp_company_renter r
+		LEFT JOIN pscp_renter_config f ON f.renter_id = r.id AND f.deleted = 0
+		LEFT JOIN pscp_member_wallet w ON r.member_id = w.uid AND w.deleted = 0
+		LEFT JOIN pscp_company c ON c.id = r.company_id AND c.deleted = 0 
+		WHERE r.deleted = 0 AND r.id = #{id}
+		LIMIT 1
+	</select>
+	
+	<insert id="save" parameterType="com.edianniu.pscp.renter.mis.domain.Renter">
+		INSERT INTO pscp_company_renter(
+			id,
+			member_id,
+			name,
+			company_id,
+			contract,
+			address,
+			mobile,
+			create_time,
+			create_user,
+			deleted
+		) 
+		VALUES(
+			nextval('seq_pscp_company_renter'),
+			#{memberId},
+			#{name},
+			#{companyId},
+			#{contract},
+			#{address},
+			#{mobile},
+			now(),
+			#{createUser},
+			#{deleted}
+		)
+		<selectKey resultType="java.lang.Long" keyProperty="id">
+			SELECT currval('seq_pscp_company_renter') as id;
+		</selectKey>
+	</insert>
+	
+	<update id="update" parameterType="com.edianniu.pscp.renter.mis.domain.Renter">
+		UPDATE pscp_company_renter
+		<set>
+			<if test="name != null and name.trim() != ''">name = #{name},</if>
+			<if test="mobile != null and mobile.trim() != ''">mobile = #{mobile},</if>
+			<if test="contract != null and contract.trim() != ''">contract = #{contract},</if>
+			<if test="address != null and address.trim() != ''">address = #{address},</if>
+			<if test="deleted != null">deleted = #{deleted},</if>
+			modified_user = #{modifiedUser},
+			modified_time = now()
+		</set>
+		WHERE id = #{id} AND deleted = 0
+	</update>
+	<select id="getRenterIds" parameterType="map"
+			resultType="java.lang.Long">
+		select t1.renter_id from pscp_renter_config t1 where 
+		t1.charge_mode=#{chargeMode} and 
+		t1.next_bill_create_time &lt; now() and 
+		t1.next_bill_create_time &gt; COALESCE(t1.prev_bill_create_time,timestamp '1900-01-01 00:00:00')and 
+		t1.bill_task_status=0 and 
+		t1.deleted=0  ORDER BY t1.next_bill_create_time asc  limit #{size}
+	</select>
+
+    		
+    
+</mapper>

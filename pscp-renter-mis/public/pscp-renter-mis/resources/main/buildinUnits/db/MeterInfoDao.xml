@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.edianniu.pscp.renter.mis.dao.MeterInfoDao">
+
+	<select id="queryInfo" parameterType="string"
+		resultType="com.edianniu.pscp.renter.mis.domain.MeterInfo">
+		SELECT * FROM pscp_meter_info
+		WHERE building_id || gateway_id || meter_id = #{meterNo}
+		AND deleted = 0
+	</select>
+	
+    		
+    
+</mapper>
